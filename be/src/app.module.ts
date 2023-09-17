@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { PolicyModule } from './policy/policy.module';
 import { RoleModule } from './role/role.module';
 import { AbilityModule } from './ability/ability.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AbilityModule } from './ability/ability.module';
     PolicyModule,
     RoleModule,
     AbilityModule,
+    FirebaseModule,
   ],
 })
 export class AppModule {}

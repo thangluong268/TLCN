@@ -4,8 +4,6 @@ import { RoleController } from './role.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoleSchema } from './schema/role.schema';
 import { AbilityModule } from 'src/ability/ability.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [

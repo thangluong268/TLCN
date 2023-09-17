@@ -3,9 +3,9 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from './schema/role.schema';
-import { CheckAbilities, ReadRoleAbility } from 'src/ability/abilities.decorator';
-import { AbilitiesGuard } from 'src/ability/abilities.guard';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CheckAbilities, CreateRoleAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
+import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
 
 @Controller('role')
 @ApiTags('Role')
@@ -13,6 +13,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateRoleAbility())
   @Post()
   async create(
     @Body() role: CreateRoleDto
@@ -37,9 +39,9 @@ export class RoleController {
     return result
   }
 
-  @Get('/:userId')
-  @UseGuards(JwtAuthGuard, AbilitiesGuard)
+  @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadRoleAbility())
+  @Get('/:userId')
   async getRoleNameByUserId(
     @Param('userId') userId: string,
   ): Promise<string> {

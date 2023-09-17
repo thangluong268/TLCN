@@ -12,6 +12,7 @@ export class PolicyService {
     ) { }
 
     async getAll(): Promise<Policy[]> {
+        console.log(test)
         const policys = await this.policyModel.find()
         return policys
     }

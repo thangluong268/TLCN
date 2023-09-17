@@ -35,8 +35,8 @@ export class RoleService {
     }
 
     async addUserIntoListUser(roleId: string, userId: string): Promise<boolean> {
-        const result = await this.roleModel.findByIdAndUpdate(roleId, { $push: { listUser: userId } })
-        if (!result) return false
+        const result = await this.roleModel.findByIdAndUpdate('test', { $push: { listUser: userId } })
+        if (!result) { throw new NotFoundException("User not found in role") }
         return true
     }
 
