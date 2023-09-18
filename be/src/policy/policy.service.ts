@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import * as mongoose from 'mongoose';
 import { Policy } from './schema/policy.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { PolicyNotFoundException } from './exceptions/PolicyNotFound.exception';
+import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
 
 @Injectable()
 export class PolicyService {
@@ -12,7 +12,6 @@ export class PolicyService {
     ) { }
 
     async getAll(): Promise<Policy[]> {
-        console.log(test)
         const policys = await this.policyModel.find()
         return policys
     }
@@ -24,7 +23,7 @@ export class PolicyService {
 
     async getById(id: string): Promise<Policy> {
         const policy = await this.policyModel.findById(id)
-        if(!policy) { throw new PolicyNotFoundException(id) }
+        if(!policy) { throw new NotFoundExceptionCustom(Policy.name) }
         return policy
     }
 }

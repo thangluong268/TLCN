@@ -54,7 +54,6 @@ export class TestAuthGuard implements CanActivate {
                     }
                 );
                 await this.userService.getById(payload.userId)
-                console.log(payload)
                 request['user'] = payload;
             }
             catch {

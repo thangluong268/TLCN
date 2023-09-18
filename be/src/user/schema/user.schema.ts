@@ -29,11 +29,11 @@ export class User extends Document {
     @Prop()
     birthday: Date;
 
-    @Prop({default: []})
-    listFriends: Array<string>;
+    @Prop({type: [mongoose.Schema.Types.ObjectId], default: []})
+    listFriends: mongoose.Types.ObjectId[];
 
-    @Prop({default: []})
-    listFollows: Array<string>;
+    @Prop({type: [mongoose.Schema.Types.ObjectId], default: []})
+    listFollows: mongoose.Types.ObjectId[];
 
     @Prop({default: 0})
     warning: number;

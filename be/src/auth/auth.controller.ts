@@ -49,7 +49,6 @@ export class AuthController {
   async logout(
     @Req() req: Request
   ) : Promise<boolean> {
-    console.log(req.user)
     return await this.authService.logout(req.user['userId'])
   }
 
@@ -63,14 +62,15 @@ export class AuthController {
     return await this.authService.refreshToken(req.user['userId'], req.user['refreshToken'])
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new CreateUserAbility())
+  // @UseGuards(AbilitiesGuard)
+  // @CheckAbilities(new CreateUserAbility())
+  @Public()
   @Post('createUser')
   async createUser(
     @Body()
     signUpDto: SignUpDto,
   ) : Promise<User> {
-    const newUser = await this.authService.signUp(signUpDto)
+    const newUser = await this.authService.createUser(signUpDto)
     return newUser
   }
 }

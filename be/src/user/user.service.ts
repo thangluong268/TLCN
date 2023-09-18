@@ -3,6 +3,7 @@ import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
 
 @Injectable()
 export class UserService {
@@ -18,13 +19,13 @@ export class UserService {
 
     async getByEmail(email: string): Promise<User> {
         const user = await this.userModel.findOne({email})
-        if(!user){ throw new NotFoundException("User not found") }
+        if(!user){ throw new NotFoundExceptionCustom(User.name) }
         return user
     }
 
     async getById(userId: string): Promise<User> {
         const user = await this.userModel.findById(userId)
-        if(!user){ throw new NotFoundException("User not found") }
+        if(!user){ throw new NotFoundExceptionCustom(User.name) }
         return user
     }
 }

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { IsNotEmpty } from "class-validator";
-import { Document, ObjectId } from "mongoose";
+import mongoose, { Document, ObjectId } from "mongoose";
 
 @Schema({
     timestamps: true,
@@ -8,7 +8,7 @@ import { Document, ObjectId } from "mongoose";
 export class UserToken extends Document {
     @Prop()
     @IsNotEmpty()
-    userId: string;
+    userId: mongoose.Types.ObjectId;;
 
     @Prop()
     hashedRefreshToken: string;

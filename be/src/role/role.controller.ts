@@ -6,6 +6,7 @@ import { Role } from './schema/role.schema';
 import { CheckAbilities, CreateRoleAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('role')
 @ApiTags('Role')
@@ -13,8 +14,9 @@ import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new CreateRoleAbility())
+  // @UseGuards(AbilitiesGuard)
+  // @CheckAbilities(new CreateRoleAbility())
+  @Public()
   @Post()
   async create(
     @Body() role: CreateRoleDto
@@ -22,6 +24,7 @@ export class RoleController {
     return await this.roleService.create(role)
   }
 
+  @Public()
   @Post('addUserToRole/:userId')
   async addUserToRole(
     @Param('userId') userId: string,
@@ -45,7 +48,7 @@ export class RoleController {
   async getRoleNameByUserId(
     @Param('userId') userId: string,
   ): Promise<string> {
-    const role = await this.roleService.getRoleNameByUserId(String(userId))
+    const role = await this.roleService.getRoleNameByUserId(userId)
     return role
   }
 

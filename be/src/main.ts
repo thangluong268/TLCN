@@ -7,7 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('/api');
   SwaggerModule.setup('api', app, createDocument(app),{
     swaggerOptions: {
         persistAuthorization: true,

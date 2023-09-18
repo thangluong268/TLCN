@@ -3,6 +3,7 @@ import { Action, Subjects } from "../ability.factory";
 import { Role } from "src/role/schema/role.schema";
 import { UserToken } from "src/auth/schema/usertoken.schema";
 import { User } from "src/user/schema/user.schema";
+import { Bill } from "src/bill/schema/bill.schema";
 
 
 export interface RequiredRule {
@@ -36,3 +37,17 @@ export class ManageUserTokenAbility implements RequiredRule {
     action = Action.Manage;
     subject = UserToken;
 }
+
+// Bill
+export class CreateBillAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Bill;
+}
+
+export class ReadBillAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Bill;
+}
+
+
+

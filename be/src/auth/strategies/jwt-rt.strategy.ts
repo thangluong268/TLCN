@@ -21,7 +21,7 @@ export class JwtRTStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
         const user = await this.userService.getById(payload.userId)
         const refreshToken = req.get('authorization').replace('Bearer ', '').trim()
         return { 
-            userId: String(user._id),
+            userId: user._id,
             refreshToken,
         }
     }

@@ -3,6 +3,7 @@ import { AbilityBuilder, ExtractSubjectType, InferSubjects, MongoAbility, create
 import { User } from "src/user/schema/user.schema";
 import { Role, RoleName } from "src/role/schema/role.schema";
 import { UserToken } from "src/auth/schema/usertoken.schema";
+import { Bill } from "src/bill/schema/bill.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -15,7 +16,8 @@ export enum Action {
 export type Subjects = InferSubjects<
     typeof User |
     typeof Role |
-    typeof UserToken
+    typeof UserToken |
+    typeof Bill
 
 > | 'all'
 
@@ -31,6 +33,7 @@ export class AbilityFactory {
         }
         else if (role === RoleName.USER) {
             can(Action.Manage, UserToken)
+            can(Action.Manage, Bill)
             cannot(Action.Read, Role).because('tao ko cho may doc role')
         }
 

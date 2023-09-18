@@ -11,6 +11,8 @@ import { UserToken } from './schema/usertoken.schema';
 import mongoose, { Model } from 'mongoose';
 import { RoleService } from 'src/role/role.service';
 import { RoleName } from 'src/role/schema/role.schema';
+import { ForbiddenExceptionCustom } from 'src/exceptions/ForbiddenExceptionCustom.exception';
+import { UnauthorizedExceptionCustom } from 'src/exceptions/UnauthorizedExceptionCustom.exception';
 
 @Injectable()
 export class AuthService {
@@ -60,13 +62,13 @@ export class AuthService {
             { hashedRefreshToken: hashedRT },
             { new: true },
         )
-        if (!userToken) { throw new ForbiddenException("Access Denied") }
+        if (!userToken) { throw new ForbiddenExceptionCustom() }
         return true
     }
 
     async deleteUserToken(userId: string): Promise<boolean> {
         const userToken = await this.userTokenModel.findOneAndDelete({ userId })
-        if (!userToken) { throw new ForbiddenException("Access Denied") }
+        if (!userToken) { throw new ForbiddenExceptionCustom() }
         return true
     }
 
@@ -82,7 +84,7 @@ export class AuthService {
         const newUser = await this.userService.create(signUpDto)
         const tokens = await this.getTokens({ userId: newUser._id })
         await this.createUserToken(newUser._id, tokens.refreshToken)
-        await this.roleService.addUserToRole(String(newUser._id), { name: RoleName.USER })
+        await this.roleService.addUserToRole(newUser._id, { name: RoleName.USER })
         return newUser
     }
 
@@ -90,11 +92,11 @@ export class AuthService {
         const { email, password } = loginDto
         const user = await this.userService.getByEmail(email)
         if (!user) {
-            throw new UnauthorizedException("Invalid email or password")
+            throw new UnauthorizedExceptionCustom()
         }
         const isPasswordMatched = await bcrypt.compare(password, user.password)
         if (!isPasswordMatched) {
-            throw new UnauthorizedException("Invalid email or password")
+            throw new UnauthorizedExceptionCustom()
         }
         const payload = { userId: user._id }
         const tokens = await this.getTokens(payload)
@@ -110,13 +112,22 @@ export class AuthService {
 
     async refreshToken(userId: string, refreshToken: string): Promise<TokensDto> {
         const userToken = await this.getUserTokenById(userId)
-        if (!userToken) { throw new ForbiddenException("Access Denied") }
+        if (!userToken) { throw new ForbiddenExceptionCustom() }
         const rtMatches = await bcrypt.compare(refreshToken, userToken.hashedRefreshToken)
-        if (!rtMatches) { throw new ForbiddenException("Access Denied") }
+        if (!rtMatches) { throw new ForbiddenExceptionCustom() }
         const payload = { userId: userToken.userId }
         const tokens = await this.getTokens(payload)
         await this.updateUserToken(userToken.userId, tokens.refreshToken)
         return tokens
+    }
+
+    async createUser(signUpDto: SignUpDto): Promise<User> {
+        const hashedPassword = await this.hashData(signUpDto.password)
+        signUpDto.password = hashedPassword
+        const newUser = await this.userService.create(signUpDto)
+        const tokens = await this.getTokens({ userId: newUser._id })
+        await this.createUserToken(newUser._id, tokens.refreshToken)
+        return newUser
     }
 
 
