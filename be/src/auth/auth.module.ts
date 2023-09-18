@@ -9,33 +9,22 @@ import { RoleModule } from 'src/role/role.module';
 import { JwtATStrategy } from './strategies/jwt-at.strategy';
 import { JwtRTStrategy } from './strategies/jwt-rt.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserTokenSchema } from './schema/usertoken.schema';
+import { UserTokenSchema } from '../usertoken/schema/usertoken.schema';
 import { AbilityModule } from 'src/ability/ability.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
-import { TestAuthGuard } from './guards/test.guard';
 import { FirebaseModule } from 'src/firebase/firebase.module';
+import { UsertokenModule } from 'src/usertoken/usertoken.module';
 
 @Module({
   imports: [
-    // JwtModule.registerAsync({
-    //   inject: [ConfigService],
-    //   useFactory: async (config: ConfigService) => {
-    //     return {
-    //       secret: config.get<string>('JWT_SECRET'),
-    //       signOptions: {
-    //         expiresIn: config.get<string | number>('JWT_EXPIRES'),
-    //       },
-    //     }
-    //   },
-    // }),
-    MongooseModule.forFeature([{ name: 'UserToken', schema: UserTokenSchema }]),
     JwtModule.register({}),
     UserModule,
     PassportModule,
     RoleModule,
     AbilityModule,
     FirebaseModule,
+    UsertokenModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -44,7 +33,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
     JwtRTStrategy,
     {
       provide: APP_GUARD,
-      useClass: TestAuthGuard,
+      useClass: JwtATAuthGuard,
     },
   ],
   exports: [AuthService],

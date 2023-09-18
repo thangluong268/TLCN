@@ -8,11 +8,13 @@ import { RoleService } from 'src/role/role.service';
 import { RoleName } from 'src/role/schema/role.schema';
 import { TokensDto } from './dto/tokens.dto';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
 import { CheckAbilities, CreateUserAbility, ManageUserTokenAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
 import { Request } from 'express';
 import { JwtRTAuthGuard } from './guards/jwt-rt-auth.guard';
 import { Public } from './decorators/public.decorator';
+import { UsertokenService } from 'src/usertoken/usertoken.service';
+import { UserService } from 'src/user/user.service';
+import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -20,17 +22,24 @@ import { Public } from './decorators/public.decorator';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly roleService: RoleService
-    ) {}
+    private readonly roleService: RoleService,
+    private readonly userService: UserService,
+    private readonly userTokenService: UsertokenService,
+  ) { }
 
   @Public()
   @Post('signup')
   async signUp(
     @Body()
     signUpDto: SignUpDto,
-  ) : Promise<User> {
-    const newUser = await this.authService.signUp(signUpDto)
-    // await this.roleService.addUserToRole(String(newUser._id), {name: RoleName.USER})
+  ): Promise<UserWithoutPassDto> {
+    const hashedPassword = await this.authService.hashData(signUpDto.password)
+    signUpDto.password = hashedPassword
+    const newUser = await this.userService.create(signUpDto)
+    const payload = { userId: newUser._id }
+    const tokens = await this.authService.getTokens(payload)
+    await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken)
+    await this.roleService.addUserToRole(newUser._id, { name: RoleName.USER })
     return newUser
   }
 
@@ -39,8 +48,16 @@ export class AuthController {
   async login(
     @Body()
     loginDto: LoginDto,
-  ) : Promise<TokensDto> {
-    return await this.authService.login(loginDto)
+  ): Promise<TokensDto> {
+    const { email, password } = loginDto
+    const user = await this.userService.getByEmail(email)
+    await this.authService.compareData(password, user.password)
+    const payload = { userId: user._id }
+    const tokens = await this.authService.getTokens(payload)
+    const userToken = await this.userTokenService.getUserTokenById(user._id)
+    userToken ? await this.userTokenService.updateUserToken(user._id, tokens.refreshToken)
+      : await this.userTokenService.createUserToken(user._id, tokens.refreshToken)
+    return tokens
   }
 
   @UseGuards(AbilitiesGuard)
@@ -48,8 +65,9 @@ export class AuthController {
   @Delete('logout')
   async logout(
     @Req() req: Request
-  ) : Promise<boolean> {
-    return await this.authService.logout(req.user['userId'])
+  ): Promise<boolean> {
+    const userId = req.user['userId']
+    return await this.userTokenService.deleteUserToken(userId)
   }
 
   @Public()
@@ -58,8 +76,15 @@ export class AuthController {
   @Post('refresh')
   async refreshToken(
     @Req() req: Request
-  ) : Promise<TokensDto> {
-    return await this.authService.refreshToken(req.user['userId'], req.user['refreshToken'])
+  ): Promise<TokensDto> {
+    const userId = req.user['userId']
+    const refreshToken = req.user['refreshToken']
+    const userToken = await this.userTokenService.getUserTokenById(userId)
+    await this.authService.compareData(refreshToken, userToken.hashedRefreshToken)
+    const payload = { userId: userToken.userId }
+    const tokens = await this.authService.getTokens(payload)
+    await this.userTokenService.updateUserToken(userToken.userId, tokens.refreshToken)
+    return tokens
   }
 
   // @UseGuards(AbilitiesGuard)
@@ -69,8 +94,13 @@ export class AuthController {
   async createUser(
     @Body()
     signUpDto: SignUpDto,
-  ) : Promise<User> {
-    const newUser = await this.authService.createUser(signUpDto)
+  ): Promise<UserWithoutPassDto> {
+    const hashedPassword = await this.authService.hashData(signUpDto.password)
+    signUpDto.password = hashedPassword
+    const newUser = await this.userService.create(signUpDto)
+    const payload = { userId: newUser._id }
+    const tokens = await this.authService.getTokens(payload)
+    await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken)
     return newUser
   }
 }

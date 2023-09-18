@@ -21,7 +21,7 @@ import { PreAuthMiddleware } from './PreAuthMiddleware';
 export class FirebaseModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer.apply(PreAuthMiddleware).forRoutes({
-      path: '/firebase/secure/*',
+      path: '/api/firebase/secure/*',
       method: RequestMethod.ALL,
     });
   }

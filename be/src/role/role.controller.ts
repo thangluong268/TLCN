@@ -7,6 +7,7 @@ import { CheckAbilities, CreateRoleAbility, ReadRoleAbility } from 'src/ability/
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { Types } from 'mongoose';
 
 @Controller('role')
 @ApiTags('Role')
@@ -30,7 +31,8 @@ export class RoleController {
     @Param('userId') userId: string,
     @Body() roleName: CreateRoleDto
   ): Promise<boolean> {
-    const result = await this.roleService.addUserToRole(userId, roleName)
+    const userObjId = new Types.ObjectId(userId)
+    const result = await this.roleService.addUserToRole(userObjId, roleName)
     return result
   }
 

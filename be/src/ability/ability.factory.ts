@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { AbilityBuilder, ExtractSubjectType, InferSubjects, MongoAbility, createMongoAbility } from "@casl/ability"
 import { User } from "src/user/schema/user.schema";
 import { Role, RoleName } from "src/role/schema/role.schema";
-import { UserToken } from "src/auth/schema/usertoken.schema";
+import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { Bill } from "src/bill/schema/bill.schema";
 
 export enum Action {
