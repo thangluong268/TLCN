@@ -3,7 +3,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from './schema/role.schema';
-import { CheckAbilities, CreateRoleAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
+import { CheckAbilities, CreateRoleAbility, ReadRoleAbility, UpdateRoleAbility } from 'src/ability/decorators/abilities.decorator';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -16,9 +16,8 @@ import { ObjectId } from 'mongodb';
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
-  // @UseGuards(AbilitiesGuard)
-  // @CheckAbilities(new CreateRoleAbility())
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateRoleAbility())
   @Post()
   async create(
     @Body() role: CreateRoleDto
@@ -26,7 +25,8 @@ export class RoleController {
     return await this.roleService.create(role)
   }
 
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateRoleAbility())
   @Post('addUserToRole/:userId')
   async addUserToRole(
     @Param('userId') userId: string,

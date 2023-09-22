@@ -87,9 +87,8 @@ export class AuthController {
     return tokens
   }
 
-  // @UseGuards(AbilitiesGuard)
-  // @CheckAbilities(new CreateUserAbility())
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateUserAbility())
   @Post('createUser')
   async createUser(
     @Body()

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserToken } from './schema/usertoken.schema';
 import { Model, MongooseError, Types } from 'mongoose';
@@ -33,7 +33,7 @@ export class UsertokenService {
         }
     }
 
-    async updateUserToken(userId: string, refreshToken: string): Promise<boolean> {
+    async updateUserToken(userId: Types.ObjectId, refreshToken: string): Promise<boolean> {
         try {
             const hashedRT = await this.hashData(refreshToken)
             const userToken = await this.userTokenModel.findOneAndUpdate(
@@ -51,7 +51,7 @@ export class UsertokenService {
         }
     }
 
-    async deleteUserToken(userId: string): Promise<boolean> {
+    async deleteUserToken(userId: Types.ObjectId): Promise<boolean> {
         try {
             const userToken = await this.userTokenModel.findOneAndDelete({ userId })
             if (!userToken) { throw new ForbiddenExceptionCustom() }
@@ -64,10 +64,9 @@ export class UsertokenService {
         }
     }
 
-    async getUserTokenById(userId: string): Promise<any> {
+    async getUserTokenById(userId: Types.ObjectId): Promise<any> {
         try {
             const userToken = await this.userTokenModel.findOne({ userId })
-            if (!userToken) { throw new ForbiddenExceptionCustom() }
             return userToken
         }
         catch (err) {
