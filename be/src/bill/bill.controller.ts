@@ -7,22 +7,47 @@ import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { CheckAbilities, CreateBillAbility, CreateRoleAbility, ReadBillAbility } from 'src/ability/decorators/abilities.decorator';
 import { Request } from 'express';
 import { Types } from 'mongoose';
+import { PaymentService } from './payment/payment.service';
+import { GiveGateway, MoMoGateway, PAYMENT_METHOD, VNPayGateway } from './payment/payment.gateway';
+import { UserService } from 'src/user/user.service';
+import { StoreService } from 'src/store/store.service';
+import { ProductService } from 'src/product/product.service';
 
-@Controller('user/bill')
+@Controller('bill/user')
 @ApiTags('Bill')
 @ApiBearerAuth('Authorization')
 export class BillController {
-  constructor(private readonly billService: BillService) { }
+  constructor(
+    private readonly billService: BillService,
+    private readonly paymentService: PaymentService,
+    private readonly userService: UserService,
+    private readonly storeService: StoreService,
+    private readonly productService: ProductService,
+  ) {
+    this.paymentService.registerPaymentGateway(PAYMENT_METHOD.VNPAY, new VNPayGateway())
+    this.paymentService.registerPaymentGateway(PAYMENT_METHOD.MOMO, new MoMoGateway())
+    this.paymentService.registerPaymentGateway(PAYMENT_METHOD.GIVE, new GiveGateway())
+  }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateBillAbility())
   @Post()
-  async createBill(
+  async create(
     @Body() bill: CreateBillDto,
     @Req() req: Request
   ): Promise<Bill> {
-    const userId = req.user['userId']
-    const newBill = await this.billService.createBill(userId, bill)
+    const userId = new Types.ObjectId(req.user['userId'])
+    const user = await this.userService.getById(userId)
+    const store = await this.storeService.getByUserId(userId)
+    const products = []
+    bill.listProductId.map(async (productId) => {
+      const product = await this.productService.getById(productId)
+      products.push(product)
+    })
+
+    const newBill = await this.billService.create(user, store, products, bill)
+    const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
+    console.log(result)
     return newBill
   }
 
@@ -32,15 +57,17 @@ export class BillController {
   @Get()
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
   @ApiQuery({ name: 'status', type: String, required: false })
   async getAllByStatus(
     @Req() req: Request,
     @Query('page') page: number,
     @Query('limit') limit: number,
-    @Query('status') status: string
+    @Query('search') search: string,
+    @Query('status') status: string,
   ): Promise<{ total: number, bills: Bill[] }> {
     const userId = new Types.ObjectId(req.user['userId'])
-    const data = await this.billService.getAllByStatus(userId, page, limit, status)
+    const data = await this.billService.getAllByStatus(userId, page, limit, search, status)
     return data
   }
 
@@ -51,7 +78,8 @@ export class BillController {
   async getDetailById(
     @Param('id') id: string
   ): Promise<Bill> {
-    const bill = await this.billService.getDetailById(id)
+    const idObjId = new Types.ObjectId(id)
+    const bill = await this.billService.getDetailById(idObjId)
     return bill
   }
 
@@ -61,7 +89,8 @@ export class BillController {
   async cancelBill(
     @Param('id') id: string
   ): Promise<boolean> {
-    const result = await this.billService.cancelBill(id)
+    const idObjId = new Types.ObjectId(id)
+    const result = await this.billService.cancel(idObjId)
     return result
   }
 }

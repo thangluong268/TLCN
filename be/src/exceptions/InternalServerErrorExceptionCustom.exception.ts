@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { Translate, UpperCaseFirstLetter } from "./translate";
+import { Translate, UpperCaseFirstLetter } from "./Translate";
 
 export class InternalServerErrorExceptionCustom extends HttpException {
     constructor() {

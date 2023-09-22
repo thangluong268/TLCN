@@ -6,6 +6,9 @@ import { CreateBillDto } from './dto/create-bill.dto';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { ProductBillDto } from './dto/product-bill.dto';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
+import { User } from 'src/user/schema/user.schema';
+import { Store } from 'src/store/schema/store.schema';
+import { Product } from 'src/product/schema/product.schema';
 
 @Injectable()
 export class BillService {
@@ -23,11 +26,26 @@ export class BillService {
         return totalPrice
     }
 
-    async createBill(userId: string, bill: CreateBillDto): Promise<Bill> {
+    async create(user: User, store: Store, products: Product[], bill: CreateBillDto): Promise<Bill> {
         try {
             const newBill = await this.billModel.create(bill)
-            newBill.userId = new Types.ObjectId(userId)
-            newBill.totalPrice = this.getTotalPrice(bill.listProducts, bill.promotionValue)
+            newBill.userId = user._id
+            newBill.fullName = user.fullName
+            newBill.email = user.email
+            newBill.phone = user.phone
+            newBill.address = user.address
+            newBill.storeId = store._id
+            newBill.storeName = store.storeName
+            newBill.listProducts = products.map(product => {
+                const productBill = new ProductBillDto()
+                productBill.avatar = product.avatar
+                productBill.productId = product._id
+                productBill.productName = product.productName
+                productBill.quantity = product.quantity
+                productBill.price = product.price
+                return productBill
+            })
+            newBill.totalPrice = this.getTotalPrice(newBill.listProducts, bill.promotionValue)
             await newBill.save()
             return newBill
         }
@@ -38,15 +56,23 @@ export class BillService {
         }
     }
 
-    async getAllByStatus(userId: Types.ObjectId, pageQuery: number, limitQuery: number, statusQuery: string)
+    async getAllByStatus(userId: Types.ObjectId, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
     : Promise<{ total: number, bills: Bill[] }> {
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
+        const search = searchQuery
+            ? {
+                $or: [
+                    { storeName: { $regex: searchQuery, $options: "i" } },
+                    { listProducts: { $elemMatch: { productName: { $regex: searchQuery, $options: "i" } } } }
+                ]
+            }
+            : {}
         const status = new RegExp(statusQuery, 'i') || "Đã đặt"
         const skip = limit * (page - 1)
         try{
-            const total = await this.billModel.countDocuments({ status, userId })
-            const bills = await this.billModel.find({ status, userId }).limit(limit).skip(skip)
+            const total = await this.billModel.countDocuments({ userId, status, ...search })
+            const bills = await this.billModel.find({ userId, status, ...search }).limit(limit).skip(skip)
             return { total, bills }
         }
         catch(err){
@@ -56,7 +82,7 @@ export class BillService {
         }
     }
 
-    async getDetailById(id: string): Promise<Bill> {
+    async getDetailById(id: Types.ObjectId): Promise<Bill> {
         try{
             const bill = await this.billModel.findById(id)
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
@@ -69,7 +95,7 @@ export class BillService {
         }
     }
 
-    async cancelBill(id: string): Promise<boolean> {
+    async cancel(id: Types.ObjectId): Promise<boolean> {
         try{
             const bill = await this.billModel.findById(id)
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
