@@ -1,13 +1,34 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from './schema/user.schema';
+import { AbilityModule } from 'src/ability/ability.module';
+import { RoleModule } from 'src/role/role.module';
+import { HasUserMiddleware } from './middleware/HasUser.middleware';
+import { HasPermitRoleMiddleware } from 'src/user/middleware/HasPermitRole.middleware';
+import { HasSameRoleUserMiddleware } from './middleware/HasSameRoleUser.middleware';
+import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name: 'User', schema: UserSchema}])],
+  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), AbilityModule, RoleModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, FreedomCustom],
   exports: [UserService],
 })
-export class UserModule {}
+export class UserModule implements NestModule {
+  // Middleware for user
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(HasUserMiddleware, HasPermitRoleMiddleware)
+      .forRoutes({ path: 'user/user/:id', method: RequestMethod.GET }, { path: 'user/user/:id', method: RequestMethod.PUT }, { path: 'user/user/:id', method: RequestMethod.DELETE })
+    consumer
+      .apply(HasUserMiddleware, HasSameRoleUserMiddleware)
+      .forRoutes({ path: 'user/user/addFriend/:id', method: RequestMethod.POST }, { path: 'user/user/unFriend/:id', method: RequestMethod.POST })
+    consumer
+      .apply(HasUserMiddleware)
+      .forRoutes({ path: 'user/user/followStore/:id', method: RequestMethod.POST }, { path: 'user/user/unFollowStore/:id', method: RequestMethod.POST })
+
+  }
+
+}

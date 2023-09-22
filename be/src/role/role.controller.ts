@@ -8,6 +8,7 @@ import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { JwtATAuthGuard } from 'src/auth/guards/jwt-at-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Types } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 @Controller('role')
 @ApiTags('Role')
@@ -50,7 +51,7 @@ export class RoleController {
   async getRoleNameByUserId(
     @Param('userId') userId: string,
   ): Promise<string> {
-    const role = await this.roleService.getRoleNameByUserId(userId)
+    const role = await this.roleService.getRoleNameByUserId(new Types.ObjectId(userId))
     return role
   }
 

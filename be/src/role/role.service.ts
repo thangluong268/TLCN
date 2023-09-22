@@ -90,11 +90,11 @@ export class RoleService {
 
     }
 
-    async getRoleNameByUserId(userId: string): Promise<string> {
+    async getRoleNameByUserId(userId: Types.ObjectId): Promise<string> {
         try {
-            const roles = await this.roleModel.findOne({ listUser: userId })
-            if (!roles) { throw new NotFoundExceptionCustom(Role.name) }
-            return roles.name
+            const role = await this.roleModel.findOne({ listUser: userId })
+            if (!role) { throw new NotFoundExceptionCustom(Role.name) }
+            return role.name
         }
         catch (err) {
             if (err instanceof MongooseError)

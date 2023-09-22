@@ -4,6 +4,7 @@ import { Role } from "src/role/schema/role.schema";
 import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { User } from "src/user/schema/user.schema";
 import { Bill } from "src/bill/schema/bill.schema";
+import { Userotp } from "src/userotp/schema/userotp.schema";
 
 
 export interface RequiredRule {
@@ -31,6 +32,18 @@ export class CreateUserAbility implements RequiredRule {
     action = Action.Create;
     subject = User;
 }
+
+export class ReadUserAbility implements RequiredRule {
+    action = Action.Read;
+    subject = User;
+}
+
+// Userotp
+export class CreateUserotpAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Userotp;
+}
+
 
 // UserToken
 export class ManageUserTokenAbility implements RequiredRule {
