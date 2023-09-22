@@ -4,6 +4,10 @@ import { User } from "src/user/schema/user.schema";
 import { Role, RoleName } from "src/role/schema/role.schema";
 import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { Bill } from "src/bill/schema/bill.schema";
+import { Cart } from "src/cart/schema/cart.schema";
+import { Store } from "src/store/schema/store.schema";
+import { Feedback } from "src/feedback/schema/feedback.schema";
+import { Product } from "src/product/schema/product.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -17,7 +21,11 @@ export type Subjects = InferSubjects<
     typeof User |
     typeof Role |
     typeof UserToken |
-    typeof Bill
+    typeof Bill |
+    typeof Cart |
+    typeof Store |
+    typeof Feedback |
+    typeof Product
 
 > | 'all'
 
@@ -28,15 +36,28 @@ export class AbilityFactory {
     defineAbility(role: string) {
         const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
-        if (role === RoleName.ADMIN) {
-            can(Action.Manage, 'all')
+        switch (role) {
+            case RoleName.ADMIN:
+                can(Action.Manage, 'all')
+                break
+            case RoleName.USER:
+                can(Action.Manage, UserToken)
+                can(Action.Manage, Bill)
+                can(Action.Manage, Cart)
+                can(Action.Create, Store)
+                can(Action.Read, Store)
+                can(Action.Create, Feedback)
+                cannot(Action.Read, Role).because('tao ko cho may doc role')
+                break
+            case RoleName.SELLER:
+                can(Action.Manage, Store)
+                can(Action.Manage, Product)
+                break
+            case RoleName.MANAGER:
+                break
+            default:
+                break
         }
-        else if (role === RoleName.USER) {
-            can(Action.Manage, UserToken)
-            can(Action.Manage, Bill)
-            cannot(Action.Read, Role).because('tao ko cho may doc role')
-        }
-
         return build({
             detectSubjectType: item => item.constructor as ExtractSubjectType<Subjects>,
         })

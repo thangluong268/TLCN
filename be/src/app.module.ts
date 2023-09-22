@@ -9,6 +9,11 @@ import { AbilityModule } from './ability/ability.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { BillModule } from './bill/bill.module';
 import { UsertokenModule } from './usertoken/usertoken.module';
+import { CartModule } from './cart/cart.module';
+import { StoreModule } from './store/store.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { ProductModule } from './product/product.module';
+import { SeedsModule } from './seeds/seeds.module';
 
 @Module({
   imports: [
@@ -25,6 +30,11 @@ import { UsertokenModule } from './usertoken/usertoken.module';
     FirebaseModule,
     BillModule,
     UsertokenModule,
+    CartModule,
+    StoreModule,
+    FeedbackModule,
+    ProductModule,
+    SeedsModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

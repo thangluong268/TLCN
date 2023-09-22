@@ -1,38 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
 import { ProductBillDto } from "./product-bill.dto";
+import { PAYMENT_METHOD } from "../payment/payment.gateway";
+import mongoose, { Types } from "mongoose";
 
 export class CreateBillDto {
-    @ApiProperty()
-    @IsNotEmpty()
-    fullName: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: [mongoose.Types.ObjectId] })
     @IsNotEmpty()
-    @IsEmail({},{message: "Email is invalid"})
-    email: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    @MinLength(10)
-    @IsNumberString()
-    phone: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    address: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    storeId: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    storeName: string;
-
-    @ApiProperty({ type: [ProductBillDto] })
-    @IsNotEmpty()
-    listProducts: ProductBillDto[];
+    listProductId: mongoose.Types.ObjectId[];
 
     @ApiProperty()
     promotionId: string;
@@ -43,7 +19,7 @@ export class CreateBillDto {
     @ApiProperty()
     promotionValue: number;
 
-    @ApiProperty()
+    @ApiProperty({type: String})
     @IsNotEmpty()
-    paymentMethod: string;
+    paymentMethod: PAYMENT_METHOD;
 }

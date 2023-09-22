@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { Translate } from "./translate";
+import { Translate } from "./Translate";
 
 export class NotFoundExceptionCustom extends HttpException {
     constructor(name: string) {

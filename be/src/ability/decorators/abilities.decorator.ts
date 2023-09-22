@@ -4,6 +4,10 @@ import { Role } from "src/role/schema/role.schema";
 import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { User } from "src/user/schema/user.schema";
 import { Bill } from "src/bill/schema/bill.schema";
+import { Cart } from "src/cart/schema/cart.schema";
+import { Store } from "src/store/schema/store.schema";
+import { Feedback } from "src/feedback/schema/feedback.schema";
+import { Product } from "src/product/schema/product.schema";
 
 
 export interface RequiredRule {
@@ -18,6 +22,11 @@ export const CheckAbilities = (...requirements: RequiredRule[]) => SetMetadata(C
 // Role
 export class ReadRoleAbility implements RequiredRule {
     action = Action.Read;
+    subject = Role;
+}
+
+export class UpdateRoleAbility implements RequiredRule {
+    action = Action.Update;
     subject = Role;
 }
 
@@ -47,6 +56,38 @@ export class CreateBillAbility implements RequiredRule {
 export class ReadBillAbility implements RequiredRule {
     action = Action.Read;
     subject = Bill;
+}
+
+
+// Cart
+export class CreateCartAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Cart;
+}
+
+// Store
+export class CreateStoreAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Store;
+}
+
+export class ReadStoreAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Store;
+}
+
+
+// Feedback
+export class CreateFeedBackAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Feedback;
+}
+
+
+// Product
+export class CreateProductAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Product;
 }
 
 

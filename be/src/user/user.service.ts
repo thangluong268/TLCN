@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, MongooseError } from 'mongoose';
+import { Model, MongooseError, Types } from 'mongoose';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
@@ -42,7 +42,7 @@ export class UserService {
         }
     }
 
-    async getById(userId: string): Promise<User> {
+    async getById(userId: Types.ObjectId): Promise<User> {
         try {
             const user = await this.userModel.findById(userId)
             if (!user) { throw new NotFoundExceptionCustom(User.name) }

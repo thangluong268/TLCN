@@ -3,5 +3,5 @@ import { RoleName } from "../schema/role.schema";
 
 export class CreateRoleDto {
     @ApiProperty()
-    readonly name: RoleName;
+    name: RoleName;
 }

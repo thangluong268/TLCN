@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
+import mongoose from "mongoose";
 
 export class ProductBillDto {
     @ApiProperty()
