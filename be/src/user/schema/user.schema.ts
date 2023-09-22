@@ -5,42 +5,41 @@ import mongoose, { ObjectId, Document, Types } from "mongoose";
     timestamps: true,
 })
 export class User extends Document {
-    @Prop()
+    @Prop({ type: String })
     avatar: string;
 
-    @Prop()
+    @Prop({ type: String })
     fullName: string;
 
-    @Prop()
+    @Prop({ type: String })
     email: string;
 
-    @Prop()
+    @Prop({ type: String })
     password: string;
 
-    @Prop()
+    @Prop({ type: String })
     address: string;
 
-    @Prop()
+    @Prop({ type: String })
     phone: string;
 
-    @Prop()
+    @Prop({ type: String })
     gender: string;
 
-    @Prop()
-    birthday: Date;
+    @Prop({ type: String })
+    birthday: string;
 
-    @Prop({type: [mongoose.Schema.Types.ObjectId], default: []})
-    listFriends: mongoose.Types.ObjectId[];
+    @Prop({ type: [String], default: [] })
+    friends: string[];
 
-    @Prop({type: [mongoose.Schema.Types.ObjectId], default: []})
-    listFollows: mongoose.Types.ObjectId[];
+    @Prop({ type: [String], default: [] })
+    followStores: string[];
 
-    @Prop({default: 0})
-    warning: number;
+    @Prop({ type: Number, default: 0 })
+    warningCount: number;
 
-    @Prop({default: true})
-    status: boolean;
-
+    @Prop({ type: String, default: "true" })
+    status: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

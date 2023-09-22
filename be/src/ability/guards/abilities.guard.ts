@@ -4,7 +4,6 @@ import { AbilityFactory } from "../ability.factory"
 import { CHECK_ABILITY, RequiredRule } from "../decorators/abilities.decorator"
 import { ForbiddenError } from "@casl/ability"
 import { RoleService } from "src/role/role.service"
-import { Type } from "class-transformer"
 import { Types } from "mongoose"
 
 

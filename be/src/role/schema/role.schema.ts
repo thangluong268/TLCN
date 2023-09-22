@@ -12,10 +12,10 @@ export enum RoleName {
     timestamps: true,
 })
 export class Role extends Document {
-    @Prop()
+    @Prop({ type: String })
     name: RoleName;
 
-    @Prop({type: [mongoose.Schema.Types.ObjectId], default: []})
+    @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
     listUser: mongoose.Types.ObjectId[];
 }
 

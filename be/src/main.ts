@@ -4,15 +4,15 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { createDocument } from '../swagger/swagger';
 import { ValidationPipe } from '@nestjs/common';
 declare const module: any;
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('/api');
-  SwaggerModule.setup('api', app, createDocument(app),{
+  SwaggerModule.setup('api', app, createDocument(app), {
     swaggerOptions: {
-        persistAuthorization: true,
-    }});
+      persistAuthorization: true,
+    }
+  });
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -23,6 +23,5 @@ async function bootstrap() {
     module.hot.accept();
     module.hot.dispose(() => app.close());
   }
-
 }
 bootstrap();

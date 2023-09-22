@@ -9,6 +9,7 @@ import { AbilityModule } from 'src/ability/ability.module';
   imports: [
     MongooseModule.forFeature([{ name: 'Role', schema: RoleSchema }]),
     AbilityModule,
+
   ],
   controllers: [RoleController],
   providers: [RoleService],

@@ -4,6 +4,7 @@ import { User } from "src/user/schema/user.schema";
 import { Role, RoleName } from "src/role/schema/role.schema";
 import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { Bill } from "src/bill/schema/bill.schema";
+import { Userotp } from "src/userotp/schema/userotp.schema";
 import { Cart } from "src/cart/schema/cart.schema";
 import { Store } from "src/store/schema/store.schema";
 import { Feedback } from "src/feedback/schema/feedback.schema";
@@ -18,7 +19,7 @@ export enum Action {
 }
 
 export type Subjects = InferSubjects<
-    typeof User |
+    typeof User | typeof Userotp |
     typeof Role |
     typeof UserToken |
     typeof Bill |
@@ -58,6 +59,14 @@ export class AbilityFactory {
             default:
                 break
         }
+        else if (role === RoleName.USER) {
+            can(Action.Manage, UserToken)
+            can(Action.Manage, Bill)
+            can(Action.Manage, User)
+            can(Action.Manage, Userotp)
+            cannot(Action.Read, Role).because('tao ko cho may doc role')
+        }
+
         return build({
             detectSubjectType: item => item.constructor as ExtractSubjectType<Subjects>,
         })
