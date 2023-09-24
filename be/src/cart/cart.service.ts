@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ACTION_CART, ActionCartGateway } from './gateway/action-cart.gateway';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
 import { Model, MongooseError, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,7 +6,8 @@ import { Cart } from './schema/cart.schema';
 import { CreateCartDto } from './dto/cart-create.dto';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { ProductBillDto } from 'src/bill/dto/product-bill.dto';
-import { UpdateCartDto } from './dto/cart-update.dto';
+import { Product } from 'src/product/schema/product.schema';
+import { ConflictExceptionCustom } from 'src/exceptions/ConflictExceptionCustom.exception';
 
 @Injectable()
 export class CartService {
@@ -15,25 +15,6 @@ export class CartService {
         @InjectModel(Cart.name)
         private readonly cartModel: Model<Cart>
     ) { }
-
-    private actionCartGateways: Record<string, ActionCartGateway> = {};
-
-    public registerActionGateway(action: ACTION_CART, gateway: ActionCartGateway) {
-        this.actionCartGateways[action] = gateway;
-    }
-
-    public async processAction(
-        userId: Types.ObjectId,
-        cart: CreateCartDto,
-        storeId: Types.ObjectId,
-        action: ACTION_CART): Promise<Cart | boolean> {
-        const gateway = this.actionCartGateways[action];
-        if (gateway) {
-            return await gateway.processAction(userId, cart, storeId);
-        } else {
-            throw new NotFoundExceptionCustom("Action");
-        }
-    }
 
     getTotalPrice(listProducts: ProductBillDto[]): number {
         const totalPrice = listProducts.reduce((total: number, product: ProductBillDto) => {
@@ -43,16 +24,22 @@ export class CartService {
         return totalPrice
     }
 
-    async create(
-        userId: Types.ObjectId,
-        cart: CreateCartDto,
-        storeId: Types.ObjectId,): Promise<Cart> {
+    async create(userId: string, product: Product): Promise<Cart> {
         try {
+            const cart = new CreateCartDto()
+            cart.userId = userId
+            cart.storeId = product.storeId
+            cart.storeName = product.storeName
+            const productInfo = new ProductBillDto()
+            productInfo.avatar = product.avatar
+            productInfo.productId = product._id
+            productInfo.productName = product.productName
+            productInfo.quantity = product.quantity
+            productInfo.price = product.price
+            cart.listProducts = [productInfo]
+            cart.totalPrice = this.getTotalPrice(cart.listProducts)
+
             const newCart = await this.cartModel.create(cart)
-            newCart.userId = new Types.ObjectId(userId)
-            newCart.storeId = new Types.ObjectId(storeId)
-            newCart.totalPrice = this.getTotalPrice(cart.listProducts)
-            await newCart.save()
             return newCart
         }
         catch (err) {
@@ -62,10 +49,10 @@ export class CartService {
         }
     }
 
-    async deleteByUserIdAndStoreId(userId: Types.ObjectId, storeId: Types.ObjectId): Promise<boolean> {
+    async getAllByUserId(userId: string): Promise<Cart[]> {
         try {
-            const result = await this.cartModel.deleteOne({ userId, storeId })
-            return result.deletedCount > 0
+            const carts = await this.cartModel.find({ userId })
+            return carts
         }
         catch (err) {
             if (err instanceof MongooseError)
@@ -74,12 +61,18 @@ export class CartService {
         }
     }
 
-    async updateByUserIdAndStoreId(userId: Types.ObjectId, storeId: Types.ObjectId, cart: CreateCartDto): Promise<boolean> {
+    async update(product: Product, cart: Cart): Promise<Cart> {
         try {
-            const totalPrice = this.getTotalPrice(cart.listProducts)
-            const result = await this.cartModel.updateOne({ userId, storeId }, { totalPrice, listProducts: cart.listProducts })
-            console.log(result)
-            return result.modifiedCount > 0
+            const productInfo = new ProductBillDto()
+            productInfo.avatar = product.avatar
+            productInfo.productId = product._id
+            productInfo.productName = product.productName
+            productInfo.quantity = product.quantity
+            productInfo.price = product.price
+            cart.listProducts.push(productInfo)
+            cart.totalPrice = this.getTotalPrice(cart.listProducts)
+            await cart.save()
+            return cart
         }
         catch (err) {
             if (err instanceof MongooseError)
@@ -88,7 +81,28 @@ export class CartService {
         }
     }
 
-    async getByUserId(userId: Types.ObjectId, pageQuery: number, limitQuery: number, searchQuery: string)
+    async addProductIntoCart(userId: string, product: Product): Promise<Cart> {
+        const allCart = await this.getAllByUserId(userId)
+        if (!allCart) {
+            const newCart = await this.create(userId, product)
+            return newCart
+        }
+        else {
+            const cart = allCart.find(cart => cart.storeId.toString() === product.storeId.toString())
+            if (!cart) {
+                const newCart = await this.create(userId, product)
+                return newCart
+            }
+            else {
+                const hasProduct = cart.listProducts.find(productCart => productCart.productId.toString() === product._id.toString())
+                if(hasProduct) { throw new ConflictExceptionCustom(Product.name) }
+                const updatedCart = await this.update(product, cart)
+                return updatedCart
+            }
+        }
+    }
+
+    async getByUserId(userId: string, pageQuery: number, limitQuery: number, searchQuery: string)
         : Promise<{ total: number, carts: Cart[] }> {
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)

@@ -7,7 +7,7 @@ import { ProductBillDto } from "../dto/product-bill.dto";
 })
 export class Bill extends Document {
     @Prop()
-    userId: mongoose.Types.ObjectId;
+    userId: string;
 
     @Prop()
     fullName: string;
@@ -22,7 +22,7 @@ export class Bill extends Document {
     address: string;
 
     @Prop()
-    storeId: mongoose.Types.ObjectId;
+    storeId: string;
 
     @Prop()
     storeName: string;
@@ -34,7 +34,7 @@ export class Bill extends Document {
     totalPrice: number;
 
     @Prop()
-    promotionId: mongoose.Types.ObjectId;
+    promotionId: string;
 
     @Prop()
     promotionName: string;

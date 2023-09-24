@@ -8,6 +8,7 @@ import { Product } from './schema/product.schema';
 import { Request} from 'express';
 import { Types } from 'mongoose';
 import { StoreService } from 'src/store/store.service';
+import { EvaluationService } from 'src/evaluation/evaluation.service';
  
 @Controller('product')
 @ApiTags('Product')
@@ -16,6 +17,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     private readonly storeService: StoreService,
+    private readonly evaluationService: EvaluationService
   ) { }
 
   @UseGuards(AbilitiesGuard)
@@ -25,9 +27,10 @@ export class ProductController {
     @Req() req: Request,
     @Body() product: CreateProductDto
   ): Promise<Product> {
-    const userId = new Types.ObjectId(req.user['userId'])
+    const userId = req.user['userId']
     const store = await this.storeService.getByUserId(userId)
     const newProduct = await this.productService.create(store._id, store.storeName, product)
+    await this.evaluationService.create(newProduct._id)
     return newProduct
   }
 

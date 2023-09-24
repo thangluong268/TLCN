@@ -15,8 +15,8 @@ export class Role extends Document {
     @Prop({ type: String })
     name: RoleName;
 
-    @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
-    listUser: mongoose.Types.ObjectId[];
+    @Prop({ type: [String], default: [] })
+    listUser: string[];
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);

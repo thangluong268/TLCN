@@ -18,6 +18,7 @@ import { StoreModule } from './store/store.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ProductModule } from './product/product.module';
 import { SeedsModule } from './seeds/seeds.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
 
 
 @Module({
@@ -66,6 +67,7 @@ import { SeedsModule } from './seeds/seeds.module';
     FeedbackModule,
     ProductModule,
     SeedsModule,
+    EvaluationModule,
   ],
   providers: [],
 })

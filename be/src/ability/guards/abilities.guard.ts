@@ -19,7 +19,11 @@ export class AbilitiesGuard implements CanActivate {
         const rules = this.reflector.get<RequiredRule[]>(CHECK_ABILITY, context.getHandler()) || []
         const request = context.switchToHttp().getRequest()
         const user = request.user
+<<<<<<< HEAD
         const userId = user.role || new Types.ObjectId(user.userId)
+=======
+        const userId = user.userId
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
         const role = user.role || await this.roleService.getRoleNameByUserId(userId)
         const ability = this.caslAbilityFactory.defineAbility(role)
         try {

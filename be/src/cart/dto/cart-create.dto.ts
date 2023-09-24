@@ -4,11 +4,18 @@ import mongoose from "mongoose";
 import { ProductBillDto } from "src/bill/dto/product-bill.dto";
 
 export class CreateCartDto {
-    @ApiProperty()
+    @IsNotEmpty()
+    userId: string;
+
+    @IsNotEmpty()
+    storeId: string;
+
     @IsNotEmpty()
     storeName: string;
 
-    @ApiProperty({ type: [ProductBillDto] })
     @IsNotEmpty()
     listProducts: ProductBillDto[];
+
+    @IsNotEmpty()
+    totalPrice: number;
 }

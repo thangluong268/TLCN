@@ -6,10 +6,10 @@ import mongoose, { ObjectId, Document, Types } from "mongoose";
 })
 export class Feedback extends Document {
     @Prop()
-    productId: mongoose.Types.ObjectId;
+    productId: string;
 
     @Prop()
-    userId: mongoose.Types.ObjectId;
+    userId: string;
 
     @Prop()
     content: string;

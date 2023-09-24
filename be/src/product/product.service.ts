@@ -13,7 +13,7 @@ export class ProductService {
         private readonly productModel: Model<Product>
     ) { }
 
-    async create(storeId: Types.ObjectId, storeName: string, product: CreateProductDto): Promise<Product> {
+    async create(storeId: string, storeName: string, product: CreateProductDto): Promise<Product> {
         try {
             const newProduct = await this.productModel.create(product)
             newProduct.storeId = storeId

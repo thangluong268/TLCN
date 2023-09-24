@@ -26,7 +26,7 @@ export class BillService {
         return totalPrice
     }
 
-    async create(user: User, store: Store, products: Product[], bill: CreateBillDto): Promise<Bill> {
+    async create(user: User, products: Product[], bill: CreateBillDto): Promise<Bill> {
         try {
             const newBill = await this.billModel.create(bill)
             newBill.userId = user._id
@@ -34,8 +34,8 @@ export class BillService {
             newBill.email = user.email
             newBill.phone = user.phone
             newBill.address = user.address
-            newBill.storeId = store._id
-            newBill.storeName = store.storeName
+            newBill.storeId = products[0].storeId
+            newBill.storeName = products[0].storeName
             newBill.listProducts = products.map(product => {
                 const productBill = new ProductBillDto()
                 productBill.avatar = product.avatar
@@ -57,7 +57,11 @@ export class BillService {
     }
 
     async getAllByStatus(userId: string, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
+<<<<<<< HEAD
         : Promise<{ total: number, bills: Bill[] }> {
+=======
+    : Promise<{ total: number, bills: Bill[] }> {
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const search = searchQuery
@@ -82,8 +86,13 @@ export class BillService {
         }
     }
 
+<<<<<<< HEAD
     async getDetailById(id: Types.ObjectId): Promise<Bill> {
         try {
+=======
+    async getDetailById(id: string): Promise<Bill> {
+        try{
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
             const bill = await this.billModel.findById(id)
             if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return bill
@@ -95,8 +104,13 @@ export class BillService {
         }
     }
 
+<<<<<<< HEAD
     async cancel(id: Types.ObjectId): Promise<boolean> {
         try {
+=======
+    async cancel(id: string): Promise<boolean> {
+        try{
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
             const bill = await this.billModel.findById(id)
             if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             bill.status = "Đã hủy"

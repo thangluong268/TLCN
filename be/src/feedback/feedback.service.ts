@@ -12,7 +12,7 @@ export class FeedbackService {
         private readonly feedbackModel: Model<Feedback>
     ) { }
 
-    async create(userId: Types.ObjectId, productId: Types.ObjectId, feedback: CreateFeedbackDto): Promise<Feedback> {
+    async create(userId: string, productId: string, feedback: CreateFeedbackDto): Promise<Feedback> {
         try {
             const newFeedback = await this.feedbackModel.create(feedback)
             newFeedback.userId = userId

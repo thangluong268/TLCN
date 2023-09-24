@@ -22,8 +22,17 @@ export class DataSeed {
 
     @Command({ command: 'create:data', describe: 'create a role and add user to role Admin' })
     async create() {
-        const role = await this.roleService.create({
+        await this.roleService.create({
             name: RoleName.ADMIN
+        });
+        await this.roleService.create({
+            name: RoleName.USER
+        });
+        await this.roleService.create({
+            name: RoleName.SELLER
+        });
+        await this.roleService.create({
+            name: RoleName.MANAGER
         });
 
         const userInfo = new SignUpDto()

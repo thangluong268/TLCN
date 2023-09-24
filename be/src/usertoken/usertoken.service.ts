@@ -18,7 +18,7 @@ export class UsertokenService {
         return await bcrypt.hash(data, saltOrRounds)
     }
 
-    async createUserToken(userId: Types.ObjectId, refreshToken: string): Promise<UserToken> {
+    async createUserToken(userId: string, refreshToken: string): Promise<UserToken> {
         const hashedRT = await this.hashData(refreshToken)
         try {
             const userToken = await this.userTokenModel.create({
@@ -33,7 +33,7 @@ export class UsertokenService {
         }
     }
 
-    async updateUserToken(userId: Types.ObjectId, refreshToken: string): Promise<boolean> {
+    async updateUserToken(userId: string, refreshToken: string): Promise<boolean> {
         try {
             const hashedRT = await this.hashData(refreshToken)
             const userToken = await this.userTokenModel.findOneAndUpdate(
@@ -51,7 +51,7 @@ export class UsertokenService {
         }
     }
 
-    async deleteUserToken(userId: Types.ObjectId): Promise<boolean> {
+    async deleteUserToken(userId: string): Promise<boolean> {
         try {
             const userToken = await this.userTokenModel.findOneAndDelete({ userId })
             if (!userToken) { throw new ForbiddenExceptionCustom() }
@@ -64,7 +64,7 @@ export class UsertokenService {
         }
     }
 
-    async getUserTokenById(userId: Types.ObjectId): Promise<any> {
+    async getUserTokenById(userId: string): Promise<any> {
         try {
             const userToken = await this.userTokenModel.findOne({ userId })
             return userToken

@@ -29,6 +29,7 @@ export class BillController {
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.GIVE, new GiveGateway())
   }
 
+<<<<<<< HEAD
   // @UseGuards(AbilitiesGuard)
   // @CheckAbilities(new CreateBillAbility())
   // @Post()
@@ -50,6 +51,27 @@ export class BillController {
   //   console.log(result)
   //   return newBill
   // }
+=======
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateBillAbility())
+  @Post()
+  async create(
+    @Body() bill: CreateBillDto,
+    @Req() req: Request
+  ): Promise<Bill> {
+    const userId = req.user['userId']
+    const user = await this.userService.getById(userId)
+    const products = []
+    bill.listProductId.map(async (productId) => {
+      const product = await this.productService.getById(productId)
+      products.push(product)
+    })
+    const newBill = await this.billService.create(user, products, bill)
+    const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
+    console.log(result)
+    return newBill
+  }
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
 
 
   @UseGuards(AbilitiesGuard)
@@ -67,6 +89,10 @@ export class BillController {
     @Query('status') status: string,
   ): Promise<{ total: number, bills: Bill[] }> {
     const userId = req.user['userId']
+<<<<<<< HEAD
+=======
+    console.log(userId)
+>>>>>>> 98c465016add8743edb49e9db73ebd1626228285
     const data = await this.billService.getAllByStatus(userId, page, limit, search, status)
     return data
   }
@@ -78,8 +104,7 @@ export class BillController {
   async getDetailById(
     @Param('id') id: string
   ): Promise<Bill> {
-    const idObjId = new Types.ObjectId(id)
-    const bill = await this.billService.getDetailById(idObjId)
+    const bill = await this.billService.getDetailById(id)
     return bill
   }
 
@@ -89,8 +114,7 @@ export class BillController {
   async cancelBill(
     @Param('id') id: string
   ): Promise<boolean> {
-    const idObjId = new Types.ObjectId(id)
-    const result = await this.billService.cancel(idObjId)
+    const result = await this.billService.cancel(id)
     return result
   }
 }

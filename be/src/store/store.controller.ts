@@ -25,7 +25,7 @@ export class StoreController {
     @Req() req: Request,
     @Body() store: CreateStoreDto
   ): Promise<Store> {
-    const userId = new Types.ObjectId(req.user['userId'])
+    const userId = req.user['userId']
     const user = await this.userService.getById(userId)
     const newStore = await this.storeService.create(userId, user.phone, store)
     return newStore
@@ -37,8 +37,7 @@ export class StoreController {
   async getById(
     @Param('id') id: string
   ): Promise<Store> {
-    const idObjId = new Types.ObjectId(id)
-    const store = await this.storeService.getById(idObjId)
+    const store = await this.storeService.getById(id)
     return store
   }
 
@@ -48,7 +47,7 @@ export class StoreController {
   async getMyStore(
     @Req() req: Request
   ): Promise<Store> {
-    const userId = new Types.ObjectId(req.user['userId'])
+    const userId = req.user['userId']
     const store = await this.storeService.getByUserId(userId)
     return store
   }

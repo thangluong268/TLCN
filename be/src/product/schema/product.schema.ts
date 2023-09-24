@@ -32,8 +32,8 @@ export class Product extends Document {
     @Prop({default: true})
     status: boolean;
 
-    @Prop({type: mongoose.Schema.Types.ObjectId})
-    storeId: Types.ObjectId;
+    @Prop()
+    storeId: string;
 
     @Prop()
     storeName: string;
