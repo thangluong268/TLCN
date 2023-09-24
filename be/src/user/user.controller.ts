@@ -21,7 +21,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Get('user/:id')
   async findOne(@Param('id') id: string): Promise<User> {
-    const user = await this.userService.getById(new Types.ObjectId(id));
+    const user = await this.userService.getById(id);
     return user
   }
 
@@ -78,6 +78,15 @@ export class UserController {
   @Post('user/unFollowStore/:id')
   async unFollowStore(@Param('id') id: string, @Body() req: AddIdDto): Promise<User> {
     const user = await this.userService.unFollowStore(new Types.ObjectId(id), new Types.ObjectId(req.id));
+    return user
+  }
+
+  //Add warningCount for user by id
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadUserAbility())
+  @Post('manager/warningcount/:id')
+  async plusWarningCount(@Param('id') id: string): Promise<User> {
+    const user = await this.userService.plusWarningCount(new Types.ObjectId(id));
     return user
   }
 

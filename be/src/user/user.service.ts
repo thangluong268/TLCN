@@ -45,7 +45,19 @@ export class UserService {
     }
   }
 
-  async getById(userId: Types.ObjectId): Promise<User> {
+  // async getById(userId: Types.ObjectId): Promise<User> {
+  //   try {
+  //     const user = await this.userModel.findById(userId)
+  //     if (!user) { throw new NotFoundExceptionCustom(User.name) }
+  //     return user
+  //   }
+  //   catch (err) {
+  //     if (err instanceof MongooseError)
+  //       throw new InternalServerErrorExceptionCustom()
+  //     throw err
+  //   }
+  // }
+  async getById(userId: string): Promise<User> {
     try {
       const user = await this.userModel.findById(userId)
       if (!user) { throw new NotFoundExceptionCustom(User.name) }
@@ -155,5 +167,18 @@ export class UserService {
         throw new InternalServerErrorExceptionCustom()
       throw err
     }
+  }
+
+  async plusWarningCount(userId: Types.ObjectId): Promise<User> {
+    try {
+      const user = await this.userModel.findByIdAndUpdate(userId, { $inc: { warningCount: 1 } })
+      if (!user) { throw new NotFoundExceptionCustom(User.name) }
+      return user
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+
   }
 }

@@ -47,6 +47,7 @@ export class AbilityFactory {
                 can(Action.Manage, Cart)
                 can(Action.Create, Store)
                 can(Action.Read, Store)
+                can(Action.Read, User)
                 can(Action.Create, Feedback)
                 cannot(Action.Read, Role).because('tao ko cho may doc role')
                 break
@@ -55,18 +56,11 @@ export class AbilityFactory {
                 can(Action.Manage, Product)
                 break
             case RoleName.MANAGER:
+                can(Action.Manage, User)
                 break
             default:
                 break
         }
-        else if (role === RoleName.USER) {
-            can(Action.Manage, UserToken)
-            can(Action.Manage, Bill)
-            can(Action.Manage, User)
-            can(Action.Manage, Userotp)
-            cannot(Action.Read, Role).because('tao ko cho may doc role')
-        }
-
         return build({
             detectSubjectType: item => item.constructor as ExtractSubjectType<Subjects>,
         })

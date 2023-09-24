@@ -31,7 +31,7 @@ export class StoreService {
     async getById(id: Types.ObjectId): Promise<Store> {
         try {
             const store = await this.storeModel.findById(id)
-            if(!store) { throw new NotFoundExceptionCustom(Store.name) }
+            if (!store) { throw new NotFoundExceptionCustom(Store.name) }
             return store
         }
         catch (err) {
@@ -41,10 +41,10 @@ export class StoreService {
         }
     }
 
-    async getByUserId(userId: Types.ObjectId): Promise<Store> {
+    async getByUserId(userId: string): Promise<Store> {
         try {
             const store = await this.storeModel.findOne({ userId })
-            if(!store) { throw new NotFoundExceptionCustom(Store.name) }
+            if (!store) { throw new NotFoundExceptionCustom(Store.name) }
             return store
         }
         catch (err) {

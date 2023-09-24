@@ -11,6 +11,7 @@ import { UserService } from 'src/user/user.service';
 import * as firebase from 'firebase-admin';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { RoleName } from 'src/role/schema/role.schema';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class JwtATAuthGuard implements CanActivate {

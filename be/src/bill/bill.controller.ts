@@ -29,27 +29,27 @@ export class BillController {
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.GIVE, new GiveGateway())
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new CreateBillAbility())
-  @Post()
-  async create(
-    @Body() bill: CreateBillDto,
-    @Req() req: Request
-  ): Promise<Bill> {
-    const userId = new Types.ObjectId(req.user['userId'])
-    const user = await this.userService.getById(userId)
-    const store = await this.storeService.getByUserId(userId)
-    const products = []
-    bill.listProductId.map(async (productId) => {
-      const product = await this.productService.getById(productId)
-      products.push(product)
-    })
+  // @UseGuards(AbilitiesGuard)
+  // @CheckAbilities(new CreateBillAbility())
+  // @Post()
+  // async create(
+  //   @Body() bill: CreateBillDto,
+  //   @Req() req: Request
+  // ): Promise<Bill> {
+  //   const userId = new Types.ObjectId(req.user['userId'])
+  //   const user = await this.userService.getById(userId)
+  //   const store = await this.storeService.getByUserId(userId)
+  //   const products = []
+  //   bill.listProductId.map(async (productId) => {
+  //     const product = await this.productService.getById(productId)
+  //     products.push(product)
+  //   })
 
-    const newBill = await this.billService.create(user, store, products, bill)
-    const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
-    console.log(result)
-    return newBill
-  }
+  //   const newBill = await this.billService.create(user, store, products, bill)
+  //   const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
+  //   console.log(result)
+  //   return newBill
+  // }
 
 
   @UseGuards(AbilitiesGuard)
@@ -66,7 +66,7 @@ export class BillController {
     @Query('search') search: string,
     @Query('status') status: string,
   ): Promise<{ total: number, bills: Bill[] }> {
-    const userId = new Types.ObjectId(req.user['userId'])
+    const userId = req.user['userId']
     const data = await this.billService.getAllByStatus(userId, page, limit, search, status)
     return data
   }
