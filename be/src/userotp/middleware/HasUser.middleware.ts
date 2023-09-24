@@ -17,7 +17,7 @@ export class HasUserMiddleware implements NestMiddleware {
     async use(req: Request, res: Response, next: NextFunction) {
         if (req.params.id) {
             try {
-                const user = await this.userService.getById(new Types.ObjectId(req.params.id))
+                const user = await this.userService.getById(req.params.id)
                 if (!user) { throw new NotFoundExceptionCustom(User.name) }
             }
             catch (err) {

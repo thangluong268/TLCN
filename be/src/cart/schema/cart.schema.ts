@@ -7,10 +7,10 @@ import { ProductBillDto } from "src/bill/dto/product-bill.dto";
 })
 export class Cart extends Document {
     @Prop()
-    userId: mongoose.Types.ObjectId;
+    userId: string;
 
     @Prop()
-    storeId: mongoose.Types.ObjectId;
+    storeId: string;
 
     @Prop()
     storeName: string;

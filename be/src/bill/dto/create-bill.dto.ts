@@ -6,9 +6,9 @@ import mongoose, { Types } from "mongoose";
 
 export class CreateBillDto {
 
-    @ApiProperty({ type: [mongoose.Types.ObjectId] })
+    @ApiProperty()
     @IsNotEmpty()
-    listProductId: mongoose.Types.ObjectId[];
+    listProductId: string[];
 
     @ApiProperty()
     promotionId: string;

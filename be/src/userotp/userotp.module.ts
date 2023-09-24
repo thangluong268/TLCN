@@ -7,9 +7,15 @@ import { UserotpService } from './userotp.service';
 import { UserotpController } from './userotp.controller';
 import { HasUserMiddleware } from './middleware/HasUser.middleware';
 import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Userotp', schema: UserotpSchema }]), AbilityModule, RoleModule],
+  imports: [
+    MongooseModule.forFeature([{ name: 'Userotp', schema: UserotpSchema }]), 
+    AbilityModule, 
+    RoleModule,
+    UserModule,
+  ],
   controllers: [UserotpController],
   providers: [UserotpService, FreedomCustom],
   exports: [UserotpService],

@@ -5,6 +5,8 @@ import { Model, MongooseError, Types } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { Userotp } from './schema/userotp.schema';
 import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
+import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
+import { User } from 'src/user/schema/user.schema';
 @Injectable()
 export class UserotpService {
 
@@ -18,7 +20,7 @@ export class UserotpService {
             const otp = Math.floor(100000 + Math.random() * 900000).toString()
             await this.mailService.sendMail({
                 to: email,
-                from: process.env.EMAIL_USER,
+                from: process.env.MAIL_USER,
                 subject: 'OTP',
                 //Template is handlebar files
                 template: './test',
@@ -57,7 +59,7 @@ export class UserotpService {
         }
     }
 
-    async findUserotpByEmail(email: string): Promise<Userotp> {
+    async findUserotpByEmail(email: string): Promise<any> {
         try {
             const userotp = await this.userotpModel.findOne({ email });
             return userotp

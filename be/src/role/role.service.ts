@@ -26,7 +26,7 @@ export class RoleService {
         }
     }
 
-    async addUserToRole(userId: Types.ObjectId, roleName: CreateRoleDto): Promise<boolean> {
+    async addUserToRole(userId: string, roleName: CreateRoleDto): Promise<boolean> {
         try {
             // check role is exist
             const role = await this.getByName(roleName.name)
@@ -59,7 +59,7 @@ export class RoleService {
         }
     }
 
-    async addUserIntoListUser(roleId: Types.ObjectId, userId: Types.ObjectId): Promise<boolean> {
+    async addUserIntoListUser(roleId: string, userId: string): Promise<boolean> {
         try {
             const result = await this.roleModel.findByIdAndUpdate(roleId, { $push: { listUser: userId } })
             if (!result) { throw new NotFoundExceptionCustom(Role.name) }
@@ -90,7 +90,7 @@ export class RoleService {
 
     }
 
-    async getRoleNameByUserId(userId: Types.ObjectId): Promise<string> {
+    async getRoleNameByUserId(userId: string): Promise<string> {
         try {
             const role = await this.roleModel.findOne({ listUser: userId })
             if (!role) { throw new NotFoundExceptionCustom(Role.name) }
@@ -103,7 +103,7 @@ export class RoleService {
         }
     }
 
-    async getByUserId(userId: Types.ObjectId): Promise<any> {
+    async getByUserId(userId: string): Promise<any> {
         try {
             const role = await this.roleModel.findOne({ listUser: userId })
             return role

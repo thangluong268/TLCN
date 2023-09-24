@@ -6,7 +6,7 @@ import mongoose, { ObjectId, Document, Types } from "mongoose";
 })
 export class Store extends Document {
     @Prop()
-    userId: mongoose.Types.ObjectId;
+    userId: string;
 
     @Prop()
     avatar: string;

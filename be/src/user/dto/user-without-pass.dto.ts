@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
 import mongoose from "mongoose";
 
 export class UserWithoutPassDto {
-    _id: mongoose.Types.ObjectId;
+    _id: string;
     avatar: string;
     fullName: string;
     email: string;

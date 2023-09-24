@@ -21,7 +21,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Get('user/:id')
   async findOne(@Param('id') id: string): Promise<User> {
-    const user = await this.userService.getById(new Types.ObjectId(id));
+    const user = await this.userService.getById(id);
     return user
   }
 
@@ -30,7 +30,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Put('user/:id')
   async update(@Param('id') id: string, @Body() UpdateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.userService.update(new Types.ObjectId(id), UpdateUserDto);
+    const user = await this.userService.update(id, UpdateUserDto);
     return user
   }
 
@@ -39,7 +39,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Delete('user/:id')
   async delete(@Param('id') id: string): Promise<User> {
-    const user = await this.userService.delete(new Types.ObjectId(id));
+    const user = await this.userService.delete(id);
     return user
   }
 
@@ -48,8 +48,8 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Post('user/addFriend/:id')
   async addFriend(@Param('id') id: string, @Body() req: AddIdDto): Promise<User> {
-    const me = await this.userService.addFriend(new Types.ObjectId(id), new Types.ObjectId(req.id));
-    const myfriend = await this.userService.addFriend(new Types.ObjectId(req.id), new Types.ObjectId(id));
+    const me = await this.userService.addFriend(id, req.id);
+    const myfriend = await this.userService.addFriend(req.id, id);
     return me
   }
 
@@ -58,8 +58,8 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Post('user/unFriend/:id')
   async unFriend(@Param('id') id: string, @Body() req: AddIdDto): Promise<User> {
-    const me = await this.userService.unFriend(new Types.ObjectId(id), new Types.ObjectId(req.id));
-    const myfriend = await this.userService.unFriend(new Types.ObjectId(req.id), new Types.ObjectId(id));
+    const me = await this.userService.unFriend(id, req.id);
+    const myfriend = await this.userService.unFriend(req.id, id);
     return me
   }
 
@@ -68,7 +68,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Post('user/followStore/:id')
   async addStore(@Param('id') id: string, @Body() req: AddIdDto): Promise<User> {
-    const user = await this.userService.followStore(new Types.ObjectId(id), new Types.ObjectId(req.id));
+    const user = await this.userService.followStore(id, req.id);
     return user
   }
 
@@ -77,7 +77,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @Post('user/unFollowStore/:id')
   async unFollowStore(@Param('id') id: string, @Body() req: AddIdDto): Promise<User> {
-    const user = await this.userService.unFollowStore(new Types.ObjectId(id), new Types.ObjectId(req.id));
+    const user = await this.userService.unFollowStore(id, req.id);
     return user
   }
 

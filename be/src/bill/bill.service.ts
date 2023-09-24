@@ -26,7 +26,7 @@ export class BillService {
         return totalPrice
     }
 
-    async create(user: User, store: Store, products: Product[], bill: CreateBillDto): Promise<Bill> {
+    async create(user: User, products: Product[], bill: CreateBillDto): Promise<Bill> {
         try {
             const newBill = await this.billModel.create(bill)
             newBill.userId = user._id
@@ -34,8 +34,8 @@ export class BillService {
             newBill.email = user.email
             newBill.phone = user.phone
             newBill.address = user.address
-            newBill.storeId = store._id
-            newBill.storeName = store.storeName
+            newBill.storeId = products[0].storeId
+            newBill.storeName = products[0].storeName
             newBill.listProducts = products.map(product => {
                 const productBill = new ProductBillDto()
                 productBill.avatar = product.avatar
@@ -56,7 +56,7 @@ export class BillService {
         }
     }
 
-    async getAllByStatus(userId: Types.ObjectId, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
+    async getAllByStatus(userId: string, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
     : Promise<{ total: number, bills: Bill[] }> {
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
@@ -82,7 +82,7 @@ export class BillService {
         }
     }
 
-    async getDetailById(id: Types.ObjectId): Promise<Bill> {
+    async getDetailById(id: string): Promise<Bill> {
         try{
             const bill = await this.billModel.findById(id)
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
@@ -95,7 +95,7 @@ export class BillService {
         }
     }
 
-    async cancel(id: Types.ObjectId): Promise<boolean> {
+    async cancel(id: string): Promise<boolean> {
         try{
             const bill = await this.billModel.findById(id)
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }

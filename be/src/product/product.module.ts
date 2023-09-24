@@ -6,6 +6,7 @@ import { AbilityModule } from 'src/ability/ability.module';
 import { RoleModule } from 'src/role/role.module';
 import { ProductSchema } from './schema/product.schema';
 import { StoreModule } from 'src/store/store.module';
+import { EvaluationModule } from 'src/evaluation/evaluation.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { StoreModule } from 'src/store/store.module';
     AbilityModule,
     RoleModule,
     StoreModule,
+    EvaluationModule,
   ],
   controllers: [ProductController],
   providers: [ProductService],

@@ -17,23 +17,13 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
   @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new CreateRoleAbility())
-  @Post()
-  async create(
-    @Body() role: CreateRoleDto
-  ): Promise<Role> {
-    return await this.roleService.create(role)
-  }
-
-  @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateRoleAbility())
   @Post('addUserToRole/:userId')
   async addUserToRole(
     @Param('userId') userId: string,
     @Body() roleName: CreateRoleDto
   ): Promise<boolean> {
-    const userObjId = new Types.ObjectId(userId)
-    const result = await this.roleService.addUserToRole(userObjId, roleName)
+    const result = await this.roleService.addUserToRole(userId, roleName)
     return result
   }
 
@@ -51,7 +41,7 @@ export class RoleController {
   async getRoleNameByUserId(
     @Param('userId') userId: string,
   ): Promise<string> {
-    const role = await this.roleService.getRoleNameByUserId(new Types.ObjectId(userId))
+    const role = await this.roleService.getRoleNameByUserId(userId)
     return role
   }
 

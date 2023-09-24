@@ -11,6 +11,7 @@ import { Cart } from "src/cart/schema/cart.schema";
 import { Store } from "src/store/schema/store.schema";
 import { Feedback } from "src/feedback/schema/feedback.schema";
 import { Product } from "src/product/schema/product.schema";
+import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 
 
 
@@ -104,6 +105,13 @@ export class CreateFeedBackAbility implements RequiredRule {
 export class CreateProductAbility implements RequiredRule {
     action = Action.Create;
     subject = Product;
+}
+
+
+// Evaluation
+export class UpdateEvaluationAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Evaluation;
 }
 
 

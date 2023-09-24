@@ -45,7 +45,7 @@ export class UserService {
     }
   }
 
-  async getById(userId: Types.ObjectId): Promise<User> {
+  async getById(userId: string): Promise<User> {
     try {
       const user = await this.userModel.findById(userId)
       if (!user) { throw new NotFoundExceptionCustom(User.name) }
@@ -59,7 +59,7 @@ export class UserService {
   }
 
 
-  async update(userId: Types.ObjectId, req: any): Promise<User> {
+  async update(userId: string, req: any): Promise<User> {
     try {
       const user = await this.userModel.findByIdAndUpdate(userId, req)
       if (!user) { throw new NotFoundExceptionCustom(User.name) }
@@ -71,7 +71,7 @@ export class UserService {
     }
   }
 
-  async delete(userId: Types.ObjectId): Promise<User> {
+  async delete(userId: string): Promise<User> {
     try {
       const user = await this.userModel.findByIdAndDelete(userId)
       if (!user) { throw new NotFoundExceptionCustom(User.name) }
@@ -83,7 +83,7 @@ export class UserService {
     }
   }
 
-  async addFriend(userId: Types.ObjectId, friendId: Types.ObjectId): Promise<User> {
+  async addFriend(userId: string, friendId: string): Promise<User> {
     try {
       // Get friends 
       const user = await this.userModel.findById(userId)
@@ -101,7 +101,7 @@ export class UserService {
     }
   }
 
-  async unFriend(userId: Types.ObjectId, friendId: Types.ObjectId): Promise<User> {
+  async unFriend(userId: string, friendId: string): Promise<User> {
     try {
       // Get friends 
       const user = await this.userModel.findById(userId)
@@ -120,7 +120,7 @@ export class UserService {
     }
   }
 
-  async followStore(userId: Types.ObjectId, storeId: Types.ObjectId): Promise<User> {
+  async followStore(userId: string, storeId: string): Promise<User> {
     try {
       // Get friends 
       const user = await this.userModel.findById(userId)
@@ -138,7 +138,7 @@ export class UserService {
     }
   }
 
-  async unFollowStore(userId: Types.ObjectId, storeId: Types.ObjectId): Promise<User> {
+  async unFollowStore(userId: string, storeId: string): Promise<User> {
     try {
       // Get friends 
       const user = await this.userModel.findById(userId)

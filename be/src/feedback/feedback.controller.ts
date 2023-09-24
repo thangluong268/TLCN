@@ -25,9 +25,8 @@ export class FeedbackController {
       @Query('productId') productId: string,
       @Body() feedback: CreateFeedbackDto,
     ) : Promise<Feedback> {
-      const userId = new Types.ObjectId(req.user['userId'])
-      const productIdObjId = new Types.ObjectId(productId)
-      const newFeedback = await this.feedbackService.create(userId, productIdObjId, feedback)
+      const userId = req.user['userId']
+      const newFeedback = await this.feedbackService.create(userId, productId, feedback)
       return newFeedback
     }
 
