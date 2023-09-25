@@ -1,13 +1,15 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { Store } from './schema/store.schema';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateBillAbility, CreateStoreAbility, ReadStoreAbility } from 'src/ability/decorators/abilities.decorator';
+import { CheckAbilities, CreateBillAbility, CreateStoreAbility, ReadStoreAbility, UpdateStoreAbility } from 'src/ability/decorators/abilities.decorator';
 import { Types } from 'mongoose';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UserService } from 'src/user/user.service';
+import { Role, RoleName } from 'src/role/schema/role.schema';
+import { CheckRole } from 'src/ability/decorators/role.decorator';
 
 @Controller('store')
 @ApiTags('Store')
@@ -52,6 +54,14 @@ export class StoreController {
     return store
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateStoreAbility())
+  @CheckRole(RoleName.MANAGER)
+  @Put('manager/warningcount/:id')
+  async updateWarningCount(@Param('id') id: string, @Param("action") action: string): Promise<Store> {
+    const store = await this.storeService.updateWarningCount(id, action);
+    return store
+  }
 }
 
 

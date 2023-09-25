@@ -45,21 +45,6 @@ export class UserService {
     }
   }
 
-<<<<<<< HEAD
-  // async getById(userId: Types.ObjectId): Promise<User> {
-  //   try {
-  //     const user = await this.userModel.findById(userId)
-  //     if (!user) { throw new NotFoundExceptionCustom(User.name) }
-  //     return user
-  //   }
-  //   catch (err) {
-  //     if (err instanceof MongooseError)
-  //       throw new InternalServerErrorExceptionCustom()
-  //     throw err
-  //   }
-  // }
-=======
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
   async getById(userId: string): Promise<User> {
     try {
       const user = await this.userModel.findById(userId)
@@ -172,9 +157,12 @@ export class UserService {
     }
   }
 
-  async plusWarningCount(userId: Types.ObjectId): Promise<User> {
+  async updateWarningCount(userId: string, action: string): Promise<User> {
     try {
-      const user = await this.userModel.findByIdAndUpdate(userId, { $inc: { warningCount: 1 } })
+      var point = 1;
+      if (action === 'minus')
+        point = -1
+      const user = await this.userModel.findByIdAndUpdate(userId, { $inc: { warningCount: point } })
       if (!user) { throw new NotFoundExceptionCustom(User.name) }
       return user
     } catch (err) {
@@ -182,6 +170,23 @@ export class UserService {
         throw new InternalServerErrorExceptionCustom()
       throw err
     }
-
   }
+
+  // getAll
+  async getAll(page: number, limit: number, search: string): Promise<{ total: number, users: User[] }> {
+    try {
+      // Total user and search user by email or name
+      const total = await this.userModel.countDocuments({ $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }] })
+      const users = await this.userModel.find({ $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }] })
+        .skip((page - 1) * limit)
+        .limit(limit)
+      if (!users) { throw new NotFoundExceptionCustom(User.name) }
+      return { total, users }
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
 }

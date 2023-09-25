@@ -41,4 +41,16 @@ export class ProductService {
         }
     }
 
+    async deleteProduct(productId: string): Promise<Product> {
+        try {
+            const product = await this.productModel.findOneAndDelete({ _id: productId })
+            return product
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
 }

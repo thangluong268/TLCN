@@ -5,14 +5,13 @@ import { AbilityModule } from 'src/ability/ability.module';
 import { RoleModule } from 'src/role/role.module';
 import { UserotpService } from './userotp.service';
 import { UserotpController } from './userotp.controller';
-import { HasUserMiddleware } from './middleware/HasUser.middleware';
 import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Userotp', schema: UserotpSchema }]), 
-    AbilityModule, 
+    MongooseModule.forFeature([{ name: 'Userotp', schema: UserotpSchema }]),
+    AbilityModule,
     RoleModule,
     UserModule,
   ],
@@ -20,12 +19,4 @@ import { UserModule } from 'src/user/user.module';
   providers: [UserotpService, FreedomCustom],
   exports: [UserotpService],
 })
-export class UserotpModule {
-  // Middleware for user
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(HasUserMiddleware)
-      .forRoutes({ path: 'userotp/user/sendotp/:id', method: RequestMethod.POST })
-  }
-
-}
+export class UserotpModule { }

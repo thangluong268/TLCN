@@ -57,11 +57,7 @@ export class BillService {
     }
 
     async getAllByStatus(userId: string, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
-<<<<<<< HEAD
         : Promise<{ total: number, bills: Bill[] }> {
-=======
-    : Promise<{ total: number, bills: Bill[] }> {
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const search = searchQuery
@@ -86,13 +82,8 @@ export class BillService {
         }
     }
 
-<<<<<<< HEAD
-    async getDetailById(id: Types.ObjectId): Promise<Bill> {
-        try {
-=======
     async getDetailById(id: string): Promise<Bill> {
-        try{
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
+        try {
             const bill = await this.billModel.findById(id)
             if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return bill
@@ -104,13 +95,8 @@ export class BillService {
         }
     }
 
-<<<<<<< HEAD
-    async cancel(id: Types.ObjectId): Promise<boolean> {
-        try {
-=======
     async cancel(id: string): Promise<boolean> {
-        try{
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
+        try {
             const bill = await this.billModel.findById(id)
             if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             bill.status = "Đã hủy"

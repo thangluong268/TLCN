@@ -29,29 +29,6 @@ export class BillController {
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.GIVE, new GiveGateway())
   }
 
-<<<<<<< HEAD
-  // @UseGuards(AbilitiesGuard)
-  // @CheckAbilities(new CreateBillAbility())
-  // @Post()
-  // async create(
-  //   @Body() bill: CreateBillDto,
-  //   @Req() req: Request
-  // ): Promise<Bill> {
-  //   const userId = new Types.ObjectId(req.user['userId'])
-  //   const user = await this.userService.getById(userId)
-  //   const store = await this.storeService.getByUserId(userId)
-  //   const products = []
-  //   bill.listProductId.map(async (productId) => {
-  //     const product = await this.productService.getById(productId)
-  //     products.push(product)
-  //   })
-
-  //   const newBill = await this.billService.create(user, store, products, bill)
-  //   const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
-  //   console.log(result)
-  //   return newBill
-  // }
-=======
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateBillAbility())
   @Post()
@@ -71,7 +48,6 @@ export class BillController {
     console.log(result)
     return newBill
   }
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
 
 
   @UseGuards(AbilitiesGuard)
@@ -89,10 +65,6 @@ export class BillController {
     @Query('status') status: string,
   ): Promise<{ total: number, bills: Bill[] }> {
     const userId = req.user['userId']
-<<<<<<< HEAD
-=======
-    console.log(userId)
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
     const data = await this.billService.getAllByStatus(userId, page, limit, search, status)
     return data
   }

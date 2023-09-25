@@ -23,9 +23,5 @@ export class UserModule implements NestModule {
     consumer
       .apply(HasSameRoleUserMiddleware)
       .forRoutes({ path: 'user/user/addFriend/:id', method: RequestMethod.POST }, { path: 'user/user/unFriend/:id', method: RequestMethod.POST })
-<<<<<<< HEAD
-=======
-
->>>>>>> 98c465016add8743edb49e9db73ebd1626228285
   }
 }
