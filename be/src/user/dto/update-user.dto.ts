@@ -27,6 +27,9 @@ export class UpdateUserDto {
     @IsNotEmpty()
     birthday: Date;
 
+    @IsNotEmpty()
+    wallet: number;
+
     @ApiProperty()
     @IsNotEmpty()
     status: boolean;

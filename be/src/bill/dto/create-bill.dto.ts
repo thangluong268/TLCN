@@ -11,6 +11,10 @@ export class CreateBillDto {
     listProductId: string[];
 
     @ApiProperty()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiProperty()
     promotionId: string;
 
     @ApiProperty()

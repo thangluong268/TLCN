@@ -5,6 +5,8 @@ import { Model, MongooseError, Types } from 'mongoose';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
+import { ConflictExceptionCustom } from 'src/exceptions/ConflictExceptionCustom.exception';
+import { User } from 'src/user/schema/user.schema';
 
 @Injectable()
 export class StoreService {
@@ -13,11 +15,13 @@ export class StoreService {
         private readonly storeModel: Model<Store>
     ) { }
 
-    async create(userId: string, phone: string, store: CreateStoreDto): Promise<Store> {
+    async create(user: User, store: CreateStoreDto): Promise<Store> {
         try {
+            const hasStore = await this.storeModel.findOne({ userId: user._id })
+            if (hasStore) { throw new ConflictExceptionCustom(Store.name) }
             const newStore = await this.storeModel.create(store)
-            newStore.userId = userId
-            newStore.phone = phone
+            newStore.userId = user._id
+            newStore.phone = [user.phone]
             await newStore.save()
             return newStore
         }
@@ -48,6 +52,31 @@ export class StoreService {
             return store
         }
         catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async update(userId: string, store: any): Promise<Store> {
+        try {
+            await this.getByUserId(userId)
+            const updatedStore = await this.storeModel.findOneAndUpdate({ userId }, store, { new: true })
+            return updatedStore
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async delete(userId: string): Promise<boolean> {
+        try {
+            const store = await this.storeModel.findOneAndDelete({ userId })
+            if (!store) { throw new NotFoundExceptionCustom(Store.name) }
+            return true
+        } catch (err) {
             if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err

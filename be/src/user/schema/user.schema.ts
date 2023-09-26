@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { ObjectId, Document, Types } from "mongoose";
+import { AddressProfileDto } from "../dto/address-profile.dto";
 
 @Schema({
     timestamps: true,
@@ -17,8 +18,8 @@ export class User extends Document {
     @Prop({ type: String })
     password: string;
 
-    @Prop({ type: String })
-    address: string;
+    @Prop({ type: [Object] })
+    address: AddressProfileDto[];
 
     @Prop({ type: String })
     phone: string;
@@ -34,6 +35,9 @@ export class User extends Document {
 
     @Prop({ type: [String], default: [] })
     followStores: string[];
+
+    @Prop({ type: Number, default: 0 })
+    wallet: number;
 
     @Prop({ type: Number, default: 0 })
     warningCount: number;

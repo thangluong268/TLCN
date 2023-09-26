@@ -12,6 +12,7 @@ import { Store } from "src/store/schema/store.schema";
 import { Feedback } from "src/feedback/schema/feedback.schema";
 import { Product } from "src/product/schema/product.schema";
 import { Evaluation } from "src/evaluation/schema/evaluation.schema";
+import { Notification } from "src/notification/schema/notification.schema";
 
 
 
@@ -75,6 +76,11 @@ export class ReadBillAbility implements RequiredRule {
     subject = Bill;
 }
 
+export class UpdateBillAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Bill;
+}
+
 
 // Cart
 export class CreateCartAbility implements RequiredRule {
@@ -93,6 +99,16 @@ export class ReadStoreAbility implements RequiredRule {
     subject = Store;
 }
 
+export class UpdateStoreAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Store;
+}
+
+export class DeleteStoreAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = Store;
+}
+
 
 // Feedback
 export class CreateFeedBackAbility implements RequiredRule {
@@ -107,11 +123,28 @@ export class CreateProductAbility implements RequiredRule {
     subject = Product;
 }
 
+export class ReadProductAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Product;
+}
+
+export class UpdateProductAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Product;
+}
+
 
 // Evaluation
 export class UpdateEvaluationAbility implements RequiredRule {
     action = Action.Update;
     subject = Evaluation;
+}
+
+
+// Notification
+export class ReadNotificationAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Notification;
 }
 
 

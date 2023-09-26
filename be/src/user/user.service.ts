@@ -7,6 +7,9 @@ import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
 import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
+import { AddressProfileDto } from './dto/address-profile.dto';
+import { ObjectId } from 'mongodb';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 
 @Injectable()
@@ -20,6 +23,10 @@ export class UserService {
   async create(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
     try {
       const newUser = await this.userModel.create(signUpDto)
+      const address = new AddressProfileDto()
+      address.name = signUpDto.address
+      newUser.address = [address]
+      await newUser.save()
       const userDoc = newUser['_doc']
       const { password, ...userWithoutPass } = userDoc
       return userWithoutPass
@@ -150,6 +157,21 @@ export class UserService {
       user.followStores = stores
       await user.save()
       return user
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
+  async updateWallet(userId: string, money: number, type: string): Promise<boolean> {
+    try {
+      const user = await this.getById(userId)
+      const bonus = (money * 0.2) / 1000
+      const updateUser = new UpdateUserDto()
+      updateUser.wallet = type == "plus" ? (user.wallet + bonus) : (user.wallet - bonus)
+      await this.update(userId, updateUser)
+      return true
     } catch (err) {
       if (err instanceof MongooseError)
         throw new InternalServerErrorExceptionCustom()

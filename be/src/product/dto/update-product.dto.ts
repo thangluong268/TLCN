@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 
-export class CreateProductDto {
+export class UpdateProductDto {
     @ApiProperty({type: [String]})
     @IsNotEmpty()
     avatar: string[];
@@ -34,4 +34,5 @@ export class CreateProductDto {
     @IsNotEmpty()
     type: string;
 
+    status: boolean = true;
 }

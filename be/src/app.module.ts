@@ -19,6 +19,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { ProductModule } from './product/product.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { EvaluationModule } from './evaluation/evaluation.module';
+import { NotificationModule } from './notification/notification.module';
 
 
 @Module({
@@ -68,6 +69,7 @@ import { EvaluationModule } from './evaluation/evaluation.module';
     ProductModule,
     SeedsModule,
     EvaluationModule,
+    NotificationModule,
   ],
   providers: [],
 })

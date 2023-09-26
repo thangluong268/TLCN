@@ -1,0 +1,53 @@
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { NotificationService } from './notification.service';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { Notification } from './schema/notification.schema';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CheckAbilities, ReadNotificationAbility } from 'src/ability/decorators/abilities.decorator';
+import { CheckRole } from 'src/ability/decorators/role.decorator';
+import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
+import { RoleName } from 'src/role/schema/role.schema';
+import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
+
+@Controller('notification')
+@ApiTags('Notification')
+@ApiBearerAuth('Authorization')
+export class NotificationController {
+  constructor(
+    private readonly notificationService: NotificationService
+  ) { }
+
+  @Public()
+  @Post()
+  async create(
+    @Body() notification: CreateNotificationDto
+  ): Promise<Notification> {
+    const newNotification = await this.notificationService.create(notification)
+    return newNotification
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadNotificationAbility())
+  @CheckRole(RoleName.SELLER)
+  @Get()
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getAllByUserId(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @GetCurrentUserId() userId: string,
+  ): Promise<{ total: number, notifications: Notification[] }> {
+    const data = await this.notificationService.getAllByUserId(userId, page, limit)
+    return data
+  }
+
+  @Public()
+  @Put('/:id')
+  async update(
+    @Param('id') id: string,
+  ): Promise<boolean> {
+    const result = await this.notificationService.update(id)
+    return result
+  }
+}
