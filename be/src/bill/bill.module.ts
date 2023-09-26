@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {  Module } from '@nestjs/common';
 import { BillService } from './bill.service';
 import { BillController } from './bill.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -9,6 +9,8 @@ import { PaymentModule } from './payment/payment.module';
 import { UserModule } from 'src/user/user.module';
 import { StoreModule } from 'src/store/store.module';
 import { ProductModule } from 'src/product/product.module';
+import { FirebaseService } from 'src/firebase/firebase.service';
+import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -17,8 +19,8 @@ import { ProductModule } from 'src/product/product.module';
     RoleModule,
     PaymentModule,
     UserModule,
-    StoreModule,
     ProductModule,
+    StoreModule,
   ],
   controllers: [BillController],
   providers: [BillService],

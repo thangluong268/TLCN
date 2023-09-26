@@ -22,18 +22,17 @@ export class AbilitiesGuard implements CanActivate {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        const checkRoles = this.reflector.get<string[]>(CHECK_ROLE, context.getHandler()) || []
         const rules = this.reflector.get<RequiredRule[]>(CHECK_ABILITY, context.getHandler()) || []
-        const check_role = this.reflector.get<string[]>(CHECK_ROLE, context.getHandler()) || []
         const request = context.switchToHttp().getRequest()
         const user = request.user
         const userId = user.userId
         const roles = user.role || await this.roleService.getRoleNameByUserId(userId)
         var currentRole = ""
-        check_role.forEach(role => {
-            if (roles.includes(role)) currentRole = role
+        checkRoles.forEach(role => {
+            if ((roles.includes(role))) { currentRole = role }
         })
-        if (currentRole == "") { currentRole = roles.split(" - ")[0] }
-        // if (!(roles.includes(check_role))) throw new UnauthorizedException()
+        if(currentRole === "") { currentRole = roles.split(" - ")[0]}
         const ability = this.caslAbilityFactory.defineAbility(currentRole)
         try {
             rules.forEach(rule => {
@@ -47,5 +46,4 @@ export class AbilitiesGuard implements CanActivate {
             }
         }
     }
-
 }

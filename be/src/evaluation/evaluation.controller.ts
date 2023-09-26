@@ -1,11 +1,15 @@
-import { Body, Controller, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { CheckAbilities, UpdateEvaluationAbility } from 'src/ability/decorators/abilities.decorator';
-import { Types } from 'mongoose';
 import { Request } from 'express';
 import { BodyDto } from './dto/body.dto';
+import { CheckRole } from 'src/ability/decorators/role.decorator';
+import { RoleName } from 'src/role/schema/role.schema';
+import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
+import { Evaluation } from './schema/evaluation.schema';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('evaluation')
 @ApiTags('Evaluation')
@@ -17,17 +21,26 @@ export class EvaluationController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateEvaluationAbility())
+  @CheckRole(RoleName.USER)
   @ApiQuery({ name: 'productId', type: String, required: true })
-  @ApiQuery({ name: 'type', type: String, required: true })
   @Put('user')
   async create(
-    @Req() req: Request,
     @Query('productId') productId: string,
-    @Query('type') type: string,
-    @Body() body: BodyDto
+    @Body() body: BodyDto,
+    @GetCurrentUserId() userId: string,
   ): Promise<boolean> {
-    const userId = req.user['userId']
-    const result = this.evaluationService.update(userId, productId, body.body, type.toLowerCase())
+    const result = this.evaluationService.update(userId, productId, body.body)
     return result
+  }
+
+
+  @Public()
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  @Get()
+  async getByProductId(
+    @Query('productId') productId: string,
+  ): Promise<Evaluation> {
+    const evaluation = await this.evaluationService.getByProductId(productId)
+    return evaluation
   }
 }

@@ -4,9 +4,8 @@ import { Evaluation } from './schema/evaluation.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { EmojiDto } from './dto/emoji.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { throwIfEmpty } from 'rxjs';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class EvaluationService {
@@ -27,17 +26,9 @@ export class EvaluationService {
         }
     }
 
-    async update(userId: string, productId: string, body: string, type: string): Promise<boolean> {
+    async update(userId: string, productId: string, body: string): Promise<boolean> {
         const evaluation = await this.evaluationModel.findOne({ productId })
-        if (type == "emoji") {
-            return this.updateEmoji(userId, body, evaluation)
-        }
-        else if (type == "comment") {
-            return this.updateComment(userId, body, evaluation)
-        }
-        else {
-            throw new NotFoundExceptionCustom("Action")
-        }
+        return this.updateEmoji(userId, body, evaluation)
     }
 
     async updateEmoji(userId: string, body: string, evaluation: Evaluation): Promise<boolean> {
@@ -67,24 +58,11 @@ export class EvaluationService {
         }
     }
 
-    async updateComment(userId: string, body: string, evaluation: Evaluation): Promise<boolean> {
+    async getByProductId(productId: string) : Promise<Evaluation> {
         try {
-            const index = evaluation.Comments.findIndex(cmt => cmt.userId.toString() === userId.toString())
-            if (index == -1) {
-                const newCmt = new CreateCommentDto()
-                newCmt.userId = userId
-                newCmt.content = body
-                evaluation.Comments.push(newCmt)
-            }
-            else {
-                const updatedCmt = new UpdateCommentDto()
-                updatedCmt.userId = userId
-                updatedCmt.content = body
-                updatedCmt.createAt = evaluation.Comments[index].createAt
-                evaluation.Comments[index] = updatedCmt
-            }
-            await evaluation.save()
-            return true
+            const evaluation = await this.evaluationModel.findOne({ productId })
+            if(!evaluation) { throw new NotFoundExceptionCustom(Evaluation.name) }
+            return evaluation
         }
         catch (err) {
             if (err instanceof MongooseError)
@@ -92,4 +70,6 @@ export class EvaluationService {
             throw err
         }
     }
+
+
 }

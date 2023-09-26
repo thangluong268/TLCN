@@ -16,9 +16,9 @@ export class HasPermitRoleMiddleware implements NestMiddleware {
         if (req.params.id) {
             try {
                 const id = req.params.id
-                const role = await this.roleService.getRoleNameByUserId(id)
-                if (!role) { throw new NotFoundExceptionCustom(Role.name) }
-                if (role == RoleName.ADMIN || role == RoleName.MANAGER) {
+                const roles = await this.roleService.getRoleNameByUserId(id)
+                if (!roles) { throw new NotFoundExceptionCustom(Role.name) }
+                if (roles.includes(RoleName.ADMIN) || roles.includes(RoleName.MANAGER)) {
                     throw new NotFoundExceptionCustom(User.name)
                 }
             }

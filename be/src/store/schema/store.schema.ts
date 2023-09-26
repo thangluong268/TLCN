@@ -17,8 +17,8 @@ export class Store extends Document {
     @Prop()
     address: string;
 
-    @Prop()
-    phone: string;
+    @Prop({types: [String]})
+    phone: string[];
 
     @Prop({ default: 0 })
     warningCount: number;

@@ -9,6 +9,8 @@ export const Translate = {
     PaymentMethod: "phương thức thanh toán",
     Action: "hành động",
     Feedback: "feedback",
+    Evaluation: "đánh giá",
+    Notification: "thông báo",
 }
 
 export const UpperCaseFirstLetter = (str: string) => {

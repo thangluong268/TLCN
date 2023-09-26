@@ -33,7 +33,7 @@ export class BillService {
             newBill.fullName = user.fullName
             newBill.email = user.email
             newBill.phone = user.phone
-            newBill.address = user.address
+            newBill.address = bill.address
             newBill.storeId = products[0].storeId
             newBill.storeName = products[0].storeName
             newBill.listProducts = products.map(product => {
@@ -56,8 +56,8 @@ export class BillService {
         }
     }
 
-    async getAllByStatus(userId: string, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
-        : Promise<{ total: number, bills: Bill[] }> {
+    async getAllByStatus(idCondition: any, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
+    : Promise<{ total: number, bills: Bill[] }> {
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const search = searchQuery
@@ -68,11 +68,11 @@ export class BillService {
                 ]
             }
             : {}
-        const status = new RegExp(statusQuery, 'i') || "Đã đặt"
+        const statusRegex = { status: { $regex: statusQuery, $options: "i" } }
         const skip = limit * (page - 1)
-        try {
-            const total = await this.billModel.countDocuments({ userId, status, ...search })
-            const bills = await this.billModel.find({ userId, status, ...search }).limit(limit).skip(skip)
+        try{
+            const total = await this.billModel.countDocuments({ ...idCondition, ...statusRegex, ...search })
+            const bills = await this.billModel.find({ ...idCondition, ...statusRegex, ...search }).limit(limit).skip(skip)
             return { total, bills }
         }
         catch (err) {
@@ -95,12 +95,10 @@ export class BillService {
         }
     }
 
-    async cancel(id: string): Promise<boolean> {
-        try {
-            const bill = await this.billModel.findById(id)
-            if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
-            bill.status = "Đã hủy"
-            await bill.save()
+    async update(id: string, status: string): Promise<boolean> {
+        try{
+            const bill = await this.billModel.findByIdAndUpdate({ _id: id }, { status })
+            if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return true
         }
         catch (err) {

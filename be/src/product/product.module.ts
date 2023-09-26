@@ -7,6 +7,7 @@ import { RoleModule } from 'src/role/role.module';
 import { ProductSchema } from './schema/product.schema';
 import { StoreModule } from 'src/store/store.module';
 import { EvaluationModule } from 'src/evaluation/evaluation.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [

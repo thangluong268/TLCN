@@ -5,8 +5,8 @@ import mongoose, { ObjectId, Document, Types } from "mongoose";
     timestamps: true,
 })
 export class Product extends Document {
-    @Prop()
-    avatar: string;
+    @Prop({type: [String]})
+    avatar: string[];
 
     @Prop()
     quantity: number;

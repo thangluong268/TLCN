@@ -17,15 +17,12 @@ export class HasSameRoleUserMiddleware implements NestMiddleware {
             try {
                 const id1 = req.params.id
                 const id2 = req.body.id
-                console.log(id2)
 
-                const role1 = await this.roleService.getRoleNameByUserId(id1)
-                console.log(role1)
-                const role2 = await this.roleService.getRoleNameByUserId(id2)
-                console.log(role2)
+                const roles1 = await this.roleService.getRoleNameByUserId(id1)
+                const roles2 = await this.roleService.getRoleNameByUserId(id2)
 
-                if (!role1 || !role2) { throw new NotFoundExceptionCustom(Role.name) }
-                if (role1 != RoleName.USER || role2 != RoleName.USER) {
+                if (!roles1 || !roles2) { throw new NotFoundExceptionCustom(Role.name) }
+                if (roles1.includes(RoleName.USER) || roles2.includes( RoleName.USER)) {
                     throw new NotFoundExceptionCustom(User.name)
                 }
             }
