@@ -85,6 +85,14 @@ export class StoreController {
     return isDeleted
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateStoreAbility())
+  @CheckRole(RoleName.MANAGER)
+  @Put('manager/warningcount/:id')
+  async updateWarningCount(@Param('id') id: string, @Param("action") action: string): Promise<Store> {
+    const store = await this.storeService.updateWarningCount(id, action);
+    return store
+  }
 }
 
 

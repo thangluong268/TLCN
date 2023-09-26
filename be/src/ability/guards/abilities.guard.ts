@@ -10,11 +10,16 @@ import { CHECK_ROLE } from "../decorators/role.decorator"
 
 @Injectable()
 export class AbilitiesGuard implements CanActivate {
+    private param: string;
     constructor(
         private reflector: Reflector,
         private caslAbilityFactory: AbilityFactory,
         private roleService: RoleService,
-    ) { }
+    ) {
+    }
+    initialize(param: string) {
+        this.param = param;
+    }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const checkRoles = this.reflector.get<string[]>(CHECK_ROLE, context.getHandler()) || []

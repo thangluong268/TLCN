@@ -12,6 +12,7 @@ import { Product } from "src/product/schema/product.schema";
 import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 import { ApiConflictResponse } from "@nestjs/swagger";
 import { Notification } from "src/notification/schema/notification.schema";
+import { Promotion } from "src/promotion/schema/promotion.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -33,7 +34,7 @@ export type Subjects = InferSubjects<
     typeof Product |
     typeof Evaluation |
     typeof Notification
-
+    typeof Promotion
 > | 'all'
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
@@ -53,9 +54,11 @@ export class AbilityFactory {
                 can(Action.Manage, Cart)
                 can(Action.Create, Store)
                 can(Action.Read, Store)
+                can(Action.Read, User)
+                can(Action.Update, User)
+                can(Action.Delete, User)
                 can(Action.Create, Feedback)
                 can(Action.Update, Evaluation)
-                can(Action.Read, User)
                 can(Action.Manage, Notification)
                 cannot(Action.Read, Role).because('Không cho đọc role!')
                 cannot(Action.Create, Product).because('Không cho tạo sản phẩm!')
@@ -70,11 +73,12 @@ export class AbilityFactory {
             case RoleName.MANAGER:
                 can(Action.Manage, Notification)
                 can(Action.Read, Role)
+                can(Action.Manage, User)
+                can(Action.Manage, Store)
                 break
             default:
                 break
         }
-
         return build({
             detectSubjectType: item => item.constructor as ExtractSubjectType<Subjects>,
         })

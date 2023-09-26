@@ -13,6 +13,8 @@ import { Feedback } from "src/feedback/schema/feedback.schema";
 import { Product } from "src/product/schema/product.schema";
 import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 import { Notification } from "src/notification/schema/notification.schema";
+import { Promotion } from "src/promotion/schema/promotion.schema";
+
 
 
 
@@ -51,6 +53,17 @@ export class ReadUserAbility implements RequiredRule {
     action = Action.Read;
     subject = User;
 }
+
+export class UpdateUserAbility implements RequiredRule {
+    action = Action.Update;
+    subject = User;
+}
+
+export class DeleteUserAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = User;
+}
+
 
 // Userotp
 export class CreateUserotpAbility implements RequiredRule {
@@ -110,6 +123,19 @@ export class DeleteStoreAbility implements RequiredRule {
 }
 
 
+export class UpdateStoreAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Store;
+}
+
+export class ManageStoreAbility implements RequiredRule {
+    action = Action.Manage;
+    subject = Store;
+}
+
+
+
+
 // Feedback
 export class CreateFeedBackAbility implements RequiredRule {
     action = Action.Create;
@@ -132,6 +158,10 @@ export class UpdateProductAbility implements RequiredRule {
     action = Action.Update;
     subject = Product;
 }
+export class DeleteProductAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = Product;
+}
 
 
 // Evaluation
@@ -149,3 +179,67 @@ export class ReadNotificationAbility implements RequiredRule {
 
 
 
+//Promotion
+export class CreatePromotionAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Promotion;
+}
+
+export class ReadPromotionAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Promotion;
+}
+
+export class UpdatePromotionAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Promotion;
+}
+
+export class DeletePromotionAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = Promotion;
+}
+
+
+// Fine
+export class CreateFineAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Promotion;
+}
+
+export class ReadFineAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Promotion;
+}
+
+export class UpdateFineAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Promotion;
+}
+
+export class DeleteFineAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = Promotion;
+}
+
+
+//Policy
+export class CreatePolicyAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Promotion;
+}
+
+export class ReadPolicyAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Promotion;
+}
+
+export class UpdatePolicyAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Promotion;
+}
+
+export class DeletePolicyAbility implements RequiredRule {
+    action = Action.Delete;
+    subject = Promotion;
+}

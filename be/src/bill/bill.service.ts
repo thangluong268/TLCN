@@ -49,8 +49,8 @@ export class BillService {
             await newBill.save()
             return newBill
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
@@ -75,21 +75,21 @@ export class BillService {
             const bills = await this.billModel.find({ ...idCondition, ...statusRegex, ...search }).limit(limit).skip(skip)
             return { total, bills }
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
     }
 
     async getDetailById(id: string): Promise<Bill> {
-        try{
+        try {
             const bill = await this.billModel.findById(id)
-            if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
+            if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return bill
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
@@ -101,8 +101,8 @@ export class BillService {
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return true
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }

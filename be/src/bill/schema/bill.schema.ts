@@ -27,7 +27,7 @@ export class Bill extends Document {
     @Prop()
     storeName: string;
 
-    @Prop({ type: [Object] })
+    @Prop({ type: [String] })
     listProducts: ProductBillDto[];
 
     @Prop()
@@ -45,7 +45,7 @@ export class Bill extends Document {
     @Prop()
     paymentMethod: string;
 
-    @Prop({default: "Đã đặt"})
+    @Prop({ default: "Đã đặt" })
     status: string;
 
 

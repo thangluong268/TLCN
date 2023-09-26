@@ -20,6 +20,8 @@ import { ProductModule } from './product/product.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { EvaluationModule } from './evaluation/evaluation.module';
 import { NotificationModule } from './notification/notification.module';
+import { PromotionModule } from './promotion/promotion.module';
+import { FineModule } from './fine/fine.module';
 
 
 @Module({
@@ -70,6 +72,8 @@ import { NotificationModule } from './notification/notification.module';
     SeedsModule,
     EvaluationModule,
     NotificationModule,
+    PromotionModule,
+    FineModule,
   ],
   providers: [],
 })

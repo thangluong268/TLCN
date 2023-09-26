@@ -13,6 +13,7 @@ import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorat
 import { Public } from 'src/auth/decorators/public.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
 
+
 @Controller('product')
 @ApiTags('Product')
 @ApiBearerAuth('Authorization')
@@ -36,7 +37,6 @@ export class ProductController {
     await this.evaluationService.create(newProduct._id)
     return newProduct
   }
-
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadProductAbility())
@@ -92,6 +92,15 @@ export class ProductController {
   ): Promise<Product> {
     const product = await this.productService.getById(id)
     return product
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new DeleteProductAbility())
+  @CheckRole(RoleName.MANAGER)
+  @Put('manager/deleteProduct/:id')
+  async deleteProduct(@Param('id') id: string): Promise<Product> {
+    const store = await this.productService.deleteProduct(id);
+    return store
   }
 
 }

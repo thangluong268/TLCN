@@ -23,7 +23,7 @@ export class CreateBillDto {
     @ApiProperty()
     promotionValue: number;
 
-    @ApiProperty({type: String})
+    @ApiProperty({ type: String })
     @IsNotEmpty()
     paymentMethod: PAYMENT_METHOD;
 }

@@ -3,27 +3,57 @@ import * as mongoose from 'mongoose';
 import { Policy } from './schema/policy.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
+import { CreatePolicyDto } from './dto/create-policy.dto';
+import { MongooseError } from 'mongoose';
+import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class PolicyService {
     constructor(
         @InjectModel(Policy.name)
-        private policyModel: mongoose.Model<Policy>,
+        private readonly policyModel: mongoose.Model<Policy>
     ) { }
-
-    async getAll(): Promise<Policy[]> {
-        const policys = await this.policyModel.find()
-        return policys
+    async create(createPolicyDto: CreatePolicyDto): Promise<Policy> {
+        try {
+            return await this.policyModel.create(createPolicyDto)
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
     }
 
-    async create(policy: Policy): Promise<Policy> {
-        const newPolicy = await this.policyModel.create(policy)
-        return newPolicy
+    async findAll(): Promise<Policy[]> {
+        try {
+            return await this.policyModel.find({})
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
     }
 
-    async getById(id: string): Promise<Policy> {
-        const policy = await this.policyModel.findById(id)
-        if(!policy) { throw new NotFoundExceptionCustom(Policy.name) }
-        return policy
+    async update(id: string, updateFineDto: CreatePolicyDto): Promise<Policy> {
+        try {
+            return await this.policyModel.findByIdAndUpdate(id, updateFineDto)
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async remove(id: string): Promise<Policy> {
+        try {
+            return await this.policyModel.findByIdAndDelete(id)
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
     }
 }
