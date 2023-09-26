@@ -20,10 +20,10 @@ export class Store extends Document {
     @Prop()
     phone: string;
 
-    @Prop({default: 0})
-    warning: number;
+    @Prop({ default: 0 })
+    warningCount: number;
 
-    @Prop({default: true})
+    @Prop({ default: true })
     status: boolean
 }
 

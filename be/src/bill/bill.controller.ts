@@ -65,7 +65,6 @@ export class BillController {
     @Query('status') status: string,
   ): Promise<{ total: number, bills: Bill[] }> {
     const userId = req.user['userId']
-    console.log(userId)
     const data = await this.billService.getAllByStatus(userId, page, limit, search, status)
     return data
   }

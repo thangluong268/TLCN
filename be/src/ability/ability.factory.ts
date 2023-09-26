@@ -11,6 +11,7 @@ import { Feedback } from "src/feedback/schema/feedback.schema";
 import { Product } from "src/product/schema/product.schema";
 import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 import { ApiConflictResponse } from "@nestjs/swagger";
+import { Promotion } from "src/promotion/schema/promotion.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -29,7 +30,8 @@ export type Subjects = InferSubjects<
     typeof Store |
     typeof Feedback |
     typeof Product |
-    typeof Evaluation
+    typeof Evaluation |
+    typeof Promotion
 
 > | 'all'
 
@@ -50,9 +52,11 @@ export class AbilityFactory {
                 can(Action.Manage, Cart)
                 can(Action.Create, Store)
                 can(Action.Read, Store)
+                can(Action.Read, User)
+                can(Action.Update, User)
+                can(Action.Delete, User)
                 can(Action.Create, Feedback)
                 can(Action.Update, Evaluation)
-                can(Action.Read, User)
                 cannot(Action.Read, Role).because('Không cho đọc role!')
                 cannot(Action.Create, Product).because('Không cho tạo sản phẩm!')
                 break
@@ -61,11 +65,12 @@ export class AbilityFactory {
                 can(Action.Manage, Product)
                 break
             case RoleName.MANAGER:
+                can(Action.Manage, User)
+                can(Action.Manage, Store)
                 break
             default:
                 break
         }
-
         return build({
             detectSubjectType: item => item.constructor as ExtractSubjectType<Subjects>,
         })

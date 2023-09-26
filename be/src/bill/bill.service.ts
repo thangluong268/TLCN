@@ -49,15 +49,15 @@ export class BillService {
             await newBill.save()
             return newBill
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
     }
 
     async getAllByStatus(userId: string, pageQuery: number, limitQuery: number, searchQuery: string, statusQuery: string)
-    : Promise<{ total: number, bills: Bill[] }> {
+        : Promise<{ total: number, bills: Bill[] }> {
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const search = searchQuery
@@ -70,41 +70,41 @@ export class BillService {
             : {}
         const status = new RegExp(statusQuery, 'i') || "Đã đặt"
         const skip = limit * (page - 1)
-        try{
+        try {
             const total = await this.billModel.countDocuments({ userId, status, ...search })
             const bills = await this.billModel.find({ userId, status, ...search }).limit(limit).skip(skip)
             return { total, bills }
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
     }
 
     async getDetailById(id: string): Promise<Bill> {
-        try{
+        try {
             const bill = await this.billModel.findById(id)
-            if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
+            if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return bill
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
     }
 
     async cancel(id: string): Promise<boolean> {
-        try{
+        try {
             const bill = await this.billModel.findById(id)
-            if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
+            if (!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             bill.status = "Đã hủy"
             await bill.save()
             return true
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }

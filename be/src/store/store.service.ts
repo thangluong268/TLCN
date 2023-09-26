@@ -54,4 +54,21 @@ export class StoreService {
         }
     }
 
+    // updateWarningCount
+    async updateWarningCount(storeId: string, action: string): Promise<Store> {
+        try {
+            var point = 1;
+            if (action === 'minus')
+                point = -1
+            const store = await this.storeModel.findByIdAndUpdate(storeId, { $inc: { warningCount: point } })
+            if (!store) { throw new NotFoundExceptionCustom(Store.name) }
+            return store
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
 }

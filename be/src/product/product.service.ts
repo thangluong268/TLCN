@@ -21,8 +21,8 @@ export class ProductService {
             await newProduct.save()
             return newProduct
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
@@ -31,11 +31,23 @@ export class ProductService {
     async getById(id: string): Promise<Product> {
         try {
             const product = await this.productModel.findById(id)
-            if(!product) { throw new NotFoundExceptionCustom(Product.name) }
+            if (!product) { throw new NotFoundExceptionCustom(Product.name) }
             return product
         }
-        catch(err){
-            if(err instanceof MongooseError)
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async deleteProduct(productId: string): Promise<Product> {
+        try {
+            const product = await this.productModel.findOneAndDelete({ _id: productId })
+            return product
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }

@@ -92,9 +92,10 @@ export class RoleService {
 
     async getRoleNameByUserId(userId: string): Promise<string> {
         try {
-            const role = await this.roleModel.findOne({ listUser: userId })
+            const role = await this.roleModel.find({ listUser: userId })
+            console.log("Role", role)
             if (!role) { throw new NotFoundExceptionCustom(Role.name) }
-            return role.name
+            return role.map(role => role.name).join(' - ');
         }
         catch (err) {
             if (err instanceof MongooseError)

@@ -16,7 +16,6 @@ import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
   exports: [UserService],
 })
 export class UserModule implements NestModule {
-  // Middleware for user
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(HasPermitRoleMiddleware)
@@ -24,7 +23,5 @@ export class UserModule implements NestModule {
     consumer
       .apply(HasSameRoleUserMiddleware)
       .forRoutes({ path: 'user/user/addFriend/:id', method: RequestMethod.POST }, { path: 'user/user/unFriend/:id', method: RequestMethod.POST })
-
   }
-
 }
