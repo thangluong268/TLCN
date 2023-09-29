@@ -173,11 +173,12 @@ export class UserService {
       updateUser.wallet = type == "plus" ? (user.wallet + bonus) : (user.wallet - bonus)
       await this.update(userId, updateUser)
       return true
-   } catch (err) {
-        if (err instanceof MongooseError)
-          throw new InternalServerErrorExceptionCustom()
-        throw err
-      }
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
 
   async updateWarningCount(userId: string, action: string): Promise<User> {
     try {

@@ -33,7 +33,7 @@ export type Subjects = InferSubjects<
     typeof Feedback |
     typeof Product |
     typeof Evaluation |
-    typeof Notification
+    typeof Notification |
     typeof Promotion
 > | 'all'
 
