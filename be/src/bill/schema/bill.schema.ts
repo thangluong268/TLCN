@@ -27,7 +27,7 @@ export class Bill extends Document {
     @Prop()
     storeName: string;
 
-    @Prop({ type: [String] })
+    @Prop({ type: [Object] })
     listProducts: ProductBillDto[];
 
     @Prop()

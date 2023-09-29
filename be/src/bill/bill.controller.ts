@@ -137,8 +137,27 @@ export class BillController {
       await this.userService.updateWallet(userId, bill.totalPrice, "sub")
     if (status === "Đã hoàn đơn") {
       await this.userService.updateWallet(userId, bill.totalPrice, "sub")
-      await this.userService.updateWallet(userId, bill.totalPrice*5, "plus")
+      await this.userService.updateWallet(userId, bill.totalPrice * 5, "plus")
     }
     return result
+  }
+
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.SELLER)
+  @Get('seller/statistic')
+  @ApiQuery({ name: 'startTime', type: String, required: true })
+  @ApiQuery({ name: 'endTime', type: String, required: false })
+  @ApiQuery({ name: 'type', type: String, required: true })
+  async getStatistic(
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+    @Query('type') type: string,
+    @GetCurrentUserId() userId: string,
+  ): Promise<Bill[]> {
+    const store = await this.storeService.getByUserId(userId)
+    const data = await this.billService.getStatistic(store._id, startTime, endTime, type)
+    return data
   }
 }

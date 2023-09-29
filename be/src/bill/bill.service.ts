@@ -43,6 +43,7 @@ export class BillService {
                 productBill.productName = product.productName
                 productBill.quantity = product.quantity
                 productBill.price = product.price
+                productBill.type = product.type
                 return productBill
             })
             newBill.totalPrice = this.getTotalPrice(newBill.listProducts, bill.promotionValue)
@@ -100,6 +101,37 @@ export class BillService {
             const bill = await this.billModel.findByIdAndUpdate({ _id: id }, { status })
             if(!bill) { throw new NotFoundExceptionCustom(Bill.name) }
             return true
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async getStatistic(storeId: string, startTime: string, endTime: string, type: string) : Promise<Bill[]> {
+        if(type === 'doanh thu') return await this.getStatisticTotalPrice(storeId, startTime, endTime)
+        return await this.getStatisticProductType(storeId, startTime, endTime, type)
+    }
+
+
+    async getStatisticProductType(storeId: string, startTime: string, endTime: string, type: string) : Promise<Bill[]>{
+        try{
+            const search = { listProducts: { $elemMatch: { type: { $regex: type, $options: "i" } } } }
+            const bills = await this.billModel.find({ storeId, createdAt: {$gte: startTime, $lte: endTime}, ...search, status: 'Đã đặt' })
+            return bills
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async getStatisticTotalPrice(storeId: string, startTime: string, endTime: string) : Promise<Bill[]>{
+        try{
+            const bills = await this.billModel.find({ storeId, createdAt: {$gte: startTime, $lte: endTime}, status: 'Đã đặt' })
+            return bills
         }
         catch (err) {
             if (err instanceof MongooseError)

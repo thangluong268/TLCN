@@ -21,4 +21,8 @@ export class ProductBillDto {
     @ApiProperty()
     @IsNotEmpty()
     price: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    type: string;
 }

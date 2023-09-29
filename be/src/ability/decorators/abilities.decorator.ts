@@ -4,9 +4,7 @@ import { Role } from "src/role/schema/role.schema";
 import { UserToken } from "src/usertoken/schema/usertoken.schema";
 import { User } from "src/user/schema/user.schema";
 import { Bill } from "src/bill/schema/bill.schema";
-
 import { Userotp } from "src/userotp/schema/userotp.schema";
-
 import { Cart } from "src/cart/schema/cart.schema";
 import { Store } from "src/store/schema/store.schema";
 import { Feedback } from "src/feedback/schema/feedback.schema";
@@ -112,10 +110,6 @@ export class ReadStoreAbility implements RequiredRule {
     subject = Store;
 }
 
-export class UpdateStoreAbility implements RequiredRule {
-    action = Action.Update;
-    subject = Store;
-}
 
 export class DeleteStoreAbility implements RequiredRule {
     action = Action.Delete;

@@ -81,6 +81,7 @@ export class ProductService {
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
+    }
 
     async deleteProduct(productId: string): Promise<Product> {
         try {
