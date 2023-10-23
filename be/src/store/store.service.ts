@@ -69,6 +69,7 @@ export class StoreService {
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
+    }
 
     async updateWarningCount(storeId: string, action: string): Promise<Store> {
         try {

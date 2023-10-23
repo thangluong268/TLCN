@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Query, Req, UseGuards } from '
 import { ProductService } from './product.service';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateProductAbility, ReadProductAbility, UpdateProductAbility } from 'src/ability/decorators/abilities.decorator';
+import { CheckAbilities, CreateProductAbility, DeleteProductAbility, ReadProductAbility, UpdateProductAbility } from 'src/ability/decorators/abilities.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './schema/product.schema';
 import { StoreService } from 'src/store/store.service';
