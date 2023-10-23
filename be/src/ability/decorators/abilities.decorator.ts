@@ -117,16 +117,10 @@ export class DeleteStoreAbility implements RequiredRule {
 }
 
 
-export class UpdateStoreAbility implements RequiredRule {
-    action = Action.Update;
-    subject = Store;
-}
-
 export class ManageStoreAbility implements RequiredRule {
     action = Action.Manage;
     subject = Store;
 }
-
 
 
 

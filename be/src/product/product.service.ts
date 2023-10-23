@@ -44,7 +44,7 @@ export class ProductService {
 
     async getAllBySearch(storeIdInput: string, pageQuery: number, limitQuery: number, searchQuery: string)
         : Promise<{ total: number, products: Product[] }> {
-        const storeId = storeIdInput ? {storeId: storeIdInput} : {}
+        const storeId = storeIdInput ? { storeId: storeIdInput } : {}
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const search = searchQuery
@@ -71,7 +71,7 @@ export class ProductService {
 
     async update(id: string, product: any): Promise<Product> {
         try {
-            product = {status: false}
+            product = { status: false }
             await this.getById(id)
             const updatedProduct = await this.productModel.findByIdAndUpdate({ _id: id }, product, { new: true })
             return updatedProduct
