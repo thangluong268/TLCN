@@ -8,7 +8,7 @@ import mongoose, { Document, ObjectId } from "mongoose";
 export class UserToken extends Document {
     @Prop()
     @IsNotEmpty()
-    userId: mongoose.Types.ObjectId;;
+    userId: string;
 
     @Prop()
     hashedRefreshToken: string;

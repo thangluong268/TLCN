@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserToken } from './schema/usertoken.schema';
 import { Model, MongooseError, Types } from 'mongoose';
@@ -18,7 +18,7 @@ export class UsertokenService {
         return await bcrypt.hash(data, saltOrRounds)
     }
 
-    async createUserToken(userId: Types.ObjectId, refreshToken: string): Promise<UserToken> {
+    async createUserToken(userId: string, refreshToken: string): Promise<UserToken> {
         const hashedRT = await this.hashData(refreshToken)
         try {
             const userToken = await this.userTokenModel.create({
@@ -67,7 +67,6 @@ export class UsertokenService {
     async getUserTokenById(userId: string): Promise<any> {
         try {
             const userToken = await this.userTokenModel.findOne({ userId })
-            if (!userToken) { throw new ForbiddenExceptionCustom() }
             return userToken
         }
         catch (err) {

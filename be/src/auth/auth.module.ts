@@ -13,8 +13,8 @@ import { UserTokenSchema } from '../usertoken/schema/usertoken.schema';
 import { AbilityModule } from 'src/ability/ability.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
-import { FirebaseModule } from 'src/firebase/firebase.module';
 import { UsertokenModule } from 'src/usertoken/usertoken.module';
+import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -23,8 +23,8 @@ import { UsertokenModule } from 'src/usertoken/usertoken.module';
     PassportModule,
     RoleModule,
     AbilityModule,
-    FirebaseModule,
     UsertokenModule,
+    FirebaseModule
   ],
   controllers: [AuthController],
   providers: [
@@ -38,4 +38,4 @@ import { UsertokenModule } from 'src/usertoken/usertoken.module';
   ],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

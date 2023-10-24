@@ -1,11 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Role } from './schema/role.schema';
+import { Role, RoleName } from './schema/role.schema';
 import { Model, MongooseError, ObjectId, Types } from 'mongoose';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
 import { ConflictExceptionCustom } from 'src/exceptions/ConflictExceptionCustom.exception';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { UnauthorizedExceptionCustom } from 'src/exceptions/UnauthorizedExceptionCustom.exception';
 
 @Injectable()
 export class RoleService {
@@ -26,25 +27,27 @@ export class RoleService {
         }
     }
 
-    async addUserToRole(userId: Types.ObjectId, roleName: CreateRoleDto): Promise<boolean> {
+    async addUserToRole(userId: string, roleName: CreateRoleDto): Promise<boolean> {
         try {
             // check role is exist
             const role = await this.getByName(roleName.name)
             if (!role) { throw new NotFoundExceptionCustom(Role.name) }
-            // check user is in listUser of any role
-            const userHasRole = await this.getByUserId(userId)
-            if (userHasRole) {
-                throw new ConflictExceptionCustom(Role.name)
+            // check user
+            const roleNames = await this.getRoleNameByUserId(userId)
+            // has no role
+            if(!roleNames) { return await this.addUserIntoListUser(role._id, userId) }
+            // has role User and roleName input is Seller
+            if(roleNames.includes(RoleName.USER) && roleName.name == RoleName.SELLER) { 
+                return await this.addUserIntoListUser(role._id, userId) 
             }
-            const result = await this.addUserIntoListUser(role._id, userId)
-            return result
+            // throw error if user has role name Admin, Manager, Seller
+            else{ throw new ConflictExceptionCustom(Role.name) }
         }
         catch (err) {
             if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()
             throw err
         }
-
     }
 
     async getByName(roleName: string): Promise<Role> {
@@ -59,7 +62,7 @@ export class RoleService {
         }
     }
 
-    async addUserIntoListUser(roleId: Types.ObjectId, userId: Types.ObjectId): Promise<boolean> {
+    async addUserIntoListUser(roleId: string, userId: string): Promise<boolean> {
         try {
             const result = await this.roleModel.findByIdAndUpdate(roleId, { $push: { listUser: userId } })
             if (!result) { throw new NotFoundExceptionCustom(Role.name) }
@@ -72,10 +75,10 @@ export class RoleService {
         }
     }
 
-    async removeUserRole(userId: string): Promise<boolean> {
+    async removeUserRole(userId: string, name: string): Promise<boolean> {
         try {
             // check user is in listUser of any role, listUde is array of userId
-            const role = await this.roleModel.findOne({ listUser: userId })
+            const role = await this.roleModel.findOne({ name, listUser: userId })
             if (!role) { throw new NotFoundExceptionCustom(Role.name) }
             // remove user from listUser of role
             const result = await this.roleModel.findByIdAndUpdate(role._id, { $pull: { listUser: userId } })
@@ -92,9 +95,10 @@ export class RoleService {
 
     async getRoleNameByUserId(userId: string): Promise<string> {
         try {
-            const roles = await this.roleModel.findOne({ listUser: userId })
-            if (!roles) { throw new NotFoundExceptionCustom(Role.name) }
-            return roles.name
+            const role = await this.roleModel.find({ listUser: userId })
+            if (!role) { throw new UnauthorizedExceptionCustom() }
+            const roleName = role.map(role => role.name).join(' - ')
+            return roleName
         }
         catch (err) {
             if (err instanceof MongooseError)
@@ -103,7 +107,7 @@ export class RoleService {
         }
     }
 
-    async getByUserId(userId: Types.ObjectId): Promise<any> {
+    async getByUserId(userId: string): Promise<any> {
         try {
             const role = await this.roleModel.findOne({ listUser: userId })
             return role

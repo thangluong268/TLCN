@@ -5,6 +5,12 @@ export const Translate = {
     Product: "sản phẩm",
     Email: "email",
     Bill: "hóa đơn",
+    Store: "cửa hàng",
+    PaymentMethod: "phương thức thanh toán",
+    Action: "hành động",
+    Feedback: "feedback",
+    Evaluation: "đánh giá",
+    Notification: "thông báo",
 }
 
 export const UpperCaseFirstLetter = (str: string) => {

@@ -15,6 +15,7 @@ import { Public } from './decorators/public.decorator';
 import { UsertokenService } from 'src/usertoken/usertoken.service';
 import { UserService } from 'src/user/user.service';
 import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
+import { CheckRole } from 'src/ability/decorators/role.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -87,9 +88,9 @@ export class AuthController {
     return tokens
   }
 
-  // @UseGuards(AbilitiesGuard)
-  // @CheckAbilities(new CreateUserAbility())
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateUserAbility())
+  @CheckRole(RoleName.ADMIN)
   @Post('createUser')
   async createUser(
     @Body()
