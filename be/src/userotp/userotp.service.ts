@@ -23,11 +23,12 @@ export class UserotpService {
                 from: process.env.MAIL_USER,
                 subject: 'OTP',
                 //Template is handlebar files
-                template: './test',
+                template: './otp',
                 context: {
                     otp
                 }
             })
+
             return otp
         }
         catch (err) {
@@ -70,13 +71,28 @@ export class UserotpService {
         }
     }
 
-    async checkotp(otp: Number, email: string): Promise<Userotp> {
+    async checkotp(otp: Number, email: string): Promise<any> {
         try {
             const userotp = await this.userotpModel.findOne({ email });
             if (userotp.otp == otp) {
                 return userotp
             } else {
-                throw this.freedomCustom.NotMatchOTP()
+                return this.freedomCustom.NotMatchOTP()
+            }
+        } catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async deleteotp(email: string): Promise<any> {
+        try {
+            const userotp = await this.userotpModel.findOneAndDelete({ email });
+            if (userotp) {
+                return userotp
+            } else {
+                throw new NotFoundExceptionCustom('Not found userotp');
             }
         } catch (err) {
             if (err instanceof MongooseError)

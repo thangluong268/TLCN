@@ -35,8 +35,10 @@ import { FineModule } from './fine/fine.module';
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
         transport: {
+          port: 465,
+          ignoreTLS: true,
           host: config.get('MAIL_HOST'),
-          secure: false,
+          secure: true,
           auth: {
             user: config.get('MAIL_USER'),
             pass: config.get('MAIL_PASSWORD'),

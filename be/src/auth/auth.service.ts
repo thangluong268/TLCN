@@ -34,9 +34,6 @@ export class AuthService {
 
     async compareData(data: string, hashedData: string): Promise<boolean> {
         const isMatched = await bcrypt.compare(data, hashedData)
-        if (!isMatched) {
-            throw new UnauthorizedExceptionCustom()
-        }
         return isMatched
     }
 }

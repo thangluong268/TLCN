@@ -52,7 +52,8 @@ export class AuthController {
   ): Promise<TokensDto> {
     const { email, password } = loginDto
     const user = await this.userService.getByEmail(email)
-    await this.authService.compareData(password, user.password)
+    const isMatch = await this.authService.compareData(password, user.password)
+    if (!isMatch) return { accessToken: null, refreshToken: null }
     const payload = { userId: user._id }
     const tokens = await this.authService.getTokens(payload)
     const userToken = await this.userTokenService.getUserTokenById(user._id)
