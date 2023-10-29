@@ -9,6 +9,7 @@ import { LOGIN } from "@/constants/Login";
 import Link from "next/link";
 import Toast from "@/utils/Toast";
 import { APILogin } from "@/services/Auth";
+import { signIn } from "next-auth/react";
 
 interface LoginForm {
   email: string;
@@ -108,7 +109,13 @@ function Login() {
                 </Input>
               </div>
             ))}
-            <div className="w-full mt-2 flex justify-end">
+            <div className="w-full mt-2 flex justify-between">
+              <Link
+                href="/forget-password"
+                className="font-bold cursor-pointer"
+              >
+                Quên mật khẩu
+              </Link>
               <Link href="/sign-up" className="font-bold cursor-pointer">
                 <div className="flex items-center">
                   <div className="mr-2">
@@ -124,6 +131,12 @@ function Login() {
                 onClick={(e) => Login()}
               >
                 Đăng nhập
+              </button>
+              <button
+                className="py-3 bg-gray-600 text-white rounded-[10px] mt-2 w-full px-4 font-bold text-lg"
+                onClick={(e) => signIn()}
+              >
+                GGG
               </button>
             </div>
           </FrameFormInit>

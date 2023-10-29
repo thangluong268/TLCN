@@ -210,4 +210,15 @@ export class UserService {
     }
   }
 
+  async updatePassword(email: string, password: string): Promise<User> {
+    try {
+      // Update password by email
+      return await this.userModel.findOneAndUpdate({ email }, { password })
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
 }

@@ -42,4 +42,22 @@ export class UserotpController {
       return await this.userotpService.deleteotp(req.email);
     }
   }
+
+  @Public()
+  @Post('user/sendotp-forget')
+  async sendOtpForget(@Body() req: CreateUserotpDto): Promise<any> {
+    const user = await this.userService.getByEmail(req.email);
+    if (user) {
+      const otp = await this.userotpService.sendotp(req.email);
+
+      const userotp = await this.userotpService.findUserotpByEmail(req.email);
+      if (userotp?.email) {
+        await this.userotpService.update(req.email, otp);
+      } else {
+        await this.userotpService.create(req.email, otp);
+      }
+    } else {
+      return { data: null, message: 'Email không tồn tại', status: 400 }
+    }
+  }
 }

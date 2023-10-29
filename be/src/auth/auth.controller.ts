@@ -62,6 +62,18 @@ export class AuthController {
     return tokens
   }
 
+  @Public()
+  @Post('forgetPassword')
+  async forgetPassword(
+    @Body()
+    loginDto: LoginDto,
+  ): Promise<string> {
+    const { email, password } = loginDto
+    const hashedPassword = await this.authService.hashData(password)
+    const user = await this.userService.updatePassword(email, hashedPassword);
+    return user.email
+  }
+
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ManageUserTokenAbility())
   @Delete('logout')

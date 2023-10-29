@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { authOptions } from "../../page/api/auth/[...nextauth]";
+import { getServerSession } from "next-auth";
 import { Lora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
   description: "This is a website for DTExchange",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
