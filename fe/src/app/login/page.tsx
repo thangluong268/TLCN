@@ -4,12 +4,13 @@ import FrameFormInit from "@/components/FrameFormInit";
 import Input from "./input";
 import CheckValidInput from "@/utils/CheckValidInput";
 import FrameInit from "@/components/FrameInit";
-import { FaLongArrowAltLeft } from "react-icons/fa";
+import { FaFacebook, FaLongArrowAltLeft } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { LOGIN } from "@/constants/Login";
 import Link from "next/link";
 import Toast from "@/utils/Toast";
 import { APILogin } from "@/services/Auth";
-import { signIn } from "next-auth/react";
+import { UserAuth } from "../authContext";
 
 interface LoginForm {
   email: string;
@@ -20,6 +21,7 @@ function Login() {
     email: "",
     password: "",
   });
+  const { user, googleSignIn, facebookSignIn, logOut } = UserAuth();
 
   React.useEffect(() => {
     const listener = (event: { code: string; preventDefault: () => void }) => {
@@ -33,6 +35,28 @@ function Login() {
       document.removeEventListener("keydown", listener);
     };
   }, [loginForm]);
+
+  React.useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  }, [user]);
+
+  const handleSignIn = async (func: () => void) => {
+    try {
+      await func();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await logOut();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const Login = async () => {
     if (
@@ -132,12 +156,26 @@ function Login() {
               >
                 Đăng nhập
               </button>
-              <button
-                className="py-3 bg-gray-600 text-white rounded-[10px] mt-2 w-full px-4 font-bold text-lg"
-                onClick={(e) => signIn()}
-              >
-                GGG
-              </button>
+              <div className="flex justify-between items-center">
+                <div
+                  className="py-3 bg-red-600 rounded-[10px] mt-2 w-[49%] px-4 font-bold text-lg"
+                  onClick={(e) => handleSignIn(googleSignIn)}
+                >
+                  <div className="flex cursor-pointer text-white items-center justify-center rounded-md">
+                    <FcGoogle fontSize={30} className="r1-2 mr-2" />
+                    <span>Log in with Google</span>
+                  </div>
+                </div>
+                <div
+                  className="py-3 bg-blue-600 rounded-[10px] mt-2 w-[49%] px-4 font-bold text-lg"
+                  onClick={(e) => handleSignIn(facebookSignIn)}
+                >
+                  <div className="flex cursor-pointer text-white items-center justify-center rounded-md">
+                    <FaFacebook fontSize={30} className="r1-2 mr-2" />
+                    <span>Log in with Facebook</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </FrameFormInit>
         </div>

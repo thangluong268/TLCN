@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { authOptions } from "../../page/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
+import { AuthContextProvider } from "../app/authContext";
 import { Lora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -27,11 +26,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={lora.className}>
-        <Header />
-        {children}
-        <Footer />
-        <ToastContainer />
-        <Loading />
+        <AuthContextProvider>
+          <Header />
+          {children}
+          <Footer />
+          <ToastContainer />
+          <Loading />
+        </AuthContextProvider>
       </body>
     </html>
   );
