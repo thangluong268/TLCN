@@ -29,7 +29,7 @@ export class NotificationController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadNotificationAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.USER)
   @Get()
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })

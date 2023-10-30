@@ -23,9 +23,9 @@ export class UserService {
   async create(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
     try {
       const newUser = await this.userModel.create(signUpDto)
-      const address = new AddressProfileDto()
-      address.name = signUpDto.address
-      newUser.address = [address]
+      // const address = new AddressProfileDto()
+      // address.name = signUpDto.address
+      // newUser.address = [address]
       await newUser.save()
       const userDoc = newUser['_doc']
       const { password, ...userWithoutPass } = userDoc
@@ -42,7 +42,6 @@ export class UserService {
   async getByEmail(email: string): Promise<User> {
     try {
       const user = await this.userModel.findOne({ email })
-      if (!user) { throw new NotFoundExceptionCustom(User.name) }
       return user
     }
     catch (err) {
@@ -204,6 +203,17 @@ export class UserService {
         .limit(limit)
       if (!users) { throw new NotFoundExceptionCustom(User.name) }
       return { total, users }
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
+  async updatePassword(email: string, password: string): Promise<User> {
+    try {
+      // Update password by email
+      return await this.userModel.findOneAndUpdate({ email }, { password })
     } catch (err) {
       if (err instanceof MongooseError)
         throw new InternalServerErrorExceptionCustom()

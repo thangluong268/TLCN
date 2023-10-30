@@ -52,13 +52,26 @@ export class AuthController {
   ): Promise<TokensDto> {
     const { email, password } = loginDto
     const user = await this.userService.getByEmail(email)
-    await this.authService.compareData(password, user.password)
+    const isMatch = await this.authService.compareData(password, user.password)
+    if (!isMatch) return { accessToken: null, refreshToken: null }
     const payload = { userId: user._id }
     const tokens = await this.authService.getTokens(payload)
     const userToken = await this.userTokenService.getUserTokenById(user._id)
     userToken ? await this.userTokenService.updateUserToken(user._id, tokens.refreshToken)
       : await this.userTokenService.createUserToken(user._id, tokens.refreshToken)
     return tokens
+  }
+
+  @Public()
+  @Post('forgetPassword')
+  async forgetPassword(
+    @Body()
+    loginDto: LoginDto,
+  ): Promise<string> {
+    const { email, password } = loginDto
+    const hashedPassword = await this.authService.hashData(password)
+    const user = await this.userService.updatePassword(email, hashedPassword);
+    return user.email
   }
 
   @UseGuards(AbilitiesGuard)

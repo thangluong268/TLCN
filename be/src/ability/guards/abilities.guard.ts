@@ -32,7 +32,7 @@ export class AbilitiesGuard implements CanActivate {
         checkRoles.forEach(role => {
             if ((roles.includes(role))) { currentRole = role }
         })
-        if(currentRole === "") { currentRole = roles.split(" - ")[0]}
+        if (currentRole === "") { currentRole = roles.split(" - ")[0] }
         const ability = this.caslAbilityFactory.defineAbility(currentRole)
         try {
             rules.forEach(rule => {
