@@ -110,12 +110,6 @@ export class ReadStoreAbility implements RequiredRule {
     subject = Store;
 }
 
-export class UpdateStoreAbility implements RequiredRule {
-    action = Action.Update;
-    subject = Store;
-}
-
-
 export class DeleteStoreAbility implements RequiredRule {
     action = Action.Delete;
     subject = Store;

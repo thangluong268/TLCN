@@ -36,14 +36,9 @@ export class DataSeed {
         });
 
         const userInfo = new SignUpDto()
-        userInfo.avatar = "avatar for admin"
         userInfo.fullName = "admin"
         userInfo.email = process.env.EMAIL_ADMIN
         userInfo.password = await this.hashData(process.env.PASSWORD_ADMIN)
-        userInfo.address = "address for admin"
-        userInfo.phone = "0123456789"
-        userInfo.gender = "Male"
-        userInfo.birthday = new Date("2002-01-01")
 
         const user = await this.userService.create(userInfo);
         const adminRole = new CreateRoleDto()

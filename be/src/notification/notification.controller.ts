@@ -9,13 +9,15 @@ import { CheckRole } from 'src/ability/decorators/role.decorator';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { RoleName } from 'src/role/schema/role.schema';
 import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
+import { UserService } from 'src/user/user.service';
 
 @Controller('notification')
 @ApiTags('Notification')
 @ApiBearerAuth('Authorization')
 export class NotificationController {
   constructor(
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly userService: UserService,
   ) { }
 
   @Public()

@@ -1,10 +1,11 @@
 import { IsNotEmpty } from "class-validator";
 import { UserWithoutPassDto } from "src/user/dto/user-without-pass.dto";
+import { TokensDto } from "./tokens.dto";
 
-export class TokensDto {
+export class UserDto {
     @IsNotEmpty()
-    accessToken: string;
+    providerData: UserWithoutPassDto[];
 
     @IsNotEmpty()
-    refreshToken: string;
+    stsTokenManager: TokensDto;
 }

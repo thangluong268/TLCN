@@ -11,11 +11,13 @@ import Link from "next/link";
 import Toast from "@/utils/Toast";
 import { APILogin } from "@/services/Auth";
 import { UserAuth } from "../authContext";
+import axios from "axios";
 
 interface LoginForm {
   email: string;
   password: string;
 }
+
 function Login() {
   const [loginForm, setLoginForm] = React.useState<LoginForm>({
     email: "",
@@ -72,9 +74,9 @@ function Login() {
       Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
     } else {
       const res = await APILogin(loginForm.email, loginForm.password);
-      if (res.accessToken && res.refreshToken) {
-        localStorage.setItem("accessToken", res.accessToken);
-        localStorage.setItem("refreshToken", res.refreshToken);
+      if (res.providerData && res.stsTokenManager) {
+        localStorage.setItem("user", JSON.stringify(res));
+        axios.defaults.headers.common['Authorization'] = `Bearer ${res.stsTokenManager.accessToken}`;
         Toast("success", "Đăng nhập thành công", 2000);
         setTimeout(() => {
           window.location.href = "/";

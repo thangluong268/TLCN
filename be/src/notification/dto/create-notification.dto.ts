@@ -1,11 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
-import mongoose, { Types } from "mongoose";
+import { SubNoti } from "./sub-notification.dto";
 
 export class CreateNotificationDto {
     @ApiProperty()
     @IsNotEmpty()
-    userId: string;
+    userIdFrom: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    userIdTo: string;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -14,4 +18,8 @@ export class CreateNotificationDto {
     @ApiProperty()
     @IsNotEmpty()
     type: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    sub: SubNoti;
 }

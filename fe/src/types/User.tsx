@@ -1,5 +1,5 @@
 
-export class UserWithoutPassDto {
+export interface UserInterface {
     _id: string;
     avatar: string;
     fullName: string;
@@ -12,4 +12,12 @@ export class UserWithoutPassDto {
     followStores: String[];
     warningCount: number;
     status: boolean;
+}
+
+export interface UserStorage {
+    providerData: UserInterface[]
+    stsTokenManager: {
+        accessToken: string
+        refreshToken: string
+    }
 }
