@@ -22,6 +22,7 @@ import { EvaluationModule } from './evaluation/evaluation.module';
 import { NotificationModule } from './notification/notification.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { FineModule } from './fine/fine.module';
+import { CategoryModule } from './category/category.module';
 
 
 @Module({
@@ -76,6 +77,7 @@ import { FineModule } from './fine/fine.module';
     NotificationModule,
     PromotionModule,
     FineModule,
+    CategoryModule,
   ],
   providers: [],
 })

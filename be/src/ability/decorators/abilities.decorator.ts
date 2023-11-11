@@ -12,6 +12,7 @@ import { Product } from "src/product/schema/product.schema";
 import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 import { Notification } from "src/notification/schema/notification.schema";
 import { Promotion } from "src/promotion/schema/promotion.schema";
+import { Category } from "src/category/schema/category.schema";
 
 
 
@@ -107,11 +108,6 @@ export class CreateStoreAbility implements RequiredRule {
 
 export class ReadStoreAbility implements RequiredRule {
     action = Action.Read;
-    subject = Store;
-}
-
-export class UpdateStoreAbility implements RequiredRule {
-    action = Action.Update;
     subject = Store;
 }
 
@@ -240,4 +236,15 @@ export class UpdatePolicyAbility implements RequiredRule {
 export class DeletePolicyAbility implements RequiredRule {
     action = Action.Delete;
     subject = Promotion;
+}
+
+//Category
+export class CreateCategoryAbility implements RequiredRule {
+    action = Action.Create;
+    subject = Category;
+}
+
+export class ReadCategoryAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Category;
 }

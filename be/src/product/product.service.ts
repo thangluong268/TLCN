@@ -95,4 +95,48 @@ export class ProductService {
         }
     }
 
+    async getlistProductLasted(limit: number): Promise<Product[]> {
+        try {
+            const products = await this.productModel.find({}).sort({ createdAt: -1 }).limit(limit)
+            return products
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async mostProductsInStore(limit: number): Promise<Product[]> {
+        try {
+            const products = await this.productModel.aggregate([
+                {
+                    $group: {
+                        _id: '$storeId',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { count: -1 }
+                },
+                {
+                    $limit: Number(limit)
+                }
+            ])
+            const storeIds = products.map(product => product._id)
+            var arr = []
+            for (let i = 0; i < storeIds.length; i++) {
+                const product = await this.productModel.find({ storeId: storeIds[i] }, { _id: 1, avatar: 1, quantity: 1, productName: 1, price: 1, storeName: 1, storeId: 1, type: 1 }).limit(10)
+                arr.push(product)
+            }
+            return arr
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+
 }

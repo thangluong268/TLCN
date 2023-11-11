@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { Store } from './schema/store.schema';
 import { Request } from 'express';
@@ -93,6 +93,7 @@ export class StoreController {
     const store = await this.storeService.updateWarningCount(id, action);
     return store
   }
+
 }
 
 

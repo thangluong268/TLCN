@@ -88,7 +88,7 @@ function Login() {
   return (
     <div>
       <FrameInit />
-      <div className="absolute top-0 left-[5%]">
+      <div className="absolute top-0 left-[5%] z-20">
         <div className="flex flex-col items-center justify-center h-screen">
           <FrameFormInit title="ĐĂNG NHẬP">
             {LOGIN.map((item) => (
@@ -124,7 +124,7 @@ function Login() {
                       )!.innerHTML = result;
                     }}
                     placeholder={item.placeholder}
-                    className="placeholder-white outline-none py-3 bg-gray-400 text-white rounded-[10px] mt-2 w-full px-4 border-solid border-2 "
+                    className="placeholder-white outline-none py-3 bg-gray-400 text-white rounded-[10px] mt-2 w-full px-4 border-solid border-2"
                   />
                   <span
                     id={`errMes-${item.name}`}
