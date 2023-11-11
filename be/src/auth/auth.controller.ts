@@ -17,6 +17,8 @@ import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
 import { CheckRole } from 'src/ability/decorators/role.decorator';
 import { UserDto } from './dto/user.dto';
 import { TokensDto } from './dto/tokens.dto';
+import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
+import { BadRequestExceptionCustom } from 'src/exceptions/BadRequestExceptionCustom.exception';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -52,9 +54,10 @@ export class AuthController {
     loginDto: LoginDto,
   ): Promise<UserDto> {
     const user = await this.userService.getByEmail(loginDto.email)
+    if (!user) throw new BadRequestExceptionCustom("Email hoặc mật khẩu không chính xác!")
     const { password, ...userWithoutPass } = user['_doc']
     const isMatch = await this.authService.compareData(loginDto.password, password)
-    if (!isMatch) return { providerData: null, stsTokenManager: null }
+    if (!isMatch) throw new BadRequestExceptionCustom("Email hoặc mật khẩu không chính xác!")
     const payload = { userId: user._id }
     const tokens = await this.authService.getTokens(payload)
     const userToken = await this.userTokenService.getUserTokenById(user._id)

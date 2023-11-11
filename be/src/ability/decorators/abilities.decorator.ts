@@ -169,6 +169,10 @@ export class ReadNotificationAbility implements RequiredRule {
     subject = Notification;
 }
 
+export class UpdateNotificationAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Notification;
+}
 
 
 //Promotion

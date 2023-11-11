@@ -40,6 +40,14 @@ class FreedomCustom extends HttpException {
             data: null
         }
     }
+
+    InvalidLogin() {
+        return {
+            statusCode: HttpStatus.BAD_REQUEST,
+            message: "Email hoặc mật khẩu không đúng!",
+            data: null
+        }
+    }
 }
 
 export default FreedomCustom;

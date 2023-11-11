@@ -4,8 +4,9 @@ import { APIGetAllNotification } from '@/services/Notification';
 import React, { useState, useEffect } from 'react';
 import Notification from './Notification';
 import LoadingPopup from './LoadingPopup';
+import { NotiData } from '@/types/Notification';
 
-function FramePopup({ total, children }: {total: number, children: any}) {
+function FramePopup({ total, component, children }: { total: number, component: string, children: any }) {
     const [items, setItems] = useState<JSX.Element>(children);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(2); // phải bắt đầu từ 2 vì page 1 đã load rồi
@@ -13,13 +14,24 @@ function FramePopup({ total, children }: {total: number, children: any}) {
     const handleScroll = async () => {
         const framePopup = document.getElementById('frame-popup');
         if (framePopup) {
-            const isAtBottom = framePopup.scrollTop + framePopup.clientHeight > framePopup.scrollHeight;
-            if (isAtBottom && !loading) {
+            const isAtBottom = framePopup.scrollTop + framePopup.clientHeight > framePopup.scrollHeight - 500;
+            if (isAtBottom && !loading && ((page - 1) * 5 < total)) {
                 setLoading(true)
-                const nextData = await APIGetAllNotification({ page, limit: 5 })
-                const updateData = nextData.notifications.map((item) => (
-                    <Notification props={item} />
-                ))
+                let nextData: NotiData
+                let updateData: JSX.Element[] = []
+                if (component === "notification") {
+                    nextData = await APIGetAllNotification({ page, limit: 5 })
+                    updateData = nextData.notifications.map((item) => (
+                        <Notification props={item} />
+                    ))
+                }
+                // else {
+                //     nextData = await APIGetAllNotification({ page, limit: 5 })
+                //     updateData = nextData.notifications.map((item) => (
+                //          <Notification props={item} />
+                //      ))
+                // }
+
                 setItems(<>{items}{updateData}</>)
                 setLoading(false)
                 setPage(page + 1)
@@ -42,11 +54,11 @@ function FramePopup({ total, children }: {total: number, children: any}) {
     return (
         <div
             id='frame-popup'
-            className={`flex flex-col absolute right-[25%] top-16 rounded-lg p-2 bg-[#D2E0FB] overflow-y-scroll scrollbar-hide min-h-[150%] max-h-[700%]`}
+            className={`flex flex-col absolute right-[25%] top-16 rounded-lg p-2 bg-[#D2E0FB] overflow-y-scroll scrollbar-hide min-h-[150%] max-h-[600%]`}
         >
             {items}
             {/* khi scroll đến cuối thì đã load và page + 1 lên rồi nên phải trừ đi 1 để xét trước khi load */}
-            {loading && ((page - 1)*5 < total) && <><LoadingPopup /> <LoadingPopup /></>}
+            {loading && ((page - 1) * 5 < total) && <><LoadingPopup /> <LoadingPopup /></>}
         </div>
     );
 }

@@ -2,40 +2,17 @@
 import Link from "next/link";
 import React from "react";
 import { FaComments, FaBell, FaCartPlus, FaSistrix, FaStore } from "react-icons/fa";
-import CartPreview from "./CartPreview";
 import FramePopup from "./FramePopup";
 import { APIGetAllNotification, APIUpdateNotification } from "@/services/Notification";
 import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
-import NotificationInterface from "@/types/Notification";
-
-export interface NotiData {
-  total: number,
-  notifications: NotificationInterface[]
-}
+import Cart from "./Cart";
+import { NotiData } from "@/types/Notification";
+import { APIGetAllCart } from "@/services/Cart";
+import { CartData } from "@/types/Cart";
+import FrameCart from "./FrameCart";
 
 function Header() {
-  const isLogin = true
-
-  const dataCart = [
-    {
-      productName: "Đồng hồ điện tử thể thao điện tử ádasdasdasdasdasd",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-  ]
-
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isNotiOpen, setIsNotiOpen] = React.useState(false);
@@ -43,6 +20,7 @@ function Header() {
   const [countCart, setCountCart] = React.useState(0);
   const [user, setUser] = React.useState<UserInterface>()
   const [dataNoti, setDataNoti] = React.useState<NotiData>({ total: 0, notifications: [] })
+  const [dataCart, setDataCart] = React.useState<CartData>({ total: 0, carts: [] })
 
   const textViewAllCart = "<<Xem tất cả>>"
 
@@ -60,7 +38,7 @@ function Header() {
     if (!isNotiOpen && user) {
       dataNoti.notifications.map(async (item) => {
         if (!item.status) {
-          await APIUpdateNotification(item._id)
+          await APIUpdateNotification(item._id, { content: item.content, status: true, sub: item.sub })
         }
       })
     }
@@ -75,6 +53,7 @@ function Header() {
     setUser(user)
   }, [])
 
+
   React.useEffect(() => {
     if (user) {
       const fetchNoti = async () => {
@@ -83,11 +62,22 @@ function Header() {
       }
       fetchNoti()
     }
-  }, [user, isNotiOpen])
+  }, [user, dataNoti])
+
 
   React.useEffect(() => {
-    setCountCart(dataCart.length)
+    if (user) {
+      const fetchCart = async () => {
+        const data = await APIGetAllCart({ page: 1, limit: 5, search: "" })
+        setDataCart(data)
+      }
+      fetchCart()
+    }
+  }, [user, dataCart])
+
+  React.useEffect(() => {
     user ? setCountNewNoti(dataNoti.notifications.filter((item) => item.status === false).length) : setCountNewNoti(0)
+    //user ? setCountCart(dataCart.carts.filter((item) => item.status === false).length) : setCountNewNoti(0)
   }, [dataCart, user])
 
   return (
@@ -122,22 +112,34 @@ function Header() {
               onClick={CartToggleDropdown}
             />
             {isCartOpen && (
-              <FramePopup total={dataNoti.total}>
-                {dataCart.map((item) => (
+              <FramePopup total={dataCart.total} component="cart">
+                {dataCart.carts.length > 0 ?
                   <>
-                    <CartPreview props={item} />
+                    {dataCart.carts.map((item) => (
+                      <FrameCart props={item} >
+                        {item.listProducts.map((item) => (
+                          <>
+                            <Cart props={item} />
+                          </>
+                        ))}
+                      </FrameCart>
+                    ))}
                   </>
-                ))}
+                  :
+                  <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
+                    <span className="text-[14px] cursor-default">Không có sản phẩm nào</span>
+                  </div>
+                }
                 <Link
-                  className="text-center border-t-2 border-[#90b0f4] rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
+                  className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
                   href="/cart/getAll">
                   {textViewAllCart}
                 </Link>
               </FramePopup>
             )}
-            {countCart > 0 && (
+            {dataCart.total > 0 && (
               <div className='flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]'>
-                <span className="text-[12px] text-white">{countCart}</span>
+                <span className="text-[12px] text-white">{dataCart.total}</span>
               </div>
             )}
           </div>
@@ -155,7 +157,7 @@ function Header() {
               onClick={NotiToggleDropdown}
             />
             {isNotiOpen && user && (
-              <FramePopup total={dataNoti.total}>
+              <FramePopup total={dataNoti.total} component="notification">
                 {dataNoti.notifications.length > 0 ?
                   <>
                     {dataNoti.notifications.map((item) => (
@@ -168,7 +170,6 @@ function Header() {
                   </div>
                 }
               </FramePopup>
-
             )}
             {countNewNoti > 0 && (
               <div className='flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]'>

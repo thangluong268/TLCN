@@ -1,9 +1,9 @@
-interface SubNoti {
+export interface SubNoti {
     fullName: string
     avatar: string
     productId: string
 }
-export default interface NotificationInterface {
+export interface NotificationInterface {
     _id: string;
     userIdFrom: string;
     userIdTo: string;
@@ -12,4 +12,9 @@ export default interface NotificationInterface {
     status: boolean;
     updatedAt: Date;
     sub: SubNoti
+}
+
+export interface NotiData {
+    total: number,
+    notifications: NotificationInterface[]
 }
