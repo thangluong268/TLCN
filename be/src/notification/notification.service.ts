@@ -5,6 +5,7 @@ import { Model, MongooseError } from 'mongoose';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Injectable()
 export class NotificationService {
@@ -31,8 +32,8 @@ export class NotificationService {
         const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
         const skip = limit * (page - 1)
         try {
-            const total = await this.notificationModel.countDocuments({ userId })
-            const notifications = await this.notificationModel.find({ userId }).limit(limit).skip(skip)
+            const total = await this.notificationModel.countDocuments({ userIdTo: userId })
+            const notifications = await this.notificationModel.find({ userIdTo: userId }).sort({ updatedAt: -1 }).limit(limit).skip(skip)
             return { total, notifications }
         }
         catch (err) {
@@ -42,12 +43,10 @@ export class NotificationService {
         }
     }
 
-    async update(id: string): Promise<boolean> {
+    async update(id: string, updateNoti: UpdateNotificationDto): Promise<boolean> {
         try {
-            const notification = await this.notificationModel.findById(id)
+            const notification = await this.notificationModel.findByIdAndUpdate(id, updateNoti)
             if (!notification) { throw new NotFoundExceptionCustom(Notification.name) }
-            notification.status = true
-            await notification.save()
             return true
         }
         catch (err) {

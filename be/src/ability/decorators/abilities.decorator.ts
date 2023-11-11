@@ -111,7 +111,6 @@ export class ReadStoreAbility implements RequiredRule {
     subject = Store;
 }
 
-
 export class DeleteStoreAbility implements RequiredRule {
     action = Action.Delete;
     subject = Store;
@@ -171,6 +170,10 @@ export class ReadNotificationAbility implements RequiredRule {
     subject = Notification;
 }
 
+export class UpdateNotificationAbility implements RequiredRule {
+    action = Action.Update;
+    subject = Notification;
+}
 
 
 //Promotion

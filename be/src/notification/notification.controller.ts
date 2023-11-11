@@ -4,18 +4,21 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Notification } from './schema/notification.schema';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CheckAbilities, ReadNotificationAbility } from 'src/ability/decorators/abilities.decorator';
+import { CheckAbilities, ReadNotificationAbility, UpdateNotificationAbility } from 'src/ability/decorators/abilities.decorator';
 import { CheckRole } from 'src/ability/decorators/role.decorator';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { RoleName } from 'src/role/schema/role.schema';
 import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
+import { UserService } from 'src/user/user.service';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Controller('notification')
 @ApiTags('Notification')
 @ApiBearerAuth('Authorization')
 export class NotificationController {
   constructor(
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly userService: UserService,
   ) { }
 
   @Public()
@@ -42,12 +45,15 @@ export class NotificationController {
     return data
   }
 
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateNotificationAbility())
+  @CheckRole(RoleName.SELLER, RoleName.USER)
   @Put('/:id')
   async update(
     @Param('id') id: string,
+    @Body() updateNoti: UpdateNotificationDto
   ): Promise<boolean> {
-    const result = await this.notificationService.update(id)
+    const result = await this.notificationService.update(id, updateNoti)
     return result
   }
 }

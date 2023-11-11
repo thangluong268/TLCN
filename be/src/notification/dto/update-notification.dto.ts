@@ -2,24 +2,15 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
 import { SubNoti } from "./sub-notification.dto";
 
-export class CreateNotificationDto {
+export class UpdateNotificationDto {
     @ApiProperty()
-    @IsNotEmpty()
-    userIdFrom: string;
+    fullName: string
 
     @ApiProperty()
     @IsNotEmpty()
-    userIdTo: string;
+    content: string
 
     @ApiProperty()
     @IsNotEmpty()
-    content: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    type: string;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    sub: SubNoti;
+    status: boolean = true
 }

@@ -8,48 +8,35 @@ import {
   FaSistrix,
   FaStore,
 } from "react-icons/fa";
-import NotificationNormal from "./NotificationNormal";
-import NotificationFriend from "./NotificationFriend";
-import CartPreview from "./CartPreview";
 import FramePopup from "./FramePopup";
-import { APIGetAllNotification } from "@/services/Notification";
-import axios from "axios";
+import {
+  APIGetAllNotification,
+  APIUpdateNotification,
+} from "@/services/Notification";
+import { UserInterface } from "@/types/User";
+import Notification from "./Notification";
+import Cart from "./Cart";
+import { NotiData } from "@/types/Notification";
+import { APIGetAllCart } from "@/services/Cart";
+import { CartData } from "@/types/Cart";
+import FrameCart from "./FrameCart";
 
 function Header() {
-  const isLogin = true;
-  // const dataNoti = [
-  //   {
-  //     userName: "Hải Đăng",
-  //     content: "đã bày tỏ cảm xúc về sản phẩm của bạn.",
-  //     type: "Cảm xúc",
-  //     status: "UnRead"
-  //   },
-  // ]
-
-  const dataCart = [
-    {
-      productName: "Đồng hồ điện tử thể thao điện tử ádasdasdasdasdasd",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-    {
-      productName: "Đồng hồ điện tử thể thao",
-      price: "99.000đ",
-    },
-  ];
-
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isNotiOpen, setIsNotiOpen] = React.useState(false);
   const [countNewNoti, setCountNewNoti] = React.useState(0);
   const [countCart, setCountCart] = React.useState(0);
+  const [user, setUser] = React.useState<UserInterface>();
+  const [dataNoti, setDataNoti] = React.useState<NotiData>({
+    total: 0,
+    notifications: [],
+  });
+  const [dataCart, setDataCart] = React.useState<CartData>({
+    total: 0,
+    carts: [],
+  });
+
   const textViewAllCart = "<<Xem tất cả>>";
 
   const profileToggleDropdown = () => {
@@ -62,51 +49,62 @@ function Header() {
     setIsNotiOpen(false);
   };
 
-  const NotiToggleDropdown = async () => {
-    // if (!isNotiOpen) {
-    //   dataNoti.notifications.map((item) => {
-    //     if (item.status === "UnRead") {
-    //       item.status = "Read"
-    //     }
-    //   })
-    // }
-
-    console.log(dataNoti.notifications);
+  const NotiToggleDropdown = () => {
+    if (!isNotiOpen && user) {
+      dataNoti.notifications.map(async (item: any) => {
+        if (!item.status) {
+          await APIUpdateNotification(item._id, {
+            content: item.content,
+            status: true,
+            sub: item.sub,
+          });
+        }
+      });
+    }
     setIsNotiOpen(!isNotiOpen);
     setIsProfileOpen(false);
     setIsCartOpen(false);
   };
-
-  const [dataNoti, setDataNoti] = React.useState({
-    total: 0,
-    notifications: [
-      {
-        userId: "",
-        content: "",
-        type: "",
-        status: false,
-      },
-    ],
-  });
-
-  // React.useEffect(() => {
-  //   const fetchNoti = async () => {
-  //     const data = await APIGetAllNotification({ page: 1, limit: 5 });
-  //     setDataNoti(data);
-  //   };
-  //   fetchNoti();
-  // }, []);
+  React.useEffect(() => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+      : null;
+    setUser(user);
+  }, []);
 
   React.useEffect(() => {
-    setCountCart(dataCart.length);
-    setCountNewNoti(
-      dataNoti.notifications.filter((item) => item.status === false).length
-    );
-  }, [dataCart]);
+    if (user) {
+      const fetchNoti = async () => {
+        const data = await APIGetAllNotification({ page: 1, limit: 5 });
+        setDataNoti(data);
+      };
+      fetchNoti();
+    }
+  }, [user, dataNoti]);
+
+  React.useEffect(() => {
+    if (user) {
+      const fetchCart = async () => {
+        const data = await APIGetAllCart({ page: 1, limit: 5, search: "" });
+        setDataCart(data);
+      };
+      fetchCart();
+    }
+  }, [user, dataCart]);
+
+  React.useEffect(() => {
+    user
+      ? setCountNewNoti(
+          dataNoti.notifications.filter((item: any) => item.status === false)
+            .length
+        )
+      : setCountNewNoti(0);
+    //user ? setCountCart(dataCart.carts.filter((item) => item.status === false).length) : setCountNewNoti(0)
+  }, [dataCart, user]);
 
   return (
     <header className="h-[60px]">
-      <div className="flex justify-between items-center w-full h-[60px] bg-[#D2E0FB] px-[160px] fixed top-0 left-0 right-0 z-10">
+      <div className="flex justify-between items-center w-full h-[60px] bg-[#D2E0FB] px-[10%] fixed top-0 left-0 right-0 z-999">
         <img
           className="cursor-pointer w-[8%]"
           src="/logo.png"
@@ -139,23 +137,37 @@ function Header() {
               onClick={CartToggleDropdown}
             />
             {isCartOpen && (
-              <FramePopup>
-                {dataCart.map((item) => (
+              <FramePopup total={dataCart.total} component="cart">
+                {dataCart.carts.length > 0 ? (
                   <>
-                    <CartPreview props={item} />
+                    {dataCart.carts.map((item) => (
+                      <FrameCart props={item}>
+                        {item.listProducts.map((item) => (
+                          <>
+                            <Cart props={item} />
+                          </>
+                        ))}
+                      </FrameCart>
+                    ))}
                   </>
-                ))}
+                ) : (
+                  <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
+                    <span className="text-[14px] cursor-default">
+                      Không có sản phẩm nào
+                    </span>
+                  </div>
+                )}
                 <Link
-                  className="text-center border-t-2 border-[#90b0f4] rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
+                  className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
                   href="/cart/getAll"
                 >
                   {textViewAllCart}
                 </Link>
               </FramePopup>
             )}
-            {countCart > 0 && (
+            {dataCart.total > 0 && (
               <div className="flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]">
-                <span className="text-[12px] text-white">{countCart}</span>
+                <span className="text-[12px] text-white">{dataCart.total}</span>
               </div>
             )}
           </div>
@@ -172,18 +184,20 @@ function Header() {
               className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]"
               onClick={NotiToggleDropdown}
             />
-            {isNotiOpen && (
-              <FramePopup>
-                {dataNoti.notifications.map((item) =>
-                  item.status === false ? (
-                    item.type === "Kết bạn" ? (
-                      <NotificationFriend props={item} />
-                    ) : (
-                      <NotificationNormal props={item} />
-                    )
-                  ) : (
-                    <></>
-                  )
+            {isNotiOpen && user && (
+              <FramePopup total={dataNoti.total} component="notification">
+                {dataNoti.notifications.length > 0 ? (
+                  <>
+                    {dataNoti.notifications.map((item) => (
+                      <Notification props={item} />
+                    ))}
+                  </>
+                ) : (
+                  <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
+                    <span className="text-[14px] cursor-default">
+                      Không có thông báo mới
+                    </span>
+                  </div>
                 )}
               </FramePopup>
             )}
@@ -195,15 +209,15 @@ function Header() {
           </div>
         </div>
 
-        {isLogin ? (
+        {user ? (
           <div className="flex items-center">
             <img
               className="rounded-full w-[50px] h-[50px] cursor-pointer"
-              src="https://scontent.fsgn2-6.fna.fbcdn.net/v/t39.30808-1/333672359_223615343396138_7077399135899680905_n.jpg?stp=cp6_dst-jpg_p60x60&_nc_cat=111&ccb=1-7&_nc_sid=5f2048&_nc_ohc=cTn9WrZsic0AX_AQIZb&_nc_ht=scontent.fsgn2-6.fna&oh=00_AfALiVYWauduHdwJD0z93BH0R1y4h53sgB68dxHEmYsAuw&oe=653D2D32"
+              src={user.avatar}
               alt="Loading..."
               onClick={profileToggleDropdown}
             />
-            <span className="pl-3">Thắng Lương</span>
+            <span className="pl-3">{user.fullName}</span>
             {isProfileOpen && (
               <ul className="z-[1] p-2 shadow menu menu-sm dropdown-content bg-[#D2E0FB] rounded-lg absolute w-[158px] top-16">
                 <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
@@ -213,20 +227,20 @@ function Header() {
                   <Link href="/bill/user?status='Đã đặt'">Đơn mua</Link>
                 </li>
                 <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <Link href="/auth/logout">Đăng xuất</Link>
+                  <Link href="/logout">Đăng xuất</Link>
                 </li>
               </ul>
             )}
           </div>
         ) : (
           <div className="flex items-center">
-            <Link href="/auth/login">
+            <Link href="/login">
               <span className="text-[14px] font-medium cursor-pointer">
                 Đăng Nhập
               </span>
             </Link>
             <div className="border-r border-gray-400 mx-3 h-6"></div>
-            <Link href="/auth/signup">
+            <Link href="/signup">
               <span className="text-[14px] font-medium cursor-pointer">
                 Đăng Ký
               </span>

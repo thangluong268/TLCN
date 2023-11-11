@@ -3,7 +3,7 @@ import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook, FaGithub, FaLinkedi
 
 function Footer() {
   return (
-    <footer className="flex justify-between items-center h-[277px] w-full bg-[#A3C0FA] px-[160px] bottom-0">
+    <footer className="flex justify-between items-center h-[277px] w-full bg-[#A3C0FA] px-[10%] bottom-0">
 
       <div className="flex flex-col items-start">
         <span className="text-[16px] font-bold">VỀ DTEx</span>
@@ -38,7 +38,7 @@ function Footer() {
       </div>
 
       <div className="flex flex-col items-center">
-        <img className="mb-5" src="/logo.png" alt="Loading..." />
+        <img className="mb-2 w-[80px]" src="/logo.png" alt="Loading..." />
         <div className="flex flex-col items-start mb-5">
           <span className="text-[16px] font-bold">THEO DÕI CHÚNG TÔI</span>
           <div className="flex items-center">

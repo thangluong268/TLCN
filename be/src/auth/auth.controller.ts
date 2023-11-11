@@ -6,7 +6,6 @@ import { LoginDto } from './dto/login.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoleService } from 'src/role/role.service';
 import { RoleName } from 'src/role/schema/role.schema';
-import { TokensDto } from './dto/tokens.dto';
 import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
 import { CheckAbilities, CreateUserAbility, ManageUserTokenAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
 import { Request } from 'express';
@@ -16,6 +15,10 @@ import { UsertokenService } from 'src/usertoken/usertoken.service';
 import { UserService } from 'src/user/user.service';
 import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
 import { CheckRole } from 'src/ability/decorators/role.decorator';
+import { UserDto } from './dto/user.dto';
+import { TokensDto } from './dto/tokens.dto';
+import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
+import { BadRequestExceptionCustom } from 'src/exceptions/BadRequestExceptionCustom.exception';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -49,17 +52,18 @@ export class AuthController {
   async login(
     @Body()
     loginDto: LoginDto,
-  ): Promise<TokensDto> {
-    const { email, password } = loginDto
-    const user = await this.userService.getByEmail(email)
-    const isMatch = await this.authService.compareData(password, user.password)
-    if (!isMatch) return { accessToken: null, refreshToken: null }
+  ): Promise<UserDto> {
+    const user = await this.userService.getByEmail(loginDto.email)
+    if (!user) throw new BadRequestExceptionCustom("Email hoặc mật khẩu không chính xác!")
+    const { password, ...userWithoutPass } = user['_doc']
+    const isMatch = await this.authService.compareData(loginDto.password, password)
+    if (!isMatch) throw new BadRequestExceptionCustom("Email hoặc mật khẩu không chính xác!")
     const payload = { userId: user._id }
     const tokens = await this.authService.getTokens(payload)
     const userToken = await this.userTokenService.getUserTokenById(user._id)
     userToken ? await this.userTokenService.updateUserToken(user._id, tokens.refreshToken)
       : await this.userTokenService.createUserToken(user._id, tokens.refreshToken)
-    return tokens
+    return {providerData: [userWithoutPass], stsTokenManager: tokens}
   }
 
   @Public()
