@@ -113,7 +113,7 @@ function SignUp() {
   return (
     <div>
       <FrameInit />
-      <div className="absolute top-0 left-[5%]">
+      <div className="absolute top-0 left-[5%] z-20">
         <div className="flex flex-col items-center justify-center h-screen">
           <FrameFormInit
             title={`${checkState.isSendOTP ? "NHẬP MÃ OTP" : "ĐĂNG KÝ"}`}

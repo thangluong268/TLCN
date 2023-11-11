@@ -13,6 +13,7 @@ import { Evaluation } from "src/evaluation/schema/evaluation.schema";
 import { ApiConflictResponse } from "@nestjs/swagger";
 import { Notification } from "src/notification/schema/notification.schema";
 import { Promotion } from "src/promotion/schema/promotion.schema";
+import { Category } from "src/category/schema/category.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -34,7 +35,8 @@ export type Subjects = InferSubjects<
     typeof Product |
     typeof Evaluation |
     typeof Notification |
-    typeof Promotion
+    typeof Promotion |
+    typeof Category
 > | 'all'
 
 export type AppAbility = MongoAbility<[Action, Subjects]>

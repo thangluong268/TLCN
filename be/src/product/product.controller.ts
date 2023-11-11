@@ -37,7 +37,20 @@ export class ProductController {
     await this.evaluationService.create(newProduct._id)
     return newProduct
   }
-
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new CreateProductAbility())
+  @CheckRole(RoleName.SELLER)
+  @Post('sellerCreateMultiple')
+  async sellerCreateMultiple(
+    @Body() products: CreateProductDto[],
+    @GetCurrentUserId() userId: string,
+  ): Promise<void> {
+    const store = await this.storeService.getByUserId(userId)
+    products.forEach(async product => {
+      const newProduct = await this.productService.create(store, product)
+      await this.evaluationService.create(newProduct._id)
+    })
+  }
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadProductAbility())
   @CheckRole(RoleName.SELLER)
@@ -86,6 +99,26 @@ export class ProductController {
 
 
   @Public()
+  @Get('/listProductLasted')
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getlistProductLasted(
+    @Query('limit') limit: number,
+  ): Promise<Product[]> {
+    const products = await this.productService.getlistProductLasted(limit)
+    return products
+  }
+
+  @Public()
+  @Get('/mostProductsInStore')
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async mostProductsInStore(
+    @Query('limit') limit: number,
+  ): Promise<Product[]> {
+    const products = await this.productService.mostProductsInStore(limit)
+    return products
+  }
+
+  @Public()
   @Get('/:id')
   async getById(
     @Param('id') id: string
@@ -93,6 +126,7 @@ export class ProductController {
     const product = await this.productService.getById(id)
     return product
   }
+
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
@@ -102,5 +136,4 @@ export class ProductController {
     const store = await this.productService.deleteProduct(id);
     return store
   }
-
 }
