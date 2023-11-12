@@ -104,7 +104,7 @@ function Header() {
 
   return (
     <header className="h-[60px]">
-      <div className="flex justify-between items-center w-full h-[60px] bg-[#D2E0FB] px-[10%] fixed top-0 left-0 right-0 z-999">
+      <div className="flex justify-between items-center w-full h-[60px] bg-[#D2E0FB] px-[10%] fixed top-0 left-0 right-0 z-10">
         <img
           className="cursor-pointer w-[8%]"
           src="/logo.png"
