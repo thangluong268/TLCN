@@ -36,7 +36,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${lora.className} bg-[#EFEFEF]`}>
         <AuthContextProvider>
-          <Header />
+          {/* <Header /> */}
           {children}
           <Footer />
           <ToastContainer />

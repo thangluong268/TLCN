@@ -41,24 +41,28 @@ function Login() {
   React.useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
+      // Toast("success", "Đăng nhập thành công", 1000);
+      // setTimeout(() => {
+      //   window.location.href = "/";
+      // }, 1000);
     }
   }, [user]);
 
   const handleSignIn = async (func: () => void) => {
     try {
-      await func();
+      func();
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await logOut();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handleSignOut = async () => {
+  //   try {
+  //     await logOut();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const Login = async () => {
     if (
@@ -74,16 +78,18 @@ function Login() {
       Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
     } else {
       const res = await APILogin(loginForm.email, loginForm.password);
-      if (res.providerData && res.stsTokenManager) {
-        localStorage.setItem("user", JSON.stringify(res));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${res.stsTokenManager.accessToken}`;
-        Toast("success", "Đăng nhập thành công", 2000);
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 2000);
-      } else {
+      if (res.status !== 200 && res.status !== 201) {
         Toast("error", "Tài khoản hoặc mật khẩu không đúng", 5000);
+        return;
       }
+      localStorage.setItem("user", JSON.stringify(res.metadata.data));
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${res.metadata.data.stsTokenManager.accessToken}`;
+      Toast("success", "Đăng nhập thành công", 2000);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
     }
   };
 

@@ -88,7 +88,8 @@ function ForgetPassword() {
         Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
       } else {
         const res = await APISendOTPForget(forgetForm.email);
-        if (res.message) {
+        console.log(res);
+        if (res.status != 200 && res.status != 201) {
           Toast("error", res.message, 5000);
         } else {
           Toast(
