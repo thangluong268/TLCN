@@ -4,6 +4,7 @@ import { GetAllCategory } from "@/services/Category";
 
 function Category() {
   const [category, setCategory] = React.useState([]);
+
   React.useEffect(() => {
     const fetchData = async () => {
       const lst = await GetAllCategory().then((res) => res);
@@ -11,9 +12,10 @@ function Category() {
     };
     fetchData();
   }, []);
+
   return (
     <>
-      {category.map((item: { name: string; url: string; _id: string }) => {
+      {/* {category.map((item: { name: string; url: string; _id: string }) => {
         return (
           <div
             key={item._id}
@@ -26,7 +28,7 @@ function Category() {
             <div className="col-span-3">{item.name}</div>
           </div>
         );
-      })}
+      })} */}
     </>
   );
 }
