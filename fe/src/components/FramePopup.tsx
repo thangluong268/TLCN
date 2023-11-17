@@ -3,9 +3,9 @@ import { APIGetAllNotification } from '@/services/Notification';
 import React, { useState, useEffect } from 'react';
 import Notification from './Notification';
 import LoadingPopup from './LoadingPopup';
-import { APIGetAllCart } from '@/services/Cart';
-import FrameCart from './FrameCart';
-import Cart from './Cart';
+import { APIGetAllCartPaging } from '@/services/Cart';
+import FrameCart from './FrameCartPreview';
+import Cart from './CartPreview';
 
 function FramePopup({ total, component, children }: { total: number, component: string, children: any }) {
     const [items, setItems] = useState<JSX.Element>(children);
@@ -27,7 +27,7 @@ function FramePopup({ total, component, children }: { total: number, component: 
                     ))
                 }
                 else {
-                    nextData = await APIGetAllCart({ page, limit: 5, search: "" })
+                    nextData = await APIGetAllCartPaging({ page, limit: 5, search: "" })
                     updateData = nextData.metadata.data.carts.map((data: any) => (
                         <FrameCart props={data}>
                             {data.listProducts.map((item: any) => (
