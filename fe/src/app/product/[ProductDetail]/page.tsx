@@ -2,6 +2,7 @@
 import Star from "@/components/Star";
 import { GetProduct } from "@/services/Product";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
 import {
@@ -20,7 +21,7 @@ function ProductDetail() {
   React.useEffect(() => {
     const fetchData = async () => {
       const pd = await GetProduct(params.ProductDetail).then((res) => res);
-      setProduct(pd);
+      setProduct(pd.metadata.data);
     };
     fetchData();
   }, []);
@@ -85,10 +86,15 @@ function ProductDetail() {
                   </button>
                   <button
                     type="button"
-                    className="flex justify-center items-center w-full text-center py-3 font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                    className="w-full text-center py-3 font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                   >
-                    <FaShopify className="mr-3" />
-                    <span>Mua ngay</span>
+                    <Link
+                      href="/payment"
+                      className="flex justify-center items-center "
+                    >
+                      <FaShopify className="mr-3" />
+                      <span>Mua ngay</span>
+                    </Link>
                   </button>
                 </div>
               </div>
@@ -120,7 +126,7 @@ function ProductDetail() {
                   <span className="">Đã bán: 56</span>
                 </div>
                 <div className="flex items-center mt-4 text-3xl font-bold">
-                  {Number(product.price).toLocaleString("en-US", {})}{" "}
+                  {Number(product.price).toLocaleString("vi-VN", {})}
                   <sup>đ</sup>
                 </div>
                 <div className="flex flex-col mt-4">
@@ -924,9 +930,6 @@ function ProductDetail() {
             </article>
             <hr className="w-full my-5" />
           </div>
-          <div className="mb-3 bg-white rounded-md p-4 w-full">3</div>
-          <div className="mb-3 bg-white rounded-md p-4 w-full">4</div>
-          <div className="mb-3 bg-white rounded-md p-4 w-full">5</div>
         </>
       )}
     </div>

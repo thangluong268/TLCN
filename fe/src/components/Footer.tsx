@@ -1,10 +1,16 @@
 import React from "react";
-import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook, FaGithub, FaLinkedin } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaEnvelope,
+  FaPhoneAlt,
+  FaFacebook,
+  FaGithub,
+  FaLinkedin,
+} from "react-icons/fa";
 
 function Footer() {
   return (
     <footer className="flex justify-between items-center h-[277px] w-full bg-[#A3C0FA] px-[10%] bottom-0">
-
       <div className="flex flex-col items-start">
         <span className="text-[16px] font-bold">VỀ DTEx</span>
         <span className="text-[16px]">Giới Thiệu Về DTEx</span>
@@ -15,9 +21,21 @@ function Footer() {
       <div className="flex flex-col items-start">
         <span className="text-[16px] font-bold">THANH TOÁN</span>
         <div className="flex">
-          <img className="mr-2 w-[56px] h-[56px] rounded-md" src="/momo.jpg" alt="Loading..." />
-          <img className="mr-2 w-[56px] h-[56px] rounded-md" src="/vnpay.png" alt="Loading..." />
-          <img className="w-[56px] h-[56px] rounded-md" src="/paypal.png" alt="Loading..." />
+          <img
+            className="mr-2 w-[56px] h-[56px] rounded-md"
+            src="/momo.jpg"
+            alt="Loading..."
+          />
+          <img
+            className="mr-2 w-[56px] h-[56px] rounded-md"
+            src="/vnpay.png"
+            alt="Loading..."
+          />
+          <img
+            className="w-[56px] h-[56px] rounded-md"
+            src="/paypal.png"
+            alt="Loading..."
+          />
         </div>
       </div>
 
@@ -48,9 +66,8 @@ function Footer() {
           </div>
         </div>
       </div>
-
     </footer>
-  )
+  );
 }
 
 export default Footer;
