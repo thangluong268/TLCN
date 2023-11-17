@@ -10,16 +10,16 @@ interface UpdateNotiInterface {
   sub: SubNoti
 }
 
-export const APIGetAllNotification = async ({ page, limit }: QueryTwoElement): Promise<NotiData> => {
+export const APIGetAllNotification = async ({ page, limit }: QueryTwoElement): Promise<any> => {
   const headers = GetHeaders()
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_API_URL}/notification?page=${page}&limit=${limit}`,
     { headers }
   )
-  return { total: res.data.total, notifications: res.data.notifications }
+  return res.data
 };
 
-export const APIUpdateNotification = async (id: string, updateNoti: UpdateNotiInterface): Promise<boolean> => {
+export const APIUpdateNotification = async (id: string, updateNoti: UpdateNotiInterface): Promise<any> => {
   const headers = GetHeaders()
   const res = await axios.put(
     `${process.env.NEXT_PUBLIC_API_URL}/notification/${id}`,

@@ -7,7 +7,7 @@ function Category() {
   React.useEffect(() => {
     const fetchData = async () => {
       const lst = await GetAllCategory().then((res) => res);
-      setCategory(lst);
+      setCategory(lst.metadata.data);
     };
     fetchData();
   }, []);
