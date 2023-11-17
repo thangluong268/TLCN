@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import FrameFormInit from "@/components/FrameFormInit";
-import Input from "./input";
+import Input from "@/components/Input";
 import CheckValidInput from "@/utils/CheckValidInput";
 import FrameInit from "@/components/FrameInit";
 import { FaFacebook, FaLongArrowAltLeft } from "react-icons/fa";
@@ -132,7 +132,7 @@ function Login() {
                       )!.innerHTML = result;
                     }}
                     placeholder={item.placeholder}
-                    className="placeholder-white outline-none py-3 bg-gray-400 text-white rounded-[10px] mt-2 w-full px-4 border-solid border-2"
+                    className="placeholder-white outline-none py-3 bg-gray-400 text-white rounded-[10px] w-full px-4 border-solid border-2"
                   />
                   <span
                     id={`errMes-${item.name}`}
@@ -159,14 +159,14 @@ function Login() {
             </div>
             <div className="w-full mt-4">
               <button
-                className="py-3 bg-gray-600 text-white rounded-[10px] mt-2 w-full px-4 font-bold text-lg"
+                className="py-3 bg-gray-600 text-white rounded-[10px] mb-2 w-full px-4 font-bold text-lg"
                 onClick={(e) => Login()}
               >
                 Đăng nhập
               </button>
               <div className="flex justify-between items-center">
                 <div
-                  className="py-3 bg-red-600 rounded-[10px] mt-2 w-[49%] px-4 font-bold text-lg"
+                  className="py-3 bg-red-600 rounded-[10px] w-[49%] px-4 font-bold text-lg"
                   onClick={(e) => handleSignIn(googleSignIn)}
                 >
                   <div className="flex cursor-pointer text-white items-center justify-center rounded-md">
@@ -175,7 +175,7 @@ function Login() {
                   </div>
                 </div>
                 <div
-                  className="py-3 bg-blue-600 rounded-[10px] mt-2 w-[49%] px-4 font-bold text-lg"
+                  className="py-3 bg-blue-600 rounded-[10px] w-[49%] px-4 font-bold text-lg"
                   onClick={(e) => handleSignIn(facebookSignIn)}
                 >
                   <div className="flex cursor-pointer text-white items-center justify-center rounded-md">

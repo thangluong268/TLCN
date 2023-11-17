@@ -120,10 +120,10 @@ function Header() {
         </div>
 
         <div className="flex items-center">
-          <div className="flex flex-col items-center">
+          <Link href={"/store/create"} className="flex flex-col items-center">
             <span className="text-[14px]">Kênh người bán</span>
             <FaStore className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-          </div>
+          </Link>
 
           <div className="border-r border-gray-400 mx-10 h-6"></div>
 
