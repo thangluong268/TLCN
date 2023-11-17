@@ -18,6 +18,7 @@ function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const params = useParams();
+  
   React.useEffect(() => {
     const fetchData = async () => {
       const pd = await GetProduct(params.ProductDetail).then((res) => res);

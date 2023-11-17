@@ -15,12 +15,12 @@ import {
 } from "@/services/Notification";
 import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
-import Cart from "./Cart";
 import { NotiData } from "@/types/Notification";
-import { APIGetAllCart } from "@/services/Cart";
+import { APIGetAllCartPaging } from "@/services/Cart";
 import { CartData } from "@/types/Cart";
-import FrameCart from "./FrameCart";
 import Toast from "@/utils/Toast";
+import FrameCartPreview from "./FrameCartPreview";
+import CartPreview from "./CartPreview";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -85,7 +85,7 @@ function Header() {
         setDataNoti(res.metadata.data);
       };
       const fetchCart = async () => {
-        const res = await APIGetAllCart({ page: 1, limit: 5, search: "" });
+        const res = await APIGetAllCartPaging({ page: 1, limit: 5, search: "" });
         if (res.status !== 200 && res.status !== 201) {
           Toast("error", res.message, 5000);
           return;
@@ -137,20 +137,20 @@ function Header() {
                 <>
                   <Link
                     className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
-                    href="/cart/getAll"
+                    href="/cart"
                   >
                     {textViewAllCart}
                   </Link>
                   {dataCart.carts.length > 0 ? (
                     <>
                       {dataCart.carts.map((data) => (
-                        <FrameCart props={data}>
+                        <FrameCartPreview props={data}>
                           {data.listProducts.map((item) => (
                             <>
-                              <Cart props={item} />
+                              <CartPreview props={item} />
                             </>
                           ))}
-                        </FrameCart>
+                        </FrameCartPreview>
                       ))}
                     </>
                   ) : (
