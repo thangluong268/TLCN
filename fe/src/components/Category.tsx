@@ -15,7 +15,7 @@ function Category() {
 
   return (
     <>
-      {/* {category.map((item: { name: string; url: string; _id: string }) => {
+      {category.map((item: { name: string; url: string; _id: string }) => {
         return (
           <div
             key={item._id}
@@ -28,7 +28,7 @@ function Category() {
             <div className="col-span-3">{item.name}</div>
           </div>
         );
-      })} */}
+      })}
     </>
   );
 }

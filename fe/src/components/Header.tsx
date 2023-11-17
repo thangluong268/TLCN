@@ -61,6 +61,7 @@ function Header() {
         }
       });
     }
+    setCountNewNoti(0);
     setIsNotiOpen(!isNotiOpen);
     setIsProfileOpen(false);
     setIsCartOpen(false);
@@ -69,10 +70,6 @@ function Header() {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
       : null;
-    setUser(user);
-  }, []);
-
-  React.useEffect(() => {
     if (user) {
       const fetchNoti = async () => {
         const res = await APIGetAllNotification({ page: 1, limit: 5 });
@@ -80,14 +77,13 @@ function Header() {
           Toast("error", res.message, 5000);
           return;
         }
+        setCountNewNoti(
+          res.metadata.data.notifications.filter(
+            (item: any) => item.status === false
+          ).length
+        );
         setDataNoti(res.metadata.data);
       };
-      fetchNoti();
-    }
-  }, [user, dataNoti]);
-
-  React.useEffect(() => {
-    if (user) {
       const fetchCart = async () => {
         const res = await APIGetAllCart({ page: 1, limit: 5, search: "" });
         if (res.status !== 200 && res.status !== 201) {
@@ -97,17 +93,10 @@ function Header() {
         setDataCart(res.metadata.data);
       };
       fetchCart();
+      fetchNoti();
     }
-  }, [user, dataCart]);
-
-  React.useEffect(() => {
-    user
-      ? setCountNewNoti(
-        dataNoti.notifications.filter((item: any) => item.status === false)
-          .length
-      )
-      : setCountNewNoti(0);
-  }, [dataCart, user]);
+    setUser(user);
+  }, []);
 
   return (
     <header className="h-[60px]">
@@ -131,10 +120,10 @@ function Header() {
         </div>
 
         <div className="flex items-center">
-          <div className="flex flex-col items-center">
+          <Link href={"/store/create"} className="flex flex-col items-center">
             <span className="text-[14px]">Kênh người bán</span>
             <FaStore className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-          </div>
+          </Link>
 
           <div className="border-r border-gray-400 mx-10 h-6"></div>
 
@@ -164,7 +153,6 @@ function Header() {
                         </FrameCart>
                       ))}
                     </>
-
                   ) : (
                     <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
                       <span className="text-[14px] cursor-default">
@@ -173,7 +161,6 @@ function Header() {
                     </div>
                   )}
                 </>
-
               </FramePopup>
             )}
             {dataCart.total > 0 && (

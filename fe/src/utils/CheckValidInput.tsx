@@ -10,6 +10,8 @@ function CheckValidInput(obInput: any) {
     repassword: "Mật khẩu không khớp",
     length6: "Mật khẩu phải có ít nhất 6 ký tự",
     otp: "Mã OTP không hợp lệ",
+    number: "Không được nhập chữ",
+    phone: "Số điện thoại không hợp lệ",
   };
   for (let key in obInput) {
     if (obInput[key].length === 0) {
@@ -45,6 +47,25 @@ function CheckValidInput(obInput: any) {
     if (key === "otp") {
       if (!obInput[key].match(/^[0-9]{6}$/)) {
         return arrInvalid.otp;
+      }
+    }
+
+    if (key === "number") {
+      if (!obInput[key].match(/^[0-9]+$/)) {
+        return arrInvalid.number;
+      }
+    }
+
+    //Số điện thoải phải thoả:
+    // 1. Bắt đầu bằng 0
+    // 2. Theo sau là 9 số
+
+    if (key === "phone") {
+      if (!obInput[key].match(/^[0-9]+$/)) {
+        return arrInvalid.number;
+      }
+      if (!obInput[key].match(/^0[0-9]{9}$/)) {
+        return arrInvalid.phone;
       }
     }
   }

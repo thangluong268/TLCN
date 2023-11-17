@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import FrameFormInit from "@/components/FrameFormInit";
-import Input from "./input";
+import Input from "@/components/Input";
 import CheckValidInput from "@/utils/CheckValidInput";
 import FrameInit from "@/components/FrameInit";
 import { FaLongArrowAltLeft } from "react-icons/fa";
