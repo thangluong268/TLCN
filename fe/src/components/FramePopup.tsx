@@ -1,10 +1,11 @@
 'use client'
 import { APIGetAllNotification } from '@/services/Notification';
-
 import React, { useState, useEffect } from 'react';
 import Notification from './Notification';
 import LoadingPopup from './LoadingPopup';
-import { NotiData } from '@/types/Notification';
+import { APIGetAllCart } from '@/services/Cart';
+import FrameCart from './FrameCart';
+import Cart from './Cart';
 
 function FramePopup({ total, component, children }: { total: number, component: string, children: any }) {
     const [items, setItems] = useState<JSX.Element>(children);
@@ -17,20 +18,26 @@ function FramePopup({ total, component, children }: { total: number, component: 
             const isAtBottom = framePopup.scrollTop + framePopup.clientHeight > framePopup.scrollHeight - 500;
             if (isAtBottom && !loading && ((page - 1) * 5 < total)) {
                 setLoading(true)
-                let nextData: NotiData
+                let nextData: any
                 let updateData: JSX.Element[] = []
                 if (component === "notification") {
                     nextData = await APIGetAllNotification({ page, limit: 5 })
-                    updateData = nextData.notifications.map((item) => (
+                    updateData = nextData.metadata.data.notifications.map((item: any) => (
                         <Notification props={item} />
                     ))
                 }
-                // else {
-                //     nextData = await APIGetAllNotification({ page, limit: 5 })
-                //     updateData = nextData.notifications.map((item) => (
-                //          <Notification props={item} />
-                //      ))
-                // }
+                else {
+                    nextData = await APIGetAllCart({ page, limit: 5, search: "" })
+                    updateData = nextData.metadata.data.carts.map((data: any) => (
+                        <FrameCart props={data}>
+                            {data.listProducts.map((item: any) => (
+                                <>
+                                    <Cart props={item} />
+                                </>
+                            ))}
+                        </FrameCart>
+                    ))
+                }
 
                 setItems(<>{items}{updateData}</>)
                 setLoading(false)

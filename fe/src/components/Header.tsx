@@ -20,13 +20,13 @@ import { NotiData } from "@/types/Notification";
 import { APIGetAllCart } from "@/services/Cart";
 import { CartData } from "@/types/Cart";
 import FrameCart from "./FrameCart";
+import Toast from "@/utils/Toast";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isNotiOpen, setIsNotiOpen] = React.useState(false);
   const [countNewNoti, setCountNewNoti] = React.useState(0);
-  const [countCart, setCountCart] = React.useState(0);
   const [user, setUser] = React.useState<UserInterface>();
   const [dataNoti, setDataNoti] = React.useState<NotiData>({
     total: 0,
@@ -75,8 +75,12 @@ function Header() {
   React.useEffect(() => {
     if (user) {
       const fetchNoti = async () => {
-        const data = await APIGetAllNotification({ page: 1, limit: 5 });
-        setDataNoti(data);
+        const res = await APIGetAllNotification({ page: 1, limit: 5 });
+        if (res.status !== 200 && res.status !== 201) {
+          Toast("error", res.message, 5000);
+          return;
+        }
+        setDataNoti(res.metadata.data);
       };
       fetchNoti();
     }
@@ -85,8 +89,12 @@ function Header() {
   React.useEffect(() => {
     if (user) {
       const fetchCart = async () => {
-        const data = await APIGetAllCart({ page: 1, limit: 5, search: "" });
-        setDataCart(data);
+        const res = await APIGetAllCart({ page: 1, limit: 5, search: "" });
+        if (res.status !== 200 && res.status !== 201) {
+          Toast("error", res.message, 5000);
+          return;
+        }
+        setDataCart(res.metadata.data);
       };
       fetchCart();
     }
@@ -95,11 +103,10 @@ function Header() {
   React.useEffect(() => {
     user
       ? setCountNewNoti(
-          dataNoti.notifications.filter((item: any) => item.status === false)
-            .length
-        )
+        dataNoti.notifications.filter((item: any) => item.status === false)
+          .length
+      )
       : setCountNewNoti(0);
-    //user ? setCountCart(dataCart.carts.filter((item) => item.status === false).length) : setCountNewNoti(0)
   }, [dataCart, user]);
 
   return (
@@ -138,31 +145,35 @@ function Header() {
             />
             {isCartOpen && (
               <FramePopup total={dataCart.total} component="cart">
-                {dataCart.carts.length > 0 ? (
-                  <>
-                    {dataCart.carts.map((item) => (
-                      <FrameCart props={item}>
-                        {item.listProducts.map((item) => (
-                          <>
-                            <Cart props={item} />
-                          </>
-                        ))}
-                      </FrameCart>
-                    ))}
-                  </>
-                ) : (
-                  <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
-                    <span className="text-[14px] cursor-default">
-                      Không có sản phẩm nào
-                    </span>
-                  </div>
-                )}
-                <Link
-                  className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
-                  href="/cart/getAll"
-                >
-                  {textViewAllCart}
-                </Link>
+                <>
+                  <Link
+                    className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
+                    href="/cart/getAll"
+                  >
+                    {textViewAllCart}
+                  </Link>
+                  {dataCart.carts.length > 0 ? (
+                    <>
+                      {dataCart.carts.map((data) => (
+                        <FrameCart props={data}>
+                          {data.listProducts.map((item) => (
+                            <>
+                              <Cart props={item} />
+                            </>
+                          ))}
+                        </FrameCart>
+                      ))}
+                    </>
+
+                  ) : (
+                    <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
+                      <span className="text-[14px] cursor-default">
+                        Không có sản phẩm nào
+                      </span>
+                    </div>
+                  )}
+                </>
+
               </FramePopup>
             )}
             {dataCart.total > 0 && (

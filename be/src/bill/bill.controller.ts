@@ -49,7 +49,6 @@ export class BillController {
     const newBill = await this.billService.create(user, products, bill)
     await this.userService.updateWallet(userId, newBill.totalPrice, "plus")
     const result = await this.paymentService.processPayment(bill, bill.paymentMethod)
-    console.log(result)
     return newBill
   }
 

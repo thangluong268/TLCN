@@ -4,13 +4,15 @@ import { GetAllCategory } from "@/services/Category";
 
 function Category() {
   const [category, setCategory] = React.useState([]);
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const lst = await GetAllCategory().then((res) => res);
-  //     setCategory(lst);
-  //   };
-  //   fetchData();
-  // }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const lst = await GetAllCategory().then((res) => res);
+      setCategory(lst.metadata.data);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       {/* {category.map((item: { name: string; url: string; _id: string }) => {
