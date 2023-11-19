@@ -21,3 +21,12 @@ export const APIGetAllCart = async (): Promise<any> => {
   )
   return res.data
 };
+
+export const APIRemoveProductInCart = async (productId: string): Promise<any> => {
+  const headers = GetHeaders()
+  const res = await axios.delete(
+    `${process.env.NEXT_PUBLIC_API_URL}/cart/user?productId=${productId}`,
+    { headers }
+  )
+  return res.data
+}

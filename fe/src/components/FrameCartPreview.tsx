@@ -10,7 +10,7 @@ function FrameCartPreview({ props, children }: { props: any, children: any }) {
                 <Link href={`/store/user/${_id}`} className='flex items-center absolute left-2 hover:bg-[#c1d2f6] p-2 rounded-lg'>
                     <img
                         className="rounded-full w-[54px] h-[54px] mr-2"
-                        src={props.avatar}
+                        src={props.storeAvatar}
                         alt="Loading..."
                     />
                     <span className='text-[12px] font-bold p-2'>{storeName}</span>
@@ -18,6 +18,7 @@ function FrameCartPreview({ props, children }: { props: any, children: any }) {
             </div>
 
             {children}
+            
             <p className="text-[12px] font-bold p-2">Tổng tiền: {FormatMoney(totalPrice)}</p>
         </div>
     )
