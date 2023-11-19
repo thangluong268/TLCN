@@ -21,6 +21,7 @@ import { CartData } from "@/types/Cart";
 import Toast from "@/utils/Toast";
 import FrameCartPreview from "./FrameCartPreview";
 import CartPreview from "./CartPreview";
+import { GetMyStore } from "@/services/Store";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -66,6 +67,7 @@ function Header() {
     setIsProfileOpen(false);
     setIsCartOpen(false);
   };
+
   React.useEffect(() => {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
@@ -85,7 +87,11 @@ function Header() {
         setDataNoti(res.metadata.data);
       };
       const fetchCart = async () => {
-        const res = await APIGetAllCartPaging({ page: 1, limit: 5, search: "" });
+        const res = await APIGetAllCartPaging({
+          page: 1,
+          limit: 5,
+          search: "",
+        });
         if (res.status !== 200 && res.status !== 201) {
           Toast("error", res.message, 5000);
           return;
@@ -97,6 +103,14 @@ function Header() {
     }
     setUser(user);
   }, []);
+  const OpenStore = async () => {
+    const store = await GetMyStore();
+    if (store.status == 200 || store.status == 201) {
+      window.location.href = "/store/" + store.metadata.data._id;
+    } else {
+      window.location.href = "/store/create";
+    }
+  };
 
   return (
     <header className="h-[60px]">
@@ -120,10 +134,13 @@ function Header() {
         </div>
 
         <div className="flex items-center">
-          <Link href={"/store/create"} className="flex flex-col items-center">
+          <div
+            onClick={(e) => OpenStore()}
+            className="flex flex-col items-center"
+          >
             <span className="text-[14px]">Kênh người bán</span>
             <FaStore className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-          </Link>
+          </div>
 
           <div className="border-r border-gray-400 mx-10 h-6"></div>
 
