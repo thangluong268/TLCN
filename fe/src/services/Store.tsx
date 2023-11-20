@@ -1,7 +1,7 @@
 import GetHeaders from "@/utils/GetHeaders";
 import axios from "axios";
 
-export const UploadImage = async (file: any) => {
+export const APIUploadImage = async (file: any) => {
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_API_URL}/upload`,
     file
@@ -9,7 +9,7 @@ export const UploadImage = async (file: any) => {
   return res.data;
 };
 
-export const Create = async (body: any) => {
+export const APICreate = async (body: any) => {
   document.getElementById("loading-page")?.classList.remove("hidden");
   const headers = GetHeaders();
   const res = await axios.post(
@@ -21,7 +21,7 @@ export const Create = async (body: any) => {
   return res.data;
 };
 
-export const GetMyStore = async () => {
+export const APIGetMyStore = async () => {
   document.getElementById("loading-page")?.classList.remove("hidden");
   const headers = GetHeaders();
   const res = await axios.get(

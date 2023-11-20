@@ -16,12 +16,12 @@ import {
 import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
 import { NotiData } from "@/types/Notification";
-import { APIGetAllCartPaging } from "@/services/Cart";
+import { APIGetAllCart, APIGetAllCartPaging } from "@/services/Cart";
 import { CartData } from "@/types/Cart";
 import Toast from "@/utils/Toast";
 import FrameCartPreview from "./FrameCartPreview";
 import CartPreview from "./CartPreview";
-import { GetMyStore } from "@/services/Store";
+import { APIGetMyStore } from "@/services/Store";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -43,6 +43,22 @@ function Header() {
   const profileToggleDropdown = () => {
     setIsProfileOpen(!isProfileOpen);
   };
+
+  React.useEffect(() => {
+    const fetchAllCart = async () => {
+      const res = await APIGetAllCart();
+      if (res.status == 200 || res.status == 201) {
+        var arrIdProduct = [] as any;
+        res.metadata.data.map((item: any) => {
+          item.listProducts.map((product: any) => {
+            arrIdProduct.push(product.productId);
+          });
+        });
+        localStorage.setItem("arrIdProduct", JSON.stringify(arrIdProduct));
+      }
+    };
+    fetchAllCart();
+  }, []);
 
   const CartToggleDropdown = () => {
     setIsCartOpen(!isCartOpen);
@@ -104,7 +120,7 @@ function Header() {
     setUser(user);
   }, []);
   const OpenStore = async () => {
-    const store = await GetMyStore();
+    const store = await APIGetMyStore();
     if (store.status == 200 || store.status == 201) {
       window.location.href = "/store/" + store.metadata.data._id;
     } else {
@@ -180,11 +196,16 @@ function Header() {
                 </>
               </FramePopup>
             )}
-            {dataCart.total > 0 && (
-              <div className="flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]">
-                <span className="text-[12px] text-white">{dataCart.total}</span>
-              </div>
-            )}
+
+            <div
+              className={`flex justify-center items-center w-[20px] h-[20px] ${
+                dataCart.total && "bg-[#6499FF]"
+              } rounded-full absolute mt-[-24px] ml-[30px]`}
+            >
+              <span className="text-[12px] text-white" id="dataCartTotal">
+                {dataCart.total || ""}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col justify-center items-center mr-10">

@@ -115,8 +115,7 @@ function Login() {
                     type={item.name === "password" ? "password" : "text"}
                     onBlur={(e) => {
                       const result = CheckValidInput({
-                        [`${item.name == "password" ? "name" : item.name}`]:
-                          e.target.value,
+                        [`${item.name}`]: e.target.value,
                       });
                       if (result !== "") {
                         document

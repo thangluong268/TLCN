@@ -1,7 +1,7 @@
 "use client";
 import Input from "@/components/Input";
 import { CREATESTORE } from "@/constants/CreateStore";
-import { Create, GetMyStore, UploadImage } from "@/services/Store";
+import { APICreate, APIGetMyStore, APIUploadImage } from "@/services/Store";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
 import React from "react";
@@ -29,7 +29,7 @@ function CreateStore() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const store = await GetMyStore();
+      const store = await APIGetMyStore();
       console.log("Store", store);
       if (store.status == 200 || store.status == 201) {
         Toast("error", "Bạn đã có cửa hàng", 2000);
@@ -111,8 +111,8 @@ function CreateStore() {
       phoneNumber.push(store.phoneNumber2);
       let formData = new FormData();
       formData.append("file", store.avatar);
-      const rs = await UploadImage(formData);
-      const storeRes = await Create({
+      const rs = await APIUploadImage(formData);
+      const storeRes = await APICreate({
         address: store.address,
         name: store.name,
         phoneNumber: phoneNumber,

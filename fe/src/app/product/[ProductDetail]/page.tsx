@@ -1,6 +1,7 @@
 "use client";
 import Star from "@/components/Star";
-import { GetProduct } from "@/services/Product";
+import { APIAddProductInCart } from "@/services/Cart";
+import { APIGetProduct } from "@/services/Product";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -18,14 +19,29 @@ function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const params = useParams();
-  
+
   React.useEffect(() => {
     const fetchData = async () => {
-      const pd = await GetProduct(params.ProductDetail).then((res) => res);
+      const pd = await APIGetProduct(params.ProductDetail).then((res) => res);
       setProduct(pd.metadata.data);
     };
     fetchData();
   }, []);
+
+  const AddToCart = async (id: string) => {
+    const cartTotalElement = document.getElementById("dataCartTotal");
+    const cartTotal = cartTotalElement ? +cartTotalElement.textContent! : 0;
+    if (cartTotalElement) {
+      const arrIdProduct = localStorage.getItem("arrIdProduct") || "[]";
+      console.log(arrIdProduct);
+      if (!arrIdProduct.includes(id)) {
+        cartTotalElement.textContent = (cartTotal + 1).toString();
+        cartTotalElement.parentElement?.classList.add("bg-[#6499FF]");
+      }
+    }
+    const cart = await APIAddProductInCart(id);
+  };
+
   console.log(product);
   return (
     <div className="min-h-screen flex flex-col px-[160px] my-4">
@@ -81,6 +97,7 @@ function ProductDetail() {
                   <button
                     type="button"
                     className="flex justify-center mr-2 text-white items-center w-full bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg py-3  dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                    onClick={(e) => AddToCart(product._id)}
                   >
                     <FaShoppingCart className="mr-3" />
                     <span>Thêm vào giỏ hàng</span>
