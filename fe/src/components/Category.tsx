@@ -1,13 +1,13 @@
 import React from "react";
 import Image from "next/image";
-import { GetAllCategory } from "@/services/Category";
+import { APIGetAllCategory } from "@/services/Category";
 
 function Category() {
   const [category, setCategory] = React.useState([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const lst = await GetAllCategory().then((res) => res);
+      const lst = await APIGetAllCategory().then((res) => res);
       setCategory(lst.metadata.data);
     };
     fetchData();

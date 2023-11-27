@@ -1,7 +1,12 @@
 "use client";
 import Star from "@/components/Star";
-import { GetProduct } from "@/services/Product";
+import { addItemtoCartPopup } from "@/redux/features/cart/cartpopup-slice";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import { APIAddProductInCart } from "@/services/Cart";
+import { APIGetProduct } from "@/services/Product";
+import { Product } from "@/types/Cart";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
+import Toast from "@/utils/Toast";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -13,20 +18,61 @@ import {
   FaShoppingCart,
   FaTelegramPlane,
 } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const params = useParams();
-  
+  const dispatch = useDispatch<AppDispatch>();
+
   React.useEffect(() => {
     const fetchData = async () => {
-      const pd = await GetProduct(params.ProductDetail).then((res) => res);
+      const pd = await APIGetProduct(params.ProductDetail).then((res) => res);
       setProduct(pd.metadata.data);
     };
     fetchData();
   }, []);
-  console.log(product);
+  const carts = useAppSelector((state) => state.cartPopupReducer.items);
+  const AddToCart = async () => {
+    let isProductInCart = false;
+    carts?.store?.map((data) => {
+      if (data.id == product.storeId) {
+        data?.product?.map((item) => {
+          if (item.id == product._id) {
+            isProductInCart = true;
+          }
+        });
+      }
+    });
+
+    if (!isProductInCart) {
+      Toast("success", "Đã thêm sản phẩm vào giỏ hàng", 2000);
+      dispatch(
+        addItemtoCartPopup({
+          product: {
+            id: product._id,
+            name: product.productName,
+            avatar: product.avatar[0],
+            price: product.price,
+            type: product.type,
+            quantity: 1,
+            quantityInStock: product.quantity,
+            isChecked: false,
+          },
+          store: {
+            id: product.storeId,
+            name: product.storeName,
+            isChecked: false,
+          },
+        })
+      );
+      await APIAddProductInCart(product._id);
+    } else {
+      Toast("success", "Sản phẩm đã có trong giỏ hàng", 2000);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-[160px] my-4">
       {product._id && (
@@ -50,6 +96,7 @@ function ProductDetail() {
                           currentImage == index && "border-blue-500"
                         }`}
                         onClick={(e) => setCurrentImage(index)}
+                        key={index}
                       >
                         <img
                           src={product.avatar[0]}
@@ -81,6 +128,7 @@ function ProductDetail() {
                   <button
                     type="button"
                     className="flex justify-center mr-2 text-white items-center w-full bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg py-3  dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                    onClick={(e) => AddToCart()}
                   >
                     <FaShoppingCart className="mr-3" />
                     <span>Thêm vào giỏ hàng</span>

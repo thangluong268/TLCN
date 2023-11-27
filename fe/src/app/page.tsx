@@ -7,8 +7,8 @@ import Category from "@/components/Category";
 import ListProductHomePage from "@/components/ListProductHomePage";
 import React from "react";
 import {
-  GetListProducMostInStore,
-  GetListProductLasted,
+  APIGetListProducMostInStore,
+  APIGetListProductLasted,
 } from "@/services/Product";
 
 export default function Home() {
@@ -16,8 +16,8 @@ export default function Home() {
   const [listProductMost, setListProductMost] = React.useState([]);
   React.useEffect(() => {
     const fetchData = async () => {
-      const lst = await GetListProductLasted().then((res) => res);
-      const lst1 = await GetListProducMostInStore().then((res) => res);
+      const lst = await APIGetListProductLasted().then((res) => res);
+      const lst1 = await APIGetListProducMostInStore().then((res) => res);
       setListProduct(lst.metadata.data);
       setListProductMost(lst1.metadata.data);
     };

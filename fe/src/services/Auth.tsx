@@ -18,6 +18,7 @@ export const APISignUp = async ({ name, email, password }: SignUpForm) => {
 };
 
 export const APILogin = async (email: string, password: string) => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
     {
@@ -25,6 +26,7 @@ export const APILogin = async (email: string, password: string) => {
       password,
     }
   );
+  document.getElementById("loading-page")?.classList.add("hidden");
   return res.data;
 };
 

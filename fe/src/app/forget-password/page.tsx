@@ -86,20 +86,15 @@ function ForgetPassword() {
         forgetForm.email === ""
       ) {
         Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
-      } else {
-        const res = await APISendOTPForget(forgetForm.email);
-        console.log(res);
-        if (res.status != 200 && res.status != 201) {
-          Toast("error", res.message, 5000);
-        } else {
-          Toast(
-            "success",
-            `Mã OTP đang được gửi đến ${forgetForm.email}`,
-            5000
-          );
-          setCheckState("Sent");
-        }
+        return;
       }
+      const res = await APISendOTPForget(forgetForm.email);
+      if (res.status != 200 && res.status != 201) {
+        Toast("error", res.message, 5000);
+        return;
+      }
+      Toast("success", `Mã OTP đang được gửi đến ${forgetForm.email}`, 5000);
+      setCheckState("Sent");
     } else if (checkState == "Sent") {
       if (
         document
@@ -108,15 +103,15 @@ function ForgetPassword() {
         forgetForm.otp === ""
       ) {
         Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
-      } else {
-        const result = await APIVerifyOTP(forgetForm.email, forgetForm.otp);
-        if (result.message) {
-          Toast("error", result.message, 5000);
-        } else {
-          Toast("success", "Chuẩn rồi, nhập mật khẩu mới nhé", 2000);
-          setCheckState("Confirm");
-        }
+        return;
       }
+      const res = await APIVerifyOTP(forgetForm.email, forgetForm.otp);
+      if (res.status != 200 && res.status != 201) {
+        Toast("error", res.message, 5000);
+        return;
+      }
+      Toast("success", "Chuẩn rồi, nhập mật khẩu mới nhé", 2000);
+      setCheckState("Confirm");
     } else {
       if (
         document
@@ -129,16 +124,20 @@ function ForgetPassword() {
         forgetForm.repassword === ""
       ) {
         Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
-      } else {
-        const result = await APIForgetPassword(
-          forgetForm.email,
-          forgetForm.password
-        );
-        Toast("success", "Cập nhật thành công", 2000);
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
+        return;
       }
+      const result = await APIForgetPassword(
+        forgetForm.email,
+        forgetForm.password
+      );
+      if (result.status != 200 && result.status != 201) {
+        Toast("error", result.message, 5000);
+        return;
+      }
+      Toast("success", "Cập nhật thành công", 2000);
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
     }
   };
   return (

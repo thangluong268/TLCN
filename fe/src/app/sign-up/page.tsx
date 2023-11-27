@@ -64,7 +64,7 @@ function SignUp() {
       Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
     } else {
       const res = await APISendOTP(signUpForm.email);
-      if (res.message) {
+      if (res.status !== 200 && res.status !== 201) {
         Toast("error", res.message, 5000);
       } else {
         Toast("success", `Mã OTP đang được gửi đến ${signUpForm.email}`, 5000);
@@ -80,7 +80,7 @@ function SignUp() {
 
   const ReSendOTP = async () => {
     const res = await APISendOTP(signUpForm.email);
-    if (res.message) {
+    if (res.status !== 200 && res.status !== 201) {
       Toast("error", res.message, 5000);
     } else {
       Toast("success", `Mã OTP đang được gửi đến ${signUpForm.email}`, 5000);
@@ -96,18 +96,24 @@ function SignUp() {
       otp === ""
     ) {
       Toast("warning", "Thông tin chưa chính xác", 5000);
-    } else {
-      const result = await APIVerifyOTP(signUpForm.email, otp);
-      if (result.message) {
-        Toast("error", result.message, 5000);
-      } else {
-        Toast("success", "Đăng ký thành công", 2000);
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-        const result = await APISignUp(signUpForm);
-      }
+      return;
     }
+
+    const res = await APIVerifyOTP(signUpForm.email, otp);
+    if (res.status !== 200 && res.status !== 201) {
+      Toast("error", res.message, 5000);
+      return;
+    }
+
+    const result = await APISignUp(signUpForm);
+    if (result.status !== 200 && result.status !== 201) {
+      Toast("error", result.message, 5000);
+      return;
+    }
+    Toast("success", "Đăng ký thành công", 2000);
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 2000);
   };
 
   return (

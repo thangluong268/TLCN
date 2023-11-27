@@ -2,7 +2,6 @@ import React from "react";
 
 function Star(props: { state: boolean }) {
   const { state } = props;
-  console.log(state);
   return (
     <svg
       className={`w-4 h-4 ${
