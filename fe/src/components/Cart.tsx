@@ -1,162 +1,93 @@
 "use client";
-import { APIRemoveProductInCart } from "@/services/Cart";
-import { CartInterface, ProductBillDto } from "@/types/Cart";
+
+import { AppDispatch, useAppSelector } from "@/redux/store";
 import FormatMoney from "@/utils/FormatMoney";
 import Toast from "@/utils/Toast";
 import Link from "next/link";
-import { rule } from "postcss";
 import React from "react";
-interface PropsCartInterface {
-  prop: any;
-  idStore: string;
-  index: number;
-  handleDelete: any;
+import { useDispatch } from "react-redux";
+import Modal from "./Modal";
+import {
+  changeQuantity,
+  changeQuantityType,
+  clickItem,
+  deleteProduct,
+} from "@/redux/features/cart/cartpopup-slice";
+interface CartProps {
+  data: {
+    id: string;
+    name: string;
+    avatar: string;
+    type: string;
+    price: number;
+    quantity: number;
+    quantityInStock: number;
+    isChecked: boolean;
+  };
 }
 
-function Cart(props: PropsCartInterface) {
-  const { prop, idStore, index, handleDelete } = props;
-  const [quantity, setQuantity] = React.useState(prop.quantity);
-  const [isDeleted, setIsDeleted] = React.useState(false);
-
-  React.useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-    cart.map((store: CartInterface) => {
-      store.listProducts = store.listProducts.map((product: ProductBillDto) => {
-        if (product.productId === prop.productId) {
-          return { ...product, quantity };
-        }
-        return product;
-      });
-      return store;
-    });
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [quantity, isDeleted]);
-
-  // add function delete product in cart from local storage
-  const deleteProductInCartLocal = async (): Promise<void> => {
-    const shouldDelete = window.confirm(
-      "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?"
-    );
-    if (!shouldDelete) return;
-
-    const cart = JSON.parse(localStorage.getItem("cart") || "{}");
-
-    const res = await APIRemoveProductInCart(prop.productId);
-
-    if (res.status !== 200 && res.status !== 201) {
-      Toast("error", res.message, 5000);
-      return;
-    }
-
-    cart.map((store: CartInterface) => {
-      store.listProducts = store.listProducts.filter(
-        (product: ProductBillDto) => product.productId !== prop.productId
-      );
-    });
-
-    handleDelete(`${idStore}-${index}`);
-
-    console.log(cart);
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    setIsDeleted(true);
-  };
-
-  const handleDecrease = () => {
-    if (quantity <= 1) {
-      deleteProductInCartLocal();
-      return;
-    }
-
-    setQuantity(quantity - 1);
-  };
-
-  const handleIncrease = () => {
-    // check số lượng sản phẩm trong kho
-    // Hiển thị thông báo khi số lượng vượt quá số lượng trong kho
-    setQuantity(quantity + 1);
-  };
-
-  const isChecked = (e: any) => {
-    const lengthListCart = document
-      .querySelector(`.store-parent-${idStore}`)
-      ?.querySelectorAll('[class*="checkbox-item-"]').length;
-    let checkedItems = 0;
-    document
-      .querySelector(`.store-parent-${idStore}`)
-      ?.querySelectorAll('[class*="checkbox-item-"]')
-      .forEach((item: any) => {
-        if (item.checked) {
-          checkedItems++;
-        }
-      });
-    const store = document.querySelector(
-      `.checkbox-store-${idStore}`
-    ) as HTMLInputElement;
-    const all = document.querySelector(
-      `.checkbox-cart-all`
-    ) as HTMLInputElement;
-    if (lengthListCart === checkedItems) {
-      store.checked = true;
-      //
-      const lengthListCart1 = document.querySelectorAll(
-        '[class*="store-parent-"]'
-      ).length;
-      let checkedItems = 0;
-      document
-        .querySelectorAll('[class*="checkbox-store-"]')
-        .forEach((item: any) => {
-          if (item.checked) {
-            checkedItems++;
-          }
-        });
-      const all = document.querySelector(
-        `.checkbox-cart-all`
-      ) as HTMLInputElement;
-      if (lengthListCart1 === checkedItems) {
-        all.checked = true;
-      } else {
-        all.checked = false;
-      }
-    } else {
-      store.checked = false;
-      all.checked = false;
-    }
+function Cart(props: CartProps) {
+  const {
+    id,
+    name,
+    avatar,
+    type,
+    price,
+    quantity,
+    quantityInStock,
+    isChecked,
+  } = props.data;
+  const dispatch = useDispatch<AppDispatch>();
+  const [isShow, setIsShow] = React.useState(false);
+  const [currentQuantity, setCurrentQuantity] = React.useState(quantity + "");
+  const ConfirmDel = (productId: string, dispatch: AppDispatch) => {
+    dispatch(deleteProduct({ productId: productId }));
+    setIsShow(false);
   };
 
   return (
-    <div
-      className={`flex justify-between items-center p-2 rounded-lg text-center `}
-    >
+    <div className="flex justify-between items-center rounded-lg text-center my-3">
       <div className="flex items-center w-[35%] mr-[5%]">
         <input
-          className={`w-4 h-4 border-2 border-slate-400 rounded-full mr-[2%] min-w-[30px] checkbox-item-${prop.productId}`}
+          className={`w-4 h-4 border-2 border-slate-400 rounded-full mr-[2%] min-w-[30px]`}
           type="checkbox"
-          onChange={(e) => isChecked(e)}
-          value={prop.productId}
+          checked={isChecked}
+          onChange={(e) =>
+            dispatch(
+              clickItem({
+                productId: id,
+                isChecked: e.target.checked,
+              })
+            )
+          }
+          min={1}
         ></input>
         <img
-          className="rounded-full w-[54px] h-[54px] mr-2"
-          src={prop.avatar}
+          className="rounded-full w-[54px] h-[54px] mr-4"
+          src={avatar}
           alt="Loading..."
         />
         <Link
-          href={`/product/${prop.productId}`}
+          href={`/product/${id}`}
           className="text-[14px] mr-2 text-ellipsis line-clamp-2 text-left"
         >
-          {prop.productName}
+          {name}
         </Link>
       </div>
 
-      <span className="text-[14px] w-[20%]">{FormatMoney(prop.price)}</span>
+      <span className="text-[14px] w-[20%]">{FormatMoney(price)}</span>
 
       <div className="flex items-center justify-center">
         <button
           className="px-2 py-1 border border-[#b6caf2] rounded-l-lg"
-          onClick={(e) => handleDecrease()}
+          onClick={(e) => {
+            if (+currentQuantity <= 1) {
+              Toast("warning", "Phải có tối thiểu 01 sản phẩm", 3000);
+              return;
+            }
+            setCurrentQuantity(+currentQuantity - 1 + "");
+            dispatch(changeQuantity({ productId: id, iSincrease: false }));
+          }}
         >
           -
         </button>
@@ -164,32 +95,69 @@ function Cart(props: PropsCartInterface) {
         <input
           className="px-3 py-1 border-t border-b border-[#b6caf2] text-center w-[20%] outline-none"
           type="text"
-          value={quantity}
-          onChange={(e) => setQuantity(parseInt(e.target.value))}
+          value={currentQuantity}
+          onChange={(e) => {
+            if (+e.target.value > quantityInStock) {
+              Toast(
+                "warning",
+                `Chỉ còn ${quantityInStock} sản phẩm trong kho`,
+                3000
+              );
+              return;
+            }
+            setCurrentQuantity(e.target.value);
+          }}
+          onBlur={(e) => {
+            if (e.target.value == "") {
+              setCurrentQuantity("1");
+              return;
+            }
+            dispatch(
+              changeQuantityType({ productId: id, quantity: +currentQuantity })
+            );
+          }}
         />
 
         <button
           className="px-2 py-1 border border-[#b6caf2] rounded-r-lg"
-          onClick={() => handleIncrease()}
+          onClick={(e) => {
+            if (+currentQuantity >= quantityInStock) {
+              Toast(
+                "warning",
+                `Chỉ còn ${quantityInStock} sản phẩm trong kho`,
+                3000
+              );
+              return;
+            }
+            setCurrentQuantity(+currentQuantity + 1 + "");
+            dispatch(changeQuantity({ productId: id, iSincrease: true }));
+          }}
         >
           +
         </button>
       </div>
 
       <span className="text-[14px] w-[20%]">
-        {FormatMoney(prop.price * quantity)}
+        {FormatMoney(price * quantity)}
       </span>
 
       <div className="flex flex-col items-center w-[15%]">
         <span
-          className="text-[14px] hover:text-[#648fe3] cursor-pointer hover:font-bold"
-          onClick={() => deleteProductInCartLocal()}
+          className="text-[14px] text-red-500 hover:text-[#648fe3] cursor-pointer hover:font-bold"
+          onClick={(e) => setIsShow(true)}
         >
           Xóa
         </span>
-        <span className="text-[14px] max-w-[70%] text-[#648fe3] cursor-pointer">
-          Tìm sản phẩm tương tự
-        </span>
+        <Modal
+          isShow={isShow}
+          setIsShow={(data: any) => setIsShow(data)}
+          confirm={() => ConfirmDel(id, dispatch)}
+          title="Xoá sản phẩm"
+        >
+          <p className="my-4 text-blueGray-500 text-lg leading-relaxed">
+            Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?
+          </p>
+        </Modal>
       </div>
     </div>
   );

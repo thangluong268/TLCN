@@ -49,11 +49,11 @@ function ListProductHomePage(props: any) {
         buttonLeft={true}
       >
         {listHighLight
-          ? listHighLight[check]?.map((item: any) => {
-              return <CardProduct data={item} />;
+          ? listHighLight[check]?.map((item: any, index: number) => {
+              return <CardProduct key={index} data={item} />;
             })
-          : listProduct.map((item: any) => {
-              return <CardProduct data={item} />;
+          : listProduct.map((item: any, index: number) => {
+              return <CardProduct key={index} data={item} />;
             })}
       </Slick>
     </div>

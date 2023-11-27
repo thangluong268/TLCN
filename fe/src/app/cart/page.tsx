@@ -1,132 +1,39 @@
 "use client";
 import Cart from "@/components/Cart";
 import FrameCart from "@/components/FrameCart";
-import { APIGetAllCart } from "@/services/Cart";
-import { CartInterface } from "@/types/Cart";
-import Toast from "@/utils/Toast";
+import { clickAll } from "@/redux/features/cart/cartpopup-slice";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import FormatMoney from "@/utils/FormatMoney";
+import { stat } from "fs";
 import React from "react";
 import { FaCartPlus } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 function CartPage() {
-  const [dataCart, setDataCart] = React.useState<CartInterface[]>([]);
-  const [indexDel, setIndexDel] = React.useState<string | null>(null);
-  const [numberOrder, setNumberOrder] = React.useState<number>(0);
-  const [dataOrder, setDataOrder] = React.useState<any[]>([]);
-
+  const dispatch = useDispatch<AppDispatch>();
+  const dataCarts = useAppSelector((state) => state.cartPopupReducer.items);
+  const totalCart = useAppSelector((state) => state.cartPopupReducer.totalCart);
   React.useEffect(() => {
-    if (localStorage.getItem("cart")) {
-      setDataCart(JSON.parse(localStorage.getItem("cart") || "{}"));
-      return;
-    }
-
-    const fetchCart = async () => {
-      const res = await APIGetAllCart();
-      if (res.status !== 200 && res.status !== 201) {
-        Toast("error", res.message, 5000);
-        return;
-      }
-      setDataCart(res.metadata.data);
-      localStorage.setItem("cart", JSON.stringify(res.metadata.data));
-    };
-    fetchCart();
+    localStorage.removeItem("listProductIdChecked");
   }, []);
-
-  const handleDelete = (index: string) => {
-    setIndexDel(index);
-  };
-
-  const isCheckedCartAll = (e: any) => {
-    document
-      .querySelectorAll('[class*="checkbox-store-"]')
-      .forEach((item: any) => {
-        if (e.target.checked) {
-          item.checked = true;
-        } else {
-          item.checked = false;
-        }
-      });
-    document
-      .querySelectorAll('[class*="checkbox-item-"]')
-      .forEach((item: any) => {
-        if (e.target.checked) {
-          item.checked = true;
-        } else {
-          item.checked = false;
-        }
-      });
-  };
-
-  const countOrder = (orders: any[]): number => {
-    var count = 0;
-    orders.forEach((item: any) => {
-      count += item.listProducts.length;
-    });
-    return count;
-  };
-
-  const passData = () => {
-    const data = document.querySelectorAll('[class*="store-parent-"]');
-    var arr: any = [];
-    data.forEach((item: any) => {
-      var temp: { idStore: string; listProducts: string[] } = {
-        idStore: "",
-        listProducts: [],
-      };
-
-      temp = {
-        idStore: item.querySelector('[class*="checkbox-store-"]')?.value,
-        listProducts: [],
-      };
-      var listItem = item.querySelectorAll('[class*="checkbox-item-"]');
-      listItem.forEach((item: any) => {
-        if (item.checked) {
-          temp.listProducts.push(item.value);
-        }
-      });
-      arr.push(temp);
-    });
-
-    setNumberOrder(countOrder(arr));
-
-    localStorage.setItem("order", JSON.stringify(arr));
-  };
-
-  React.useEffect(() => {
-    const data = document.querySelectorAll('[class*="store-parent-"]');
-    var arr: any = [];
-    data.forEach((item: any) => {
-      var temp: { idStore: string; listProducts: string[] } = {
-        idStore: "",
-        listProducts: [],
-      };
-
-      temp = {
-        idStore: item.querySelector('[class*="checkbox-store-"]')?.value,
-        listProducts: [],
-      };
-      var listItem = item.querySelectorAll('[class*="checkbox-item-"]');
-      listItem.forEach((item: any) => {
-        if (item.checked) {
-          temp.listProducts.push(item.value);
-        }
-      });
-      arr.push(temp);
-    });
-
-    setDataOrder(arr);
-    setNumberOrder(countOrder(arr));
-  }, []);
+  const totalChecked = useAppSelector(
+    (state) => state.cartPopupReducer.totalChecked
+  );
+  const totalMoney = useAppSelector(
+    (state) => state.cartPopupReducer.totalMoney
+  );
 
   return (
     <div className="min-h-screen px-[10%]">
-      {dataCart.length > 0 ? (
+      {totalCart > 0 ? (
         <>
-          <div className="flex items-center p-10 mt-[2%] rounded-lg bg-white text-center font-bold text-sm">
+          <div className="flex items-center px-8 py-5 mt-[2%] rounded-lg bg-white text-center font-bold text-sm">
             <div className="flex items-center w-[35%] mr-[5%]">
               <input
                 className="w-4 h-5 border-2 border-slate-400 rounded-full mr-[4%] checkbox-cart-all"
                 type="checkbox"
-                onChange={(e) => isCheckedCartAll(e)}
+                checked={dataCarts.isCheckAll}
+                onChange={(e) => dispatch(clickAll(e.target.checked))}
               ></input>
               <span className="text-left"> Sản Phẩm</span>
             </div>
@@ -136,24 +43,20 @@ function CartPage() {
             <span className="w-[15%]"> Thao Tác </span>
           </div>
 
-          {dataCart.map((data) => (
-            <FrameCart props={data}>
-              {data.listProducts.map((item, index) => (
-                <div
-                  className={`${
-                    indexDel === `${data._id}-${index}` ? "hidden" : ""
-                  }`}
-                >
-                  <Cart
-                    prop={item}
-                    idStore={data._id}
-                    index={index}
-                    handleDelete={(res: string) => handleDelete(res)}
-                  />
-                </div>
-              ))}
-            </FrameCart>
-          ))}
+          {dataCarts.store?.length > 0 &&
+            dataCarts.store.map((data, i) => (
+              <FrameCart
+                storeId={data.id}
+                storeName={data.name}
+                storeAvatar={data.avatar}
+                isChecked={dataCarts.store[i]?.isChecked}
+                key={i}
+              >
+                {data.product.map((item, index) => (
+                  <Cart key={index} data={item} />
+                ))}
+              </FrameCart>
+            ))}
         </>
       ) : (
         <div className="flex justify-center items-center hover:bg-[#c1d2f6] p-2 rounded-lg">
@@ -172,23 +75,25 @@ function CartPage() {
           </span>
         </div>
 
-        <div className="flex items-center justify-between mx-[2%]">
-          <div className="flex items-center">
+        <div className="flex items-center justify-between px-4">
+          <div className="flex items-center min-w-[200px]">
             <input
-              className="w-4 h-5 border-2 border-slate-400 rounded-full mr-[2%] checkbox-cart-all min-w-[30px]"
+              className="w-4 h-5 border-2 border-slate-400 rounded-full mr-[6%]"
               type="checkbox"
-              onChange={(e) => isCheckedCartAll(e)}
+              checked={dataCarts.isCheckAll}
+              onChange={(e) => dispatch(clickAll(e.target.checked))}
             ></input>
-            <span className="text-[16px] min-w-[100%]">Chọn Tất Cả</span>
+            <span className="text-[16px] ">Chọn Tất Cả</span>
           </div>
 
           <p className="text-[16px] mr-[-25%]">
-            Tổng thanh toán ({numberOrder} Sản Phẩm): <span>0đ</span>
+            Tổng thanh toán ({totalChecked} Sản Phẩm):{" "}
+            <span>{FormatMoney(totalMoney)}</span>
           </p>
 
           <button
             className="w-[15%] h-[10%] bg-[#648fe3] rounded-lg p-2"
-            onClick={(e) => passData()}
+            onClick={(e) => (window.location.href = "/payment")}
           >
             Đặt Hàng
           </button>

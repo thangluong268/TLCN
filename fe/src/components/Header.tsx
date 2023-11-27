@@ -16,109 +16,78 @@ import {
 import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
 import { NotiData } from "@/types/Notification";
-import { APIGetAllCart, APIGetAllCartPaging } from "@/services/Cart";
-import { CartData } from "@/types/Cart";
+import { APIGetAllCart } from "@/services/Cart";
+import { Cart, Order } from "@/types/Cart";
 import Toast from "@/utils/Toast";
-import FrameCartPreview from "./FrameCartPreview";
-import CartPreview from "./CartPreview";
 import { APIGetMyStore } from "@/services/Store";
+import { setCartPopUp } from "@/redux/features/cart/cartpopup-slice";
+import { useDispatch } from "react-redux";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import FormatMoney from "@/utils/FormatMoney";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-  const [isCartOpen, setIsCartOpen] = React.useState(false);
-  const [isNotiOpen, setIsNotiOpen] = React.useState(false);
   const [countNewNoti, setCountNewNoti] = React.useState(0);
+
   const [user, setUser] = React.useState<UserInterface>();
-  const [dataNoti, setDataNoti] = React.useState<NotiData>({
-    total: 0,
-    notifications: [],
-  });
-  const [dataCart, setDataCart] = React.useState<CartData>({
-    total: 0,
-    carts: [],
-  });
-
-  const textViewAllCart = "<<Xem tất cả>>";
-
-  const profileToggleDropdown = () => {
-    setIsProfileOpen(!isProfileOpen);
-  };
-
-  React.useEffect(() => {
-    const fetchAllCart = async () => {
-      const res = await APIGetAllCart();
-      if (res.status == 200 || res.status == 201) {
-        var arrIdProduct = [] as any;
-        res.metadata.data.map((item: any) => {
-          item.listProducts.map((product: any) => {
-            arrIdProduct.push(product.productId);
-          });
-        });
-        localStorage.setItem("arrIdProduct", JSON.stringify(arrIdProduct));
-      }
-    };
-    fetchAllCart();
-  }, []);
-
-  const CartToggleDropdown = () => {
-    setIsCartOpen(!isCartOpen);
-    setIsProfileOpen(false);
-    setIsNotiOpen(false);
-  };
-
-  const NotiToggleDropdown = () => {
-    if (!isNotiOpen && user) {
-      dataNoti.notifications.map(async (item: any) => {
-        if (!item.status) {
-          await APIUpdateNotification(item._id, {
-            content: item.content,
-            status: true,
-            sub: item.sub,
-          });
-        }
-      });
-    }
-    setCountNewNoti(0);
-    setIsNotiOpen(!isNotiOpen);
-    setIsProfileOpen(false);
-    setIsCartOpen(false);
-  };
+  const [isShowCart, setIsShowCart] = React.useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const dataCarts = useAppSelector((state) => state.cartPopupReducer.items);
+  const totalCart = useAppSelector((state) => state.cartPopupReducer.totalCart);
 
   React.useEffect(() => {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
       : null;
-    if (user) {
-      const fetchNoti = async () => {
-        const res = await APIGetAllNotification({ page: 1, limit: 5 });
-        if (res.status !== 200 && res.status !== 201) {
-          Toast("error", res.message, 5000);
-          return;
-        }
-        setCountNewNoti(
-          res.metadata.data.notifications.filter(
-            (item: any) => item.status === false
-          ).length
-        );
-        setDataNoti(res.metadata.data);
-      };
-      const fetchCart = async () => {
-        const res = await APIGetAllCartPaging({
-          page: 1,
-          limit: 5,
-          search: "",
-        });
-        if (res.status !== 200 && res.status !== 201) {
-          Toast("error", res.message, 5000);
-          return;
-        }
-        setDataCart(res.metadata.data);
-      };
-      fetchCart();
-      fetchNoti();
-    }
     setUser(user);
+    const fetchAllCart = async () => {
+      const res = await APIGetAllCart();
+      var total = 0;
+      if (res.status == 200 || res.status == 201) {
+        const carts: Cart = {
+          isCheckAll: false,
+          store: res.metadata.data.map((item: any) => {
+            return {
+              id: item.storeId,
+              name: item.storeName,
+              isChecked: false,
+              avatar: item.storeAvatar,
+              product: item.listProducts.map((product: any) => {
+                total += 1;
+                return {
+                  id: product.productId,
+                  name: product.productName,
+                  avatar: product.avatar[0],
+                  type: product.type,
+                  price: product.price,
+                  quantity: product.quantity,
+                  quantityInStock: product.quantityInStock,
+                  isChecked: false,
+                };
+              }),
+            };
+          }),
+        };
+        dispatch(setCartPopUp(carts));
+      }
+    };
+    if (user) {
+      fetchAllCart();
+    }
   }, []);
+
+  React.useEffect(() => {
+    if (window.location.pathname == "/cart") {
+      setIsShowCart(false);
+    } else {
+      setIsShowCart(true);
+    }
+  }, []);
+
+  const profileToggleDropdown = () => {
+    setIsProfileOpen(!isProfileOpen);
+  };
+
   const OpenStore = async () => {
     const store = await APIGetMyStore();
     if (store.status == 200 || store.status == 201) {
@@ -151,7 +120,7 @@ function Header() {
 
         <div className="flex items-center">
           <div
-            onClick={(e) => OpenStore()}
+            onClick={() => OpenStore()}
             className="flex flex-col items-center"
           >
             <span className="text-[14px]">Kênh người bán</span>
@@ -160,52 +129,73 @@ function Header() {
 
           <div className="border-r border-gray-400 mx-10 h-6"></div>
 
-          <div className="flex flex-col justify-center items-center mr-10">
-            <FaCartPlus
-              className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]"
-              onClick={CartToggleDropdown}
-            />
-            {isCartOpen && (
-              <FramePopup total={dataCart.total} component="cart">
-                <>
-                  <Link
-                    className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1 text-[12px] text-blue-500 font-bold py-2"
-                    href="/cart"
-                  >
-                    {textViewAllCart}
-                  </Link>
-                  {dataCart.carts.length > 0 ? (
-                    <>
-                      {dataCart.carts.map((data) => (
-                        <FrameCartPreview props={data}>
-                          {data.listProducts.map((item) => (
-                            <>
-                              <CartPreview props={item} />
-                            </>
-                          ))}
-                        </FrameCartPreview>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
-                      <span className="text-[14px] cursor-default">
-                        Không có sản phẩm nào
-                      </span>
+          <div className="group py-6 flex flex-col justify-center items-center mr-10">
+            <FaCartPlus className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b] " />
+            {dataCarts?.store?.length! > 0 && isShowCart && (
+              <>
+                <div className="group-hover:block group-hover:shadow-inner hidden">
+                  <FramePopup>
+                    <div
+                      className="text-center rounded-lg cursor-pointer hover:bg-[#c1d2f6] px-1  text-blue-500 font-bold py-2"
+                      onClick={() => (window.location.href = "/cart")}
+                    >
+                      Xem tất cả
                     </div>
-                  )}
-                </>
-              </FramePopup>
-            )}
+                    <>
+                      {dataCarts?.store.map((store, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className="flex flex-col items-start mb-2 border-b-2 border-[#90b0f4] max-w-full"
+                          >
+                            <div>
+                              <Link
+                                href={`/store/user/${store.id}`}
+                                className="flex items-center hover:bg-[#c1d2f6] p-2 rounded-lg"
+                              >
+                                <span className="text-[14px] font-bold p-2">
+                                  {store.name}
+                                </span>
+                              </Link>
+                            </div>
+                            {store.product.length > 0 &&
+                              store.product.map((product, index) => (
+                                <Link
+                                  key={index}
+                                  href={`/product/${product.id}`}
+                                >
+                                  <div className="flex justify-between products-center w-[500px] cursor-pointer hover:bg-[#c1d2f6] p-2 rounded-lg">
+                                    <img
+                                      className="rounded-full w-[54px] h-[54px] mr-2"
+                                      src={product.avatar}
+                                      alt="Loading..."
+                                    />
+                                    <span className="text-[12px]">
+                                      x{product.quantity}
+                                    </span>
+                                    <p className="text-[12px] mr-2 text-ellipsis line-clamp-1 overflow-hidden max-w-[50%]">
+                                      {product.name}
+                                    </p>
+                                    <span className="text-[12px]">
+                                      {FormatMoney(product.price)}
+                                    </span>
+                                  </div>
+                                </Link>
+                              ))}
+                          </div>
+                        );
+                      })}
+                    </>
+                  </FramePopup>
+                </div>
 
-            <div
-              className={`flex justify-center items-center w-[20px] h-[20px] ${
-                dataCart.total && "bg-[#6499FF]"
-              } rounded-full absolute mt-[-24px] ml-[30px]`}
-            >
-              <span className="text-[12px] text-white" id="dataCartTotal">
-                {dataCart.total || ""}
-              </span>
-            </div>
+                <div
+                  className={`flex justify-center items-center w-[20px] h-[20px] ${"bg-[#6499FF]"} rounded-full absolute mt-[-24px] ml-[30px]`}
+                >
+                  <span className="text-[12px] text-white">{totalCart}</span>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col justify-center items-center mr-10">
@@ -216,11 +206,8 @@ function Header() {
           </div>
 
           <div className="flex flex-col justify-center items-center">
-            <FaBell
-              className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]"
-              onClick={NotiToggleDropdown}
-            />
-            {isNotiOpen && user && (
+            <FaBell className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
+            {/* {isNotiOpen && user && (
               <FramePopup total={dataNoti.total} component="notification">
                 {dataNoti.notifications.length > 0 ? (
                   <>
@@ -236,7 +223,7 @@ function Header() {
                   </div>
                 )}
               </FramePopup>
-            )}
+            )} */}
             {countNewNoti > 0 && (
               <div className="flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]">
                 <span className="text-[12px] text-white">{countNewNoti}</span>

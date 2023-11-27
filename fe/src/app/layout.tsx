@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Loading from "@/components/Loading";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ReduxProvider from "@/redux/provider";
 
 // const lora = Lora({
 //   weight: ["400", "500", "600", "700"],
@@ -36,9 +37,11 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${lora.className} bg-[#EFEFEF]`}>
         <AuthContextProvider>
-          <Header />
-          {children}
-          <Footer />
+          <ReduxProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ReduxProvider>
           <ToastContainer />
           <Loading />
         </AuthContextProvider>

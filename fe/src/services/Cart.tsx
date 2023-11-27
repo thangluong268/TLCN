@@ -1,4 +1,3 @@
-import { CartData, CartInterface } from "@/types/Cart";
 import { QueryThreeElement } from "@/types/Query";
 import GetHeaders from "@/utils/GetHeaders";
 import Toast from "@/utils/Toast";
