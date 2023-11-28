@@ -123,7 +123,7 @@ function ForgetPassword() {
         forgetForm.password === "" ||
         forgetForm.repassword === ""
       ) {
-        Toast("warning", "Vui lòng nhập đầy đủ thông tin", 5000);
+        Toast("warning", "Vui lòng nhập chính xác thông tin", 5000);
         return;
       }
       const result = await APIForgetPassword(
@@ -177,11 +177,11 @@ function ForgetPassword() {
                       );
                       if (result !== "") {
                         document
-                          .getElementById(`formSignup-${item.name}`)
+                          .getElementById(`formForgetPassword-${item.name}`)
                           ?.classList.add("border-red-500");
                       } else {
                         document
-                          .getElementById(`formSignup-${item.name}`)
+                          .getElementById(`formForgetPassword-${item.name}`)
                           ?.classList.remove("border-red-500");
                       }
                       document.getElementById(

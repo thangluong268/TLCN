@@ -1,0 +1,67 @@
+const secretKey = "ZZDXIPAWMRHDXDCKMEDWWAWMXAYMRNLZ"; // Thay thế bằng khóa bảo mật thực của bạn
+      const vnpCommand = "pay";
+      const vnpCreateDate = new Date()
+        .toISOString()
+        .replace(/[^0-9]/g, "")
+        .slice(0, 14);
+      const vnpCurrCode = "VND";
+
+      // Sử dụng fetch để lấy địa chỉ IP
+      fetch("https://api.ipify.org?format=json")
+        .then((res) => res.json())
+        .then((data) => {
+          const vnpIpAddr = data.ip;
+          const vnpLocale = "vn";
+          const vnpOrderInfo = "Test";
+          const vnpOrderType = "topupup";
+          const vnpReturnUrl = "https://domainmerchant.vn/ReturnUrl";
+          const vnpTmnCode = "CTTVNP01";
+          const vnpTxnRef = "163307";
+          const vnpVersion = "2.1.0";
+          const vnpParams = {
+            vnp_Version: vnpVersion,
+            vnp_Command: vnpCommand,
+            vnp_TmnCode: vnpTmnCode,
+            vnp_Locale: vnpLocale,
+            vnp_CurrCode: vnpCurrCode,
+            vnp_TxnRef: vnpTxnRef,
+            vnp_OrderInfo: vnpOrderInfo,
+            vnp_OrderType: vnpOrderType,
+            vnp_Amount: 8888 * 100,
+            vnp_ReturnUrl: vnpReturnUrl,
+            vnp_IpAddr: vnpIpAddr,
+            vnp_CreateDate: vnpCreateDate,
+            vnp_SecureHash: "ZZDXIPAWMRHDXDCKMEDWWAWMXAYMRNLZ",
+          } as any;
+          const sortedParams = Object.keys(vnpParams)
+            .sort()
+            .reduce((acc: any, key: any) => {
+              acc[key] = vnpParams[key];
+              return acc;
+            }, {});
+          const paramsString = Object.entries(sortedParams)
+            .map(([key, value]) => `${key}=${value}`)
+            .join("&");
+          const dataToHash = `${paramsString}&${secretKey}`;
+          const secureHash = CryptoJS.HmacSHA512(
+            dataToHash,
+            secretKey
+          ).toString(CryptoJS.enc.Hex);
+
+          vnpParams["vnp_SecureHash"] = secureHash;
+
+          // Concatenate parameters into the URL
+          const vnpUrl =
+            "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?" +
+            new URLSearchParams(vnpParams).toString();
+
+          console.log(vnpUrl);
+          // https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=1806000&vnp_Command=pay&vnp_CreateDate=20210801153333&vnp_CurrCode=VND&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+don+hang+%3A5&vnp_OrderType=other&vnp_ReturnUrl=https%3A%2F%2Fdomainmerchant.vn%2FReturnUrl&vnp_TmnCode=DEMOV210&vnp_TxnRef=5&vnp_Version=2.1.0&vnp_SecureHash=3e0d61a0c0534b2e36680b3f7277743e8784cc4e1d68fa7d276e79c23be7d6318d338b477910a27992f5057bb1582bd44bd82ae8009ffaf6d141219218625c42
+          // const url = `${vnpUrl}?vnp_Amount=${
+          //   data?.reduce((total, item) => total + item.totalPrice, 0) +
+          //   deliveryMethod?.reduce(
+          //     (total, item) => (item.checked ? total + item.price : total),
+          //     0
+          //   )
+          // }&vnp_Command=${vnpCommand}&vnp_CreateDate=${vnpCreateDate}&vnp_CurrCode=${vnpCurrCode}&vnp_IpAddr=${vnpIpAddr}&vnp_Locale=${vnpLocale}&vnp_OrderInfo=${vnpOrderInfo}&vnp_OrderType=${vnpOrderType}&vnp_ReturnUrl=${vnpReturnUrl}&vnp_TmnCode=${vnpTmnCode}&vnp_TxnRef=${vnpTxnRef}&vnp_Version=${vnpVersion}&vnp_SecureHash=${vnp_SecureHash}`;
+        });
