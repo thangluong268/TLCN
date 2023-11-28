@@ -1,7 +1,10 @@
 "use client";
 import Input from "@/components/Input";
 import Modal from "@/components/Modal";
+import Paypal from "@/components/Paypal";
 import { useAppSelector } from "@/redux/store";
+import { APICreateBill } from "@/services/Bill";
+import { APIRemoveProductInCart } from "@/services/Cart";
 import { APIUpdateUser } from "@/services/User";
 import CheckValidInput from "@/utils/CheckValidInput";
 import FormatMoney from "@/utils/FormatMoney";
@@ -28,12 +31,14 @@ function Payment() {
   const [deliveryMethod, setDeliveryMethod] = React.useState([
     {
       name: "Giao hàng nhanh",
+      value: "Express",
       icon: <FaTruckFast className="w-8 h-8 mr-2" />,
       checked: true,
       price: 30000,
     },
     {
       name: "Giao hàng tiết kiệm",
+      value: "Economical",
       icon: <FaTruckField className="w-8 h-8 mr-2" />,
       checked: false,
       price: 15000,
@@ -42,6 +47,7 @@ function Payment() {
   const [paymentMethod, setPaymentMethod] = React.useState([
     {
       name: "Thanh toán tiền mặt khi nhận hàng",
+      value: "CashOnDelivery",
       icon: (
         <img
           src="https://salt.tikicdn.com/ts/upload/92/b2/78/1b3b9cda5208b323eb9ec56b84c7eb87.png"
@@ -52,7 +58,20 @@ function Payment() {
       checked: true,
     },
     {
+      name: "Thanh toán bằng paypal",
+      value: "Paypal",
+      icon: (
+        <img
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADpklEQVR4Ae2XA7D0VhSAv3uD9TNq27Zt27Ztux1PbQ1qd9RhbVvP9nqTe4pUedrU+r+ZZXC+HARKRPg7mSOgiYQhOgakDHi/PQMiwi677MLXX38NCLRstC8Nq56CqVQRVjn8fCeFntcY+/Apsp99AhqUBuD+++9nmWWW4ZfYwLQCb7/9NoEAsOC6x5PsWgVToSpKgUrtiax8KYOl6xh85gIIyGazANUFAOLxOAA46SSZpnmwNYhNdJwEC251PjE9TtdT1wForX9DDzj13wZPzoUYfh0CfgEa1jgTu7b+tzdhrGkRtOOAMDXVevYXAnayCbducWbAphrx5qVAEUZBOQd+hRkIBCwH7CSU8jkAUL8hA27j0iDh4OKjCsOo4uhMr2D5RB+qPAS7nbQfbkJjKtEzAAJBCZbEmFB8fA9EQFXx9zzIxIWdjzmLVKyM710YOQNBUDuOW7swGEIGxqN6UwYCssTigleENXY4nvmWaowugAGdmRs7NXdYAJRfoSq+DzUZYZUVFZUy2G49qdoFowuIAbdpYbQbQ4QQpgIoZs1exUM231hoblL4PiAgmF+XgXjrkqCmihkP1AyBSyWQb9l2C8Naq2vKZUBBpTxOMdtN9CbUEGuePAFB8EIh+PylhdaQTAiLLyay/lqw6CJBcBGwXej69F36cv3MWx9BQAQsF2KNS4UmAAGNsOaqQioJRkArI4mEor5W0doCTY0aRZAJCHAT8Pqz97LxDkTMgAEr5eLULRJqwLIHyyzsy26b2/gGEAANBNKeD55HqGfiSej5/G2eu/Nezt0zooAYcNKteMl5QMKZaWkQPA9KZWZFW5BIw3DPF9xw9F7kxwpYDtEz4DYuTCmWCB2NVlCXCUQmn3ZjSVAqeInwbcBBXnr0QR666hK6P+8FAImcgWACsgoQgODDsQ11aYUx4eBeaYTXn76NYm6cwY5xRvs/5bPX3qT3y37CRBRQCuItS0+SCro8nVSYSTV+4Zn7uPHYM/64e0LlQqx5WcQAKngZgUwK4jEVKoGyoO399wD+QAFLYSVaQIOygpdoqE2DY+uQgPGg54tP+Y3YzHQiaLt/d9q+nAulBIK/WPm4g7Dcw6Dyc/2LuQJ9bV//wQIg2bbPyX/7+iXNTUdhACHAsmB0aIChzp4/XADtEEZBTfMCGB8UAbYDnR+/QDFb/sOfjD7++GOKxWJ4Mprmn59kTSNifj7ZDHV9xsRwjggsscQSJJPJOc+G/yyBbwD59pkN5OE4OwAAAABJRU5ErkJggg=="
+          alt=""
+          className="w-8 h-8 mr-2 "
+        />
+      ),
+      checked: false,
+    },
+    {
       name: "Thanh toán bằng ví MoMo",
+      value: "MoMo",
       icon: (
         <img
           src="https://salt.tikicdn.com/ts/upload/ce/f6/e8/ea880ef285856f744e3ffb5d282d4b2d.jpg"
@@ -64,6 +83,7 @@ function Payment() {
     },
     {
       name: "Thanh toán bằng VNPAY",
+      value: "VNPAY",
       icon: (
         <img
           src="https://salt.tikicdn.com/ts/upload/77/6a/df/a35cb9c62b9215dbc6d334a77cda4327.png"
@@ -79,6 +99,11 @@ function Payment() {
     receiverPhone: "",
     address: "",
   });
+  const [giveInfo, setGiveInfo] = React.useState({
+    senderName: "",
+    wish: "",
+  });
+  const [showPaypal, setShowPaypal] = React.useState("hidden");
 
   const store = useAppSelector((state) => state.cartPopupReducer.items);
   React.useEffect(() => {
@@ -104,6 +129,7 @@ function Payment() {
             obj.totalPrice += product.price * item.quantity;
           }
         });
+
         obj.products.length > 0 && listProducts.push(obj);
       });
     });
@@ -191,6 +217,114 @@ function Payment() {
       userLocal.providerData[0].address
     );
   };
+
+  const HandleOrder = async () => {
+    if (isGift) {
+      if (
+        giveInfo.senderName === "" ||
+        giveInfo.wish === "" ||
+        receiverInfo.receiverName === ""
+      ) {
+        Toast("error", "Vui lòng nhập đầy đủ thông tin", 2000);
+        return;
+      }
+    }
+    if (paymentMethod[0].checked) {
+      CraeteBill();
+    } else if (paymentMethod[1].checked) {
+      setShowPaypal("");
+    } else if (paymentMethod[2].checked) {
+      Toast("", "Chức năng đang phát triển", 2000);
+    } else {
+      Toast("", "Chức năng đang phát triển", 2000);
+    }
+  };
+
+  const CraeteBill = async () => {
+    // {
+    //   "data": [
+    //     {
+    //       "storeId": "string",
+    //       "listProducts": [
+    //         {
+    //           "productId": "string",
+    //           "quantity": 0,
+    //           "type": "string"
+    //         }
+    //       ],
+    //       "notes": "string",
+    //       "totalPrice": 0
+    //     }
+    //   ],
+    //   "deliveryMethod": "string",
+    //   "paymentMethod": "string",
+    //   "receiverInfo": {
+    //     "fullName": "string",
+    //     "phoneNumber": "string",
+    //     "address": "string"
+    //   },
+    //   "giveInfo": {
+    //     "senderName": "string",
+    //     "wish": "string"
+    //   },
+    //   "deliveryFee": 0
+    // }
+    const listProducts = [] as any[];
+    data?.forEach((item) => {
+      const obj = {
+        storeId: item.storeId,
+        listProducts: [] as any[],
+        notes: item.notes,
+        totalPrice: item.totalPrice,
+      };
+      item.products.forEach((product: any) => {
+        obj.listProducts.push({
+          productId: product.id,
+          quantity: product.quantity,
+          type: product.type,
+        });
+      });
+      listProducts.push(obj);
+    });
+    const obj = {
+      data: listProducts,
+      deliveryMethod: deliveryMethod.find((item) => item.checked)?.value,
+      paymentMethod: paymentMethod.find((item) => item.checked)?.value,
+      receiverInfo: {
+        fullName: receiverInfo.receiverName,
+        phoneNumber: receiverInfo.receiverPhone,
+        address: receiverInfo.address,
+      },
+      giveInfo: isGift && {
+        senderName: giveInfo.senderName,
+        wish: giveInfo.wish,
+      },
+      deliveryFee:
+        deliveryMethod.find((item) => item.checked)?.price! * data?.length,
+    };
+    APICreateBill(obj);
+    // Cập nhật lại cart trong database
+    const listProductIdChecked = JSON.parse(
+      localStorage.getItem("listProductIdChecked") || "[]"
+    );
+    listProductIdChecked.forEach((item: any) => {
+      store?.store?.forEach((store: any) => {
+        store.product?.forEach((product: any) => {
+          if (product.id === item.id) {
+            APIRemoveProductInCart(product.id);
+          }
+        });
+      });
+    });
+    // remove cart and listProductIdChecked
+    localStorage.removeItem("cart");
+    localStorage.removeItem("listProductIdChecked");
+    Toast("success", "Đặt hàng thành công", 2000);
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen flex px-[160px] my-4">
       <div className="w-[70%] mr-4 rounded-sm">
@@ -291,6 +425,9 @@ function Payment() {
                   });
                   newData[index].checked = true;
                   setPaymentMethod(newData);
+                  if (index != 1 && showPaypal == "") {
+                    setShowPaypal("hidden");
+                  }
                 }}
               />
               {item.icon}
@@ -461,18 +598,28 @@ function Payment() {
             <Input label="Tên người gửi">
               <input
                 type="text"
+                value={giveInfo.senderName}
+                onChange={(e) => {
+                  setGiveInfo({ ...giveInfo, senderName: e.target.value });
+                }}
                 className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
               />
             </Input>
             <Input label="Tên người nhận">
               <input
                 type="text"
+                value={receiverInfo.receiverName}
+                disabled
                 className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
               />
             </Input>
             <Input label="Lời chúc">
               <input
                 type="text"
+                value={giveInfo.wish}
+                onChange={(e) => {
+                  setGiveInfo({ ...giveInfo, wish: e.target.value });
+                }}
                 className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
               />
             </Input>
@@ -492,40 +639,44 @@ function Payment() {
           </div>
           <div className={isDetail ? "" : "hidden"}>
             <hr className="w-full my-4" />
-            <div className="flex mt-2 items-center text-center">
-              <div className="w-[10%] text-left">x1</div>
-              <div className="w-[60%] text-ellipsis line-clamp-2">
-                Hạhd dhaisidhasd iad ád ád ád ád ád ád ád ád á Hạhd dhaisidhasd
-                iad ád ád ád ád ád ád ád ád á
-              </div>
-              <div className="w-[30%] text-right">55.000 đ</div>
-            </div>
-            <div className="flex mt-2 items-center text-center">
-              <div className="w-[10%] text-left">x1</div>
-              <div className="w-[60%] text-ellipsis line-clamp-2">
-                Hạhd dhaisidhasd iad ád ád ád ád ád ád ád ád á Hạhd dhaisidhasd
-                iad ád ád ád ád ád ád ád ád á
-              </div>
-              <div className="w-[30%] text-right">55.000 đ</div>
-            </div>
-            <div className="flex mt-2 items-center text-center">
-              <div className="w-[10%] text-left">x1</div>
-              <div className="w-[60%] text-ellipsis line-clamp-2">
-                Hạhd dhaisidhasd iad ád ád ád ád ád ád ád ád á Hạhd dhaisidhasd
-                iad ád ád ád ád ád ád ád ád á
-              </div>
-              <div className="w-[30%] text-right">55.000 đ</div>
-            </div>
+            {/* List product */}
+            {data?.map((item, index) =>
+              item.products?.map((product: any, index: number) => (
+                <div key={index} className="flex mt-2 items-center text-center">
+                  <div className="w-[10%] text-left">x {product.quantity}</div>
+                  <div className="w-[60%] text-ellipsis line-clamp-2">
+                    {product.name}
+                  </div>
+                  <div className="w-[30%] text-right">
+                    {FormatMoney(product.price * product.quantity)}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           <div>
             <hr className="w-full my-4" />
             <div className="flex">
               <div className="w-[70%]">Tạm tính</div>
-              <div className="w-[30%] text-right">55.000 đ</div>
+              {
+                <div className="w-[30%] text-right">
+                  {FormatMoney(
+                    data?.reduce((total, item) => total + item.totalPrice, 0)
+                  )}
+                </div>
+              }
             </div>
             <div className="flex">
               <div className="w-[70%]">Phí vận chuyển</div>
-              <div className="w-[30%] text-right">55.000 đ</div>
+              <div className="w-[30%] text-right">
+                {FormatMoney(
+                  deliveryMethod?.reduce(
+                    (total, item) =>
+                      item.checked ? total + item.price : total,
+                    0
+                  ) * data?.length
+                )}
+              </div>
             </div>
           </div>
           <div>
@@ -533,15 +684,38 @@ function Payment() {
             <div className="flex">
               <div className="w-[70%]">Tổng cộng</div>
               <div className="w-[30%] text-right text-red-500 font-bold text-lg">
-                55.000 đ
+                {FormatMoney(
+                  data?.reduce((total, item) => total + item.totalPrice, 0) +
+                    deliveryMethod?.reduce(
+                      (total, item) =>
+                        item.checked ? total + item.price : total,
+                      0
+                    )
+                )}
               </div>
             </div>
+          </div>
+          <div className={showPaypal}>
+            <hr className="w-full my-4" />
+            <Paypal
+              amount={
+                data?.reduce((total, item) => total + item.totalPrice, 0) +
+                deliveryMethod?.reduce(
+                  (total, item) => (item.checked ? total + item.price : total),
+                  0
+                )
+              }
+              callback={() => CraeteBill()}
+            />
           </div>
           <div>
             <hr className="w-full my-4" />
             {/* Button Đặt hàng */}
             <div className="flex justify-center">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md w-full">
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
+                onClick={(e) => HandleOrder()}
+              >
                 Đặt hàng
               </button>
             </div>
