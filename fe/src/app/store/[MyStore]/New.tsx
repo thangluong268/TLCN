@@ -1,11 +1,11 @@
 import React from "react";
+
 interface NewProps {
-  title: string;
+  setActive?: any;
 }
 
 function New(props: NewProps) {
-  const { title } = props;
-  return <div>New {title}</div>;
+  return <div>New</div>;
 }
 
 export default New;

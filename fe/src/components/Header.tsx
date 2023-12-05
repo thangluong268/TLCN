@@ -24,10 +24,12 @@ import { setCartPopUp } from "@/redux/features/cart/cartpopup-slice";
 import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import FormatMoney from "@/utils/FormatMoney";
+import { UserAuth } from "@/app/authContext";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [countNewNoti, setCountNewNoti] = React.useState(0);
+  const { logOut } = UserAuth();
 
   const [user, setUser] = React.useState<UserInterface>();
   const [isShowCart, setIsShowCart] = React.useState(true);
@@ -236,7 +238,7 @@ function Header() {
           <div className="flex items-center">
             <img
               className="rounded-full w-[50px] h-[50px] cursor-pointer"
-              src={user.avatar}
+              src={user.avatar || user.photoURL}
               alt="Loading..."
               onClick={profileToggleDropdown}
             />
@@ -250,7 +252,15 @@ function Header() {
                   <Link href="/bill/user?status='Đã đặt'">Đơn mua</Link>
                 </li>
                 <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <Link href="/logout">Đăng xuất</Link>
+                  <div
+                    onClick={(e) => {
+                      logOut();
+                      localStorage.removeItem("user");
+                      window.location.href = "/login";
+                    }}
+                  >
+                    Đăng xuất
+                  </div>
                 </li>
               </ul>
             )}

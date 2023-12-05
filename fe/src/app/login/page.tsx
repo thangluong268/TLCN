@@ -26,6 +26,16 @@ function Login() {
   const { user, googleSignIn, facebookSignIn, logOut } = UserAuth();
 
   React.useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+      // Toast("success", "Đăng nhập thành công", 1000);
+      // setTimeout(() => {
+      window.location.href = "/";
+      // }, 1000);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
     const listener = (event: { code: string; preventDefault: () => void }) => {
       if (event.code === "Enter" || event.code === "NumpadEnter") {
         event.preventDefault();
@@ -37,16 +47,6 @@ function Login() {
       document.removeEventListener("keydown", listener);
     };
   }, [loginForm]);
-
-  React.useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      // Toast("success", "Đăng nhập thành công", 1000);
-      // setTimeout(() => {
-      //   window.location.href = "/";
-      // }, 1000);
-    }
-  }, [user]);
 
   const handleSignIn = async (func: () => void) => {
     try {

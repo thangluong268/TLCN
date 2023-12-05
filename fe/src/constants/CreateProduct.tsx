@@ -8,13 +8,13 @@ export const CREATEPRODUCT = [
     identify: "blank",
     label: "Tên sản phẩm",
     placeholder: "Nhập tên sản phẩm",
-    name: "name",
+    name: "productName",
   },
   {
     identify: "number",
     label: "Số lượng",
     placeholder: "Nhập số lượng",
-    name: "amount",
+    name: "quantity",
   },
   {
     identify: "number",
@@ -26,7 +26,7 @@ export const CREATEPRODUCT = [
     identify: "blank",
     label: "Từ khóa",
     placeholder: "Áo thun, cotton, hàng tặng....",
-    name: "keyword",
+    name: "list_keyword",
   },
   {
     identify: "blank",

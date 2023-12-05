@@ -1,7 +1,8 @@
 "use client";
 import Input from "@/components/Input";
 import { CREATESTORE } from "@/constants/CreateStore";
-import { APICreate, APIGetMyStore, APIUploadImage } from "@/services/Store";
+import { APICreate, APIGetMyStore } from "@/services/Store";
+import { APIUploadImage } from "@/services/UploadImage";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
 import React from "react";
@@ -14,7 +15,7 @@ function CreateStore() {
     : null;
   const [store, setStore] = React.useState({
     address:
-      user?.providerData[0].address.filter(
+      user?.providerData[0].address?.filter(
         (item: any) => item.isDefault == true
       )[0]?.name || "Cửa hàng mặc định",
     name: "",
@@ -30,7 +31,6 @@ function CreateStore() {
   React.useEffect(() => {
     const fetchData = async () => {
       const store = await APIGetMyStore();
-      console.log("Store", store);
       if (store.status == 200 || store.status == 201) {
         Toast("error", "Bạn đã có cửa hàng", 2000);
         setTimeout(() => {

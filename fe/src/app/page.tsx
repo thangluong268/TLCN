@@ -23,6 +23,7 @@ export default function Home() {
     };
     fetchData();
   }, []);
+  console.log(listProductMost);
   return (
     <main>
       <FrameMainContent>
