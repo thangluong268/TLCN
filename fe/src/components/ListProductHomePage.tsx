@@ -4,6 +4,7 @@ import CardProduct from "./CardProduct";
 
 function ListProductHomePage(props: any) {
   const { title, listHighLight, listProduct } = props;
+  console.log(listHighLight);
   const [check, setCheck] = React.useState(0);
   return (
     <div className="flex flex-col bg-white p-4 rounded-xl mb-2">

@@ -4,6 +4,7 @@ import FrameCart from "@/components/FrameCart";
 import { clickAll } from "@/redux/features/cart/cartpopup-slice";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import FormatMoney from "@/utils/FormatMoney";
+import Toast from "@/utils/Toast";
 import { stat } from "fs";
 import React from "react";
 import { FaCartPlus } from "react-icons/fa";
@@ -93,7 +94,13 @@ function CartPage() {
 
           <button
             className="w-[15%] h-[10%] bg-[#648fe3] rounded-lg p-2"
-            onClick={(e) => (window.location.href = "/payment")}
+            onClick={(e) => {
+              if (totalChecked === 0) {
+                Toast("warning", "Vui lòng chọn sản phẩm", 2000);
+              } else {
+                window.location.href = "/payment";
+              }
+            }}
           >
             Đặt Hàng
           </button>

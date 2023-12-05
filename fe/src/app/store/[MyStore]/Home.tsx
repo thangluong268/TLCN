@@ -31,7 +31,7 @@ interface ChartData {
 }
 
 interface HomeProps {
-  setActive: any;
+  setActive?: any;
 }
 
 function Home(props: HomeProps) {

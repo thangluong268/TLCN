@@ -13,6 +13,7 @@ import {
   clickItem,
   deleteProduct,
 } from "@/redux/features/cart/cartpopup-slice";
+import { APIRemoveProductInCart } from "@/services/Cart";
 interface CartProps {
   data: {
     id: string;
@@ -42,6 +43,7 @@ function Cart(props: CartProps) {
   const [currentQuantity, setCurrentQuantity] = React.useState(quantity + "");
   const ConfirmDel = (productId: string, dispatch: AppDispatch) => {
     dispatch(deleteProduct({ productId: productId }));
+    APIRemoveProductInCart(productId);
     setIsShow(false);
   };
 

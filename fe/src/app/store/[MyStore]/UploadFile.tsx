@@ -1,10 +1,11 @@
 import React from "react";
 interface UploadFileProps {
   index: number;
+  setProduct: any;
 }
 
 function UploadFile(props: UploadFileProps) {
-  const { index } = props;
+  const { index, setProduct } = props;
   return (
     <div>
       <div
@@ -39,13 +40,13 @@ function UploadFile(props: UploadFileProps) {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) {
+            setProduct(file as any);
             const reader = new FileReader();
             reader.onloadend = function () {
               const img = document.getElementById(`img-preview-${index}`);
               const symbol = document.getElementById(`symbol-upload-${index}`);
               console.log(img);
               if (img) {
-                // setStore({ ...store, img: reader.result as string });
                 img.setAttribute("src", reader.result as string);
                 img.hidden = false;
               }

@@ -585,8 +585,12 @@ function Payment() {
               onChange={(e) => {
                 setIsGift(e.target.checked);
                 let newData = [...paymentMethod];
-                newData[0].checked = false;
-                newData[1].checked = true;
+                if (e.target.checked) {
+                  newData.forEach((item) => {
+                    item.checked = false;
+                  });
+                  newData[1].checked = true;
+                }
                 setPaymentMethod(newData);
               }}
             />
