@@ -1,4 +1,4 @@
-import {  Module } from '@nestjs/common';
+import {  Module, forwardRef } from '@nestjs/common';
 import { BillService } from './bill.service';
 import { BillController } from './bill.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,6 +11,7 @@ import { StoreModule } from 'src/store/store.module';
 import { ProductModule } from 'src/product/product.module';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FirebaseModule } from 'src/firebase/firebase.module';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [
@@ -19,8 +20,9 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
     RoleModule,
     PaymentModule,
     UserModule,
-    ProductModule,
     StoreModule,
+    CartModule,
+    forwardRef(() => ProductModule),
   ],
   controllers: [BillController],
   providers: [BillService],

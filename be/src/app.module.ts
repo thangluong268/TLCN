@@ -23,6 +23,8 @@ import { NotificationModule } from './notification/notification.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { FineModule } from './fine/fine.module';
 import { CategoryModule } from './category/category.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { DatabaseModule } from './database/database.module';
 
 
 @Module({
@@ -31,7 +33,6 @@ import { CategoryModule } from './category/category.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.DB_URI, { dbName: "ReduxAndAuth" }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
@@ -58,7 +59,7 @@ import { CategoryModule } from './category/category.module';
       }),
       inject: [ConfigService],
     }),
-
+    DatabaseModule,
     UserModule,
     AuthModule,
     PolicyModule,
@@ -78,6 +79,7 @@ import { CategoryModule } from './category/category.module';
     PromotionModule,
     FineModule,
     CategoryModule,
+    CloudinaryModule,
   ],
   providers: [],
 })
