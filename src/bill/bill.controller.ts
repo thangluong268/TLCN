@@ -393,7 +393,7 @@ export class BillController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
   @CheckRole(RoleName.SELLER)
-  @Put('seller/:id')
+  @Put('/seller/:id')
   @ApiQuery({ name: 'status', type: String, required: true })
   async updateStatus(
     @Param('id') id: string,
