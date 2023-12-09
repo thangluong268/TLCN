@@ -93,7 +93,7 @@ export class ProductService {
 
     async deleteProduct(productId: string): Promise<Product> {
         try {
-            const product = await this.productModel.findByIdAndUpdate({ _id: productId, status: true }, { status: false }, { new: true })
+            const product = await this.productModel.findByIdAndDelete(productId)
             return product
         }
         catch (err) {

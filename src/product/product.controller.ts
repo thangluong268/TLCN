@@ -248,14 +248,14 @@ export class ProductController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
-  @CheckRole(RoleName.MANAGER)
-  @Delete('manager/deleteProduct/:id')
+  @CheckRole(RoleName.MANAGER, RoleName.SELLER)
+  @Delete('/:id')
   async deleteProduct(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
-    const store = await this.productService.deleteProduct(id);
-    if (!store) return new NotFoundException("Không tìm thấy sản phẩm này!")
+    const product = await this.productService.deleteProduct(id);
+    if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
     return new SuccessResponse({
       message: "Xóa sản phẩm thành công!",
-      metadata: { data: store },
+      metadata: { data: product },
     })
   }
 
