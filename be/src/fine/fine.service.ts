@@ -3,7 +3,7 @@ import { CreateFineDto } from './dto/create-fine.dto';
 import { Fine } from './schema/fine.shema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class FineService {

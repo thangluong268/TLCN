@@ -2,11 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Pu
 import { PromotionService } from './promotion.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { Promotion } from './schema/promotion.schema';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreatePromotionAbility, DeletePromotionAbility, ReadPromotionAbility, UpdatePromotionAbility } from 'src/ability/decorators/abilities.decorator';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreatePromotionAbility, DeletePromotionAbility, ReadPromotionAbility, UpdatePromotionAbility } from '../ability/decorators/abilities.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { SuccessResponse } from '../core/success.response';
+import { NotFoundException } from '../core/error.response';
 
 @Controller('promotion')
 @ApiTags('Promotion')
@@ -18,8 +20,12 @@ export class PromotionController {
   @CheckAbilities(new CreatePromotionAbility())
   @CheckRole(RoleName.MANAGER)
   @Post("manager")
-  create(@Body() createPromotionDto: CreatePromotionDto): Promise<Promotion> {
-    return this.promotionService.create(createPromotionDto);
+  async create(@Body() createPromotionDto: CreatePromotionDto): Promise<SuccessResponse> {
+    const data = await this.promotionService.create(createPromotionDto);
+    return new SuccessResponse({
+      message: "Tạo chương trình khuyến mãi thành công!",
+      metadata: { data },
+    })
   }
 
   @UseGuards(AbilitiesGuard)
@@ -27,23 +33,37 @@ export class PromotionController {
   @CheckRole(RoleName.MANAGER)
   @Get('manager')
   @ApiQuery({ name: 'productType', type: String, required: false })
-  findAllByProductType(@Query('productType') productType: string): Promise<Promotion[]> {
-    return this.promotionService.findAllByProductType(productType);
+  async findAllByProductType(@Query('productType') productType: string): Promise<SuccessResponse> {
+    const data = await this.promotionService.findAllByProductType(productType);
+    return new SuccessResponse({
+      message: "Lấy danh sách chương trình khuyến mãi thành công!",
+      metadata: { data },
+    })
   }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdatePromotionAbility())
   @CheckRole(RoleName.MANAGER)
   @Put('manager/:id')
-  update(@Param('id') id: string, @Body() updatePromotionDto: CreatePromotionDto): Promise<Promotion> {
-    return this.promotionService.update(id, updatePromotionDto);
+  async update(@Param('id') id: string, @Body() updatePromotionDto: CreatePromotionDto): Promise<SuccessResponse | NotFoundException> {
+    const data = await this.promotionService.update(id, updatePromotionDto)
+    if (!data) return new NotFoundException("Không tìm thấy chương trình khuyến mãi này!")
+    return new SuccessResponse({
+      message: "Cập nhật chương trình khuyến mãi thành công!",
+      metadata: { data },
+    })
   }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeletePromotionAbility())
   @CheckRole(RoleName.MANAGER)
   @Delete('manager/:id')
-  remove(@Param('id') id: string): Promise<Promotion> {
-    return this.promotionService.remove(id);
+  async remove(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const data = await this.promotionService.remove(id);
+    if (!data) return new NotFoundException("Không tìm thấy chương trình khuyến mãi này!")
+    return new SuccessResponse({
+      message: "Xóa chương trình khuyến mãi thành công!",
+      metadata: { data },
+    })
   }
 }

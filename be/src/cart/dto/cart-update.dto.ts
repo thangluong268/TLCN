@@ -1,8 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
-import { ProductBillDto } from "src/bill/dto/product-bill.dto";
+import { ProductBillDto } from "../../bill/dto/product-bill.dto";
 
 export class UpdateCartDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    storeAvatar: string;
+
     @ApiProperty()
     @IsNotEmpty()
     storeName: string;

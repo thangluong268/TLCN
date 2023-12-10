@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Model, MongooseError } from 'mongoose';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { Category } from './schema/category.schema';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class CategoryService {
@@ -30,6 +30,17 @@ export class CategoryService {
         query['status'] = Boolean(status);
       }
       return await this.categoryModel.find(query).exec()
+    }
+    catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
+  async getById(id: string): Promise<Category> {
+    try {
+      return await this.categoryModel.findById(id)
     }
     catch (err) {
       if (err instanceof MongooseError)

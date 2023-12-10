@@ -3,9 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schema/product.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
-import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
-import { Store } from 'src/store/schema/store.schema';
+import { Store } from '../store/schema/store.schema';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import removeVietnameseTones from '../utils/removeVietNameseTones';
+import sortByConditions from '../utils/sortByContitions';
 
 @Injectable()
 export class ProductService {
@@ -18,7 +19,6 @@ export class ProductService {
         try {
             const newProduct = await this.productModel.create(product)
             newProduct.storeId = store._id
-            newProduct.storeName = store.storeName
             await newProduct.save()
             return newProduct
         }
@@ -31,8 +31,7 @@ export class ProductService {
 
     async getById(id: string): Promise<Product> {
         try {
-            const product = await this.productModel.findById(id)
-            if (!product) { throw new NotFoundExceptionCustom(Product.name) }
+            const product = await this.productModel.findOne({ _id: id })
             return product
         }
         catch (err) {
@@ -42,7 +41,8 @@ export class ProductService {
         }
     }
 
-    async getAllBySearch(storeIdInput: string, pageQuery: number, limitQuery: number, searchQuery: string)
+    async getAllBySearch(storeIdInput: string, pageQuery: number, limitQuery: number, searchQuery: string, 
+        sortTypeQuery: string = 'desc', sortValueQuery: string = 'productName', status: any)
         : Promise<{ total: number, products: Product[] }> {
         const storeId = storeIdInput ? { storeId: storeIdInput } : {}
         const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
@@ -58,8 +58,14 @@ export class ProductService {
             : {}
         const skip = limit * (page - 1)
         try {
-            const total = await this.productModel.countDocuments({ ...search, ...storeId })
-            const products = await this.productModel.find({ ...search, ...storeId }).limit(limit).skip(skip)
+            const total = await this.productModel.countDocuments({ ...search, ...storeId, ...status })
+            const products = await this.productModel.find({ ...search, ...storeId, ...status })
+                .sort({ createdAt: -1 })
+                .limit(limit)
+                .skip(skip)
+
+            sortByConditions(products, sortTypeQuery, sortValueQuery)
+
             return { total, products }
         }
         catch (err) {
@@ -71,9 +77,11 @@ export class ProductService {
 
     async update(id: string, product: any): Promise<Product> {
         try {
-            product = { status: false }
-            await this.getById(id)
-            const updatedProduct = await this.productModel.findByIdAndUpdate({ _id: id }, product, { new: true })
+            const updatedProduct = await this.productModel.findByIdAndUpdate({ _id: id }, { ...product }, { new: true })
+            if (product.quantity === 0) {
+                updatedProduct.status = false
+                await updatedProduct.save()
+            }
             return updatedProduct
         }
         catch (err) {
@@ -85,7 +93,7 @@ export class ProductService {
 
     async deleteProduct(productId: string): Promise<Product> {
         try {
-            const product = await this.productModel.findOneAndDelete({ _id: productId })
+            const product = await this.productModel.findByIdAndDelete(productId)
             return product
         }
         catch (err) {
@@ -95,9 +103,9 @@ export class ProductService {
         }
     }
 
-    async getlistProductLasted(limit: number): Promise<Product[]> {
+    async getListProductLasted(limit: number): Promise<Product[]> {
         try {
-            const products = await this.productModel.find({}).sort({ createdAt: -1 }).limit(limit)
+            const products = await this.productModel.find({status: true}).sort({ createdAt: -1 }).limit(limit)
             return products
         }
         catch (err) {
@@ -109,7 +117,11 @@ export class ProductService {
 
     async mostProductsInStore(limit: number): Promise<Product[]> {
         try {
+            const limitQuery = Number(limit) || Number(process.env.LIMIT_DEFAULT)
             const products = await this.productModel.aggregate([
+                {
+                    $match: { status: true }
+                },
                 {
                     $group: {
                         _id: '$storeId',
@@ -120,13 +132,13 @@ export class ProductService {
                     $sort: { count: -1 }
                 },
                 {
-                    $limit: Number(limit)
+                    $limit: limitQuery
                 }
             ])
             const storeIds = products.map(product => product._id)
             var arr = []
             for (let i = 0; i < storeIds.length; i++) {
-                const product = await this.productModel.find({ storeId: storeIds[i] }, { _id: 1, avatar: 1, quantity: 1, productName: 1, price: 1, storeName: 1, storeId: 1, type: 1 }).limit(10)
+                const product = await this.productModel.find({ storeId: storeIds[i] }).limit(10)
                 arr.push(product)
             }
             return arr
@@ -138,5 +150,36 @@ export class ProductService {
         }
     }
 
+    async updateQuantity(id: string, quantitySold: number): Promise<void> {
+        try {
+            const product: Product = await this.getById(id)
+            product.quantity -= quantitySold
+            if (product.quantity === 0) {
+                product.status = false
+            }
+            await product.save()
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+
+    async getRandomProducts(limit: number = 3): Promise<Product[]> {
+        try {
+            const products = await this.productModel.aggregate([
+                { $match: { status: true } },
+                { $sample: { size: Number(limit) } }
+            ])
+            return products
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
 
 }

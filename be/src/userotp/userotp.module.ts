@@ -1,12 +1,12 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserotpSchema } from './schema/userotp.schema';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
 import { UserotpService } from './userotp.service';
 import { UserotpController } from './userotp.controller';
-import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
+import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
   imports: [
@@ -14,9 +14,10 @@ import { UserModule } from 'src/user/user.module';
     AbilityModule,
     RoleModule,
     UserModule,
+    FirebaseModule
   ],
   controllers: [UserotpController],
-  providers: [UserotpService, FreedomCustom],
+  providers: [UserotpService],
   exports: [UserotpService],
 })
 export class UserotpModule { }

@@ -7,11 +7,10 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../../user/user.service';
 import * as firebase from 'firebase-admin';
-import { FirebaseService } from 'src/firebase/firebase.service';
-import { RoleName } from 'src/role/schema/role.schema';
-import { Types } from 'mongoose';
+import { FirebaseService } from '../../firebase/firebase.service';
+import { RoleName } from '../../role/schema/role.schema';
 
 @Injectable()
 export class JwtATAuthGuard implements CanActivate {
@@ -34,7 +33,7 @@ export class JwtATAuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
         if (!token) {
-            throw new UnauthorizedException();
+            return false
         }
         try {
             const payLoadFirebaseAuth = await this.auth.verifyIdToken(token.replace('Bearer ', ''))
@@ -58,7 +57,7 @@ export class JwtATAuthGuard implements CanActivate {
                 request['user'] = payload;
             }
             catch {
-                throw new UnauthorizedException();
+                return false
             }
         }
         return true;

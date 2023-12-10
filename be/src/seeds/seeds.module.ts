@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CommandModule } from 'nestjs-command';
 import { DataSeed } from './data.seed';
-import { UserModule } from 'src/user/user.module';
-import { RoleModule } from 'src/role/role.module';
+import { UserModule } from '../user/user.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
     imports: [

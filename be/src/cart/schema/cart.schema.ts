@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { ObjectId, Document, Types } from "mongoose";
-import { ProductBillDto } from "src/bill/dto/product-bill.dto";
+import { ProductBillDto } from "../../bill/dto/product-bill.dto";
 
 @Schema({
     timestamps: true,
@@ -11,6 +11,9 @@ export class Cart extends Document {
 
     @Prop()
     storeId: string;
+
+    @Prop()
+    storeAvatar: string;
 
     @Prop()
     storeName: string;

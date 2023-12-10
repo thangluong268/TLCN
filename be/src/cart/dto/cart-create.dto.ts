@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
 import mongoose from "mongoose";
-import { ProductBillDto } from "src/bill/dto/product-bill.dto";
+import { ProductBillDto } from "../../bill/dto/product-bill.dto";
 
 export class CreateCartDto {
     @IsNotEmpty()
@@ -9,6 +9,9 @@ export class CreateCartDto {
 
     @IsNotEmpty()
     storeId: string;
+
+    @IsNotEmpty()
+    storeAvatar: string;
 
     @IsNotEmpty()
     storeName: string;

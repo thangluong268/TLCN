@@ -1,18 +1,18 @@
 import { SetMetadata } from "@nestjs/common";
 import { Action, Subjects } from "../ability.factory";
-import { Role } from "src/role/schema/role.schema";
-import { UserToken } from "src/usertoken/schema/usertoken.schema";
-import { User } from "src/user/schema/user.schema";
-import { Bill } from "src/bill/schema/bill.schema";
-import { Userotp } from "src/userotp/schema/userotp.schema";
-import { Cart } from "src/cart/schema/cart.schema";
-import { Store } from "src/store/schema/store.schema";
-import { Feedback } from "src/feedback/schema/feedback.schema";
-import { Product } from "src/product/schema/product.schema";
-import { Evaluation } from "src/evaluation/schema/evaluation.schema";
-import { Notification } from "src/notification/schema/notification.schema";
-import { Promotion } from "src/promotion/schema/promotion.schema";
-import { Category } from "src/category/schema/category.schema";
+import { Role } from "../../role/schema/role.schema";
+import { UserToken } from "../..//usertoken/schema/usertoken.schema";
+import { User } from "../..//user/schema/user.schema";
+import { Bill } from "../..//bill/schema/bill.schema";
+import { Userotp } from "../..//userotp/schema/userotp.schema";
+import { Cart } from "../..//cart/schema/cart.schema";
+import { Store } from "../..//store/schema/store.schema";
+import { Feedback } from "../..//feedback/schema/feedback.schema";
+import { Product } from "../..//product/schema/product.schema";
+import { Evaluation } from "../..//evaluation/schema/evaluation.schema";
+import { Notification } from "../..//notification/schema/notification.schema";
+import { Promotion } from "../..//promotion/schema/promotion.schema";
+import { Category } from "../..//category/schema/category.schema";
 
 
 
@@ -97,6 +97,16 @@ export class UpdateBillAbility implements RequiredRule {
 // Cart
 export class CreateCartAbility implements RequiredRule {
     action = Action.Create;
+    subject = Cart;
+}
+
+export class ReadCartAbility implements RequiredRule {
+    action = Action.Read;
+    subject = Cart;
+}
+
+export class UpdateCartAbility implements RequiredRule {
+    action = Action.Update;
     subject = Cart;
 }
 

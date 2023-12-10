@@ -1,9 +1,20 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class AddressProfileDto {
-    @IsNotEmpty()
-    name: string;
+    @ApiProperty()
+    @IsOptional()
+    receiverName: string;
 
-    default: boolean = true;
+    @ApiProperty()
+    @IsOptional()
+    receiverPhone: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    default: boolean = false;
 }

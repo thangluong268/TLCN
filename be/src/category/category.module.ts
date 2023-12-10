@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
 import { CategorySchema } from './schema/category.schema';
 import { CategoryController } from './category.controller';
 import { CategoryService } from './category.service';
@@ -14,5 +14,6 @@ import { CategoryService } from './category.service';
     ],
     controllers: [CategoryController],
     providers: [CategoryService],
+    exports: [CategoryService]
 })
 export class CategoryModule { }
