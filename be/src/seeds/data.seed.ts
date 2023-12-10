@@ -1,12 +1,12 @@
 
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
-import { RoleService } from 'src/role/role.service';
-import { RoleName } from 'src/role/schema/role.schema';
+import { UserService } from '../user/user.service';
+import { RoleService } from '../role/role.service';
+import { RoleName } from '../role/schema/role.schema';
 import { Command } from 'nestjs-command';
 import * as bcrypt from 'bcrypt';
-import { SignUpDto } from 'src/auth/dto/signup.dto';
-import { CreateRoleDto } from 'src/role/dto/create-role.dto';
+import { SignUpDto } from '../auth/dto/signup.dto';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
 
 @Injectable()
 export class DataSeed {
@@ -36,14 +36,9 @@ export class DataSeed {
         });
 
         const userInfo = new SignUpDto()
-        userInfo.avatar = "avatar for admin"
         userInfo.fullName = "admin"
         userInfo.email = process.env.EMAIL_ADMIN
         userInfo.password = await this.hashData(process.env.PASSWORD_ADMIN)
-        userInfo.address = "address for admin"
-        userInfo.phone = "0123456789"
-        userInfo.gender = "Male"
-        userInfo.birthday = new Date("2002-01-01")
 
         const user = await this.userService.create(userInfo);
         const adminRole = new CreateRoleDto()

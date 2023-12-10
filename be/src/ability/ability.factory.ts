@@ -1,18 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { AbilityBuilder, ExtractSubjectType, InferSubjects, MongoAbility, createMongoAbility } from "@casl/ability"
-import { User } from "src/user/schema/user.schema";
-import { Role, RoleName } from "src/role/schema/role.schema";
-import { UserToken } from "src/usertoken/schema/usertoken.schema";
-import { Bill } from "src/bill/schema/bill.schema";
-import { Userotp } from "src/userotp/schema/userotp.schema";
-import { Cart } from "src/cart/schema/cart.schema";
-import { Store } from "src/store/schema/store.schema";
-import { Feedback } from "src/feedback/schema/feedback.schema";
-import { Product } from "src/product/schema/product.schema";
-import { Evaluation } from "src/evaluation/schema/evaluation.schema";
+import { User } from "../user/schema/user.schema";
+import { Role, RoleName } from "../role/schema/role.schema";
+import { UserToken } from "../usertoken/schema/usertoken.schema";
+import { Bill } from "../bill/schema/bill.schema";
+import { Userotp } from "../userotp/schema/userotp.schema";
+import { Cart } from "../cart/schema/cart.schema";
+import { Store } from "../store/schema/store.schema";
+import { Feedback } from "../feedback/schema/feedback.schema";
+import { Product } from "../product/schema/product.schema";
+import { Evaluation } from "../evaluation/schema/evaluation.schema";
 import { ApiConflictResponse } from "@nestjs/swagger";
-import { Notification } from "src/notification/schema/notification.schema";
-import { Promotion } from "src/promotion/schema/promotion.schema";
+import { Notification } from "../notification/schema/notification.schema";
+import { Promotion } from "../promotion/schema/promotion.schema";
+import { Category } from "../category/schema/category.schema";
 
 export enum Action {
     Manage = 'manage',
@@ -34,7 +35,8 @@ export type Subjects = InferSubjects<
     typeof Product |
     typeof Evaluation |
     typeof Notification |
-    typeof Promotion
+    typeof Promotion |
+    typeof Category
 > | 'all'
 
 export type AppAbility = MongoAbility<[Action, Subjects]>

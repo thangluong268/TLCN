@@ -4,17 +4,17 @@ import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserModule } from 'src/user/user.module';
-import { RoleModule } from 'src/role/role.module';
+import { UserModule } from '../user/user.module';
+import { RoleModule } from '../role/role.module';
 import { JwtATStrategy } from './strategies/jwt-at.strategy';
 import { JwtRTStrategy } from './strategies/jwt-rt.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserTokenSchema } from '../usertoken/schema/usertoken.schema';
-import { AbilityModule } from 'src/ability/ability.module';
+import { AbilityModule } from '../ability/ability.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
-import { UsertokenModule } from 'src/usertoken/usertoken.module';
-import { FirebaseModule } from 'src/firebase/firebase.module';
+import { UsertokenModule } from '../usertoken/usertoken.module';
+import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
   imports: [

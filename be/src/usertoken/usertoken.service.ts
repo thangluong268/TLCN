@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserToken } from './schema/usertoken.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { ForbiddenExceptionCustom } from 'src/exceptions/ForbiddenExceptionCustom.exception';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class UsertokenService {
@@ -41,7 +40,7 @@ export class UsertokenService {
                 { hashedRefreshToken: hashedRT },
                 { new: true },
             )
-            if (!userToken) { throw new ForbiddenExceptionCustom() }
+            if (!userToken) { return false }
             return true
         }
         catch (err) {
@@ -54,7 +53,7 @@ export class UsertokenService {
     async deleteUserToken(userId: string): Promise<boolean> {
         try {
             const userToken = await this.userTokenModel.findOneAndDelete({ userId })
-            if (!userToken) { throw new ForbiddenExceptionCustom() }
+            if (!userToken) { return false }
             return true
         }
         catch (err) {

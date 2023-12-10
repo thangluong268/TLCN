@@ -21,22 +21,16 @@ export class Product extends Document {
     description: string;
 
     @Prop()
-    category: string;
+    categoryId: string;
 
     @Prop({type: [String]})
     keywords: string[];
-
-    @Prop()
-    type: string;
 
     @Prop({default: true})
     status: boolean;
 
     @Prop()
     storeId: string;
-
-    @Prop()
-    storeName: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

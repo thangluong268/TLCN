@@ -1,13 +1,11 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
-import mongoose from "mongoose";
+import { AddressProfileDto } from "./address-profile.dto";
 
 export class UserWithoutPassDto {
     _id: string;
     avatar: string;
     fullName: string;
     email: string;
-    address: string;
+    address: AddressProfileDto[];
     phone: string;
     gender: string;
     birthday: Date;

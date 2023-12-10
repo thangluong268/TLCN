@@ -1,5 +1,7 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiConsumes, ApiProperty } from "@nestjs/swagger";
+import { File } from "buffer";
 import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
+import { HasMimeType, IsFile } from "nestjs-form-data";
 
 export class CreateStoreDto {
     @ApiProperty()
@@ -8,9 +10,17 @@ export class CreateStoreDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    storeName: string;
+    name: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    description: string;
 
     @ApiProperty()
     @IsNotEmpty()
     address: string;
+
+    @ApiProperty({ type: [String] })
+    @IsNotEmpty()
+    phoneNumber: string[];
 }

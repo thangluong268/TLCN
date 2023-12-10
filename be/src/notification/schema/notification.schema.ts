@@ -1,12 +1,16 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
+import { SubNoti } from "../dto/sub-notification.dto";
 
 @Schema({
     timestamps: true,
 })
 export class Notification extends Document {
     @Prop()
-    userId: string;
+    userIdFrom: string;
+
+    @Prop()
+    userIdTo: string;
 
     @Prop()
     content: string;
@@ -16,6 +20,9 @@ export class Notification extends Document {
 
     @Prop({default: false})
     status: boolean;
+
+    @Prop()
+    sub: SubNoti;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

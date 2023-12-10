@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { TokensDto } from './dto/tokens.dto';
-import { UnauthorizedExceptionCustom } from 'src/exceptions/UnauthorizedExceptionCustom.exception';
 
 @Injectable()
 export class AuthService {
@@ -34,9 +33,6 @@ export class AuthService {
 
     async compareData(data: string, hashedData: string): Promise<boolean> {
         const isMatched = await bcrypt.compare(data, hashedData)
-        if (!isMatched) {
-            throw new UnauthorizedExceptionCustom()
-        }
         return isMatched
     }
 }

@@ -2,18 +2,15 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError, Types } from 'mongoose';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
 import { Userotp } from './schema/userotp.schema';
-import FreedomCustom from 'src/exceptions/FreedomCustom.exception';
-import { NotFoundExceptionCustom } from 'src/exceptions/NotFoundExceptionCustom.exception';
-import { User } from 'src/user/schema/user.schema';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+
 @Injectable()
 export class UserotpService {
 
     constructor(private mailService: MailerService,
         @InjectModel(Userotp.name)
-        private userotpModel: Model<Userotp>,
-        private readonly freedomCustom: FreedomCustom
+        private userotpModel: Model<Userotp>
     ) { }
     async sendotp(email: string) {
         try {
@@ -23,11 +20,12 @@ export class UserotpService {
                 from: process.env.MAIL_USER,
                 subject: 'OTP',
                 //Template is handlebar files
-                template: './test',
+                template: './otp',
                 context: {
                     otp
                 }
             })
+
             return otp
         }
         catch (err) {
@@ -70,14 +68,23 @@ export class UserotpService {
         }
     }
 
-    async checkotp(otp: Number, email: string): Promise<Userotp> {
+    async checkotp(otp: Number, email: string): Promise<boolean> {
         try {
             const userotp = await this.userotpModel.findOne({ email });
             if (userotp.otp == otp) {
-                return userotp
-            } else {
-                throw this.freedomCustom.NotMatchOTP()
+                return true
             }
+            return false
+        } catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async deleteotp(email: string): Promise<any> {
+        try {
+            return await this.userotpModel.findOneAndDelete({ email });
         } catch (err) {
             if (err instanceof MongooseError)
                 throw new InternalServerErrorExceptionCustom()

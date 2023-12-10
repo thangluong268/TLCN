@@ -3,7 +3,7 @@ import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { Promotion } from './schema/promotion.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class PromotionService {
