@@ -24,7 +24,11 @@ function SortTable(props: SortTableProps) {
             <tr>
               {title?.map((item, index) =>
                 item.sort ? (
-                  <th scope="col" className="px-6 py-3 text-center" key={index}>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center min-w-[150px]"
+                    key={index}
+                  >
                     <div className="flex items-center justify-center">
                       {item.title}
                       <div
@@ -46,7 +50,11 @@ function SortTable(props: SortTableProps) {
                     </div>
                   </th>
                 ) : (
-                  <th scope="col" className="px-6 py-3 text-center" key={index}>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center min-w-[150px]"
+                    key={index}
+                  >
                     {item.title}
                   </th>
                 )
