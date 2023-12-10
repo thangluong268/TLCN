@@ -66,6 +66,7 @@ export class AbilityFactory {
                 cannot(Action.Create, Product).because('Không cho tạo sản phẩm!')
                 break
             case RoleName.SELLER:
+                can(Action.Manage, UserToken)
                 can(Action.Read, Bill)
                 can(Action.Update, Bill)
                 can(Action.Manage, Store)
@@ -73,6 +74,7 @@ export class AbilityFactory {
                 can(Action.Manage, Notification)
                 break
             case RoleName.MANAGER:
+                can(Action.Manage, UserToken)
                 can(Action.Manage, Notification)
                 can(Action.Read, Role)
                 can(Action.Manage, User)

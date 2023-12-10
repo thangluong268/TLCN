@@ -88,13 +88,14 @@ export class AuthController {
     const hashedPassword = await this.authService.hashData(password)
     const user = await this.userService.updatePassword(email, hashedPassword);
     return new SuccessResponse({
-      message: "Đăng nhập thành công!",
+      message: "Lấy lại mật khẩu thành công!",
       metadata: { data: user.email },
     })
   }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ManageUserTokenAbility())
+  @CheckRole(RoleName.USER, RoleName.SELLER, RoleName.MANAGER, RoleName.ADMIN)
   @Delete('logout')
   async logout(
     @GetCurrentUserId() userId: string,
