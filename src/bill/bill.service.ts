@@ -48,7 +48,7 @@ export class BillService {
         }
     }
 
-    async countTotalByStatus(storeId: string, status: string, year: number): Promise<number> {
+    async countTotalByStatusSeller(storeId: string, status: string, year: number): Promise<number> {
         try {
             const query: any = { storeId, status }
 
@@ -60,6 +60,21 @@ export class BillService {
                     ]
                 }
             }
+
+            const total = await this.billModel.countDocuments({ ...query })
+
+            return total
+
+        } catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom();
+            throw err
+        }
+    }
+
+    async countTotalByStatusUser(userId: string, status: string): Promise<number> {
+        try {
+            const query: any = { userId, status }
 
             const total = await this.billModel.countDocuments({ ...query })
 

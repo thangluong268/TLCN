@@ -13,7 +13,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '../c
 import { SuccessResponse } from '../core/success.response';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { BillService } from 'src/bill/bill.service';
+import { BillService } from '../bill/bill.service';
 
 @Controller('user')
 @ApiTags('User')

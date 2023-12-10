@@ -7,7 +7,7 @@ import { AbilityModule } from '../ability/ability.module';
 import { RoleModule } from '../role/role.module';
 import { HasPermitRoleMiddleware } from '../user/middleware/HasPermitRole.middleware';
 import { HasSameRoleUserMiddleware } from './middleware/HasSameRoleUser.middleware';
-import { BillModule } from 'src/bill/bill.module';
+import { BillModule } from '../bill/bill.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), 

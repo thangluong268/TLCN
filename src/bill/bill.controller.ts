@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { BillService } from './bill.service';
 import { CreateBillDto, ProductInfo } from './dto/create-bill.dto';
-import { BILL_STATUS, Bill } from './schema/bill.schema';
+import { BILL_STATUS, BILL_STATUS_TRANSITION, Bill } from './schema/bill.schema';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { CheckAbilities, CreateBillAbility, CreateRoleAbility, ReadBillAbility, UpdateBillAbility } from '../ability/decorators/abilities.decorator';
@@ -78,7 +78,7 @@ export class BillController {
   @CheckRole(RoleName.SELLER)
   @ApiQuery({ name: 'year', type: Number, required: false, example: "2023" })
   @Get('seller/count-total-by-status')
-  async countTotalByStatus(
+  async countTotalByStatusSeller(
     @Query('year') year: number,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException> {
@@ -92,12 +92,46 @@ export class BillController {
     const statusData: string[] = BILL_STATUS.split("-").map((item: string) => item.toUpperCase())
 
     const countTotal = await Promise.all(statusData.map(async (status: string) => {
-      return this.billService.countTotalByStatus(store._id, status, year)
+      return this.billService.countTotalByStatusSeller(store._id, status, year)
     }))
 
     const transformedData = Object.fromEntries(
       countTotal.map((value, index) => [statusData[index], value])
     )
+
+    return new SuccessResponse({
+      message: "Lấy tổng số lượng các đơn theo trạng thái thành công!",
+      metadata: { data: transformedData },
+    })
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.USER)
+  @Get('user/count-total-by-status')
+  async countTotalByStatusUser(
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse | NotFoundException> {
+
+    const user = await this.userService.getById(userId)
+    if (!user) return new NotFoundException("Không tìm thấy người dùng này!")
+
+    const store = await this.storeService.getByUserId(userId)
+    if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+
+    const statusData: string[] = BILL_STATUS.split("-").map((item: string) => item.toUpperCase())
+
+    const countTotal = await Promise.all(statusData.map(async (status: string) => {
+      return this.billService.countTotalByStatusUser(userId, status)
+    }))
+
+    const transformedData: any = countTotal.map((value, index) => {
+      return {
+        status: statusData[index],
+        title: BILL_STATUS_TRANSITION[statusData[index]],
+        value: value
+      }
+    })
 
     return new SuccessResponse({
       message: "Lấy tổng số lượng các đơn theo trạng thái thành công!",
