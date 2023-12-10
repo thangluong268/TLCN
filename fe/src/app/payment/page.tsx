@@ -329,7 +329,7 @@ function Payment() {
             <div className="">
               {/* List product */}
               {item.products?.map((product: any, index: number) => (
-                <div className="flex justify-between mt-2 pr-2 items-center outline-1 outline-double outline-gray-300 rounded-sm ">
+                <div key={product.id} className="flex justify-between mt-2 pr-2 items-center outline-1 outline-double outline-gray-300 rounded-sm ">
                   <div className="flex items-center">
                     <div className="w-[100px] h-[100px]">
                       <img
@@ -378,7 +378,7 @@ function Payment() {
             Chọn phương thức giao hàng
           </div>
           {deliveryMethod.map((item, index) => (
-            <div className="flex items-center mb-3">
+            <div key={index} className="flex items-center mb-3">
               <input
                 type="radio"
                 checked={item.checked}
@@ -403,7 +403,7 @@ function Payment() {
             Chọn phương thức thanh toán
           </div>
           {paymentMethod.map((item, index) => (
-            <div
+            <div key={index}
               className={`flex items-center mb-3 ${
                 isGift && index == 0 ? "hidden" : ""
               }`}
@@ -517,7 +517,7 @@ function Payment() {
             <>
               <div className="grid grid-cols-5 gap-3 my-3">
                 {user.address.map((item: any, index: number) => (
-                  <div
+                  <div key={index}
                     className={`hover:shadow-lg cursor-pointer rounded-md  ease-linear transition-all duration-150 p-3 ${
                       indexAddressPicked == index
                         ? "bg-blue-500 text-white"

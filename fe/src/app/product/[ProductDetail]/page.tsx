@@ -182,7 +182,7 @@ function ProductDetail() {
                   <div className="font-bold">Mô tả sản phẩm:</div>
                   <div className="ml-3 text-justify indent-8">
                     *Thông số kỹ thuật: - Bộ nhớ mở rộng: RAM 8GB(4GB+4GB) ROM:
-                    128GB - Màn hình: IPS LCD 6,6" ,Độ phân giải HD+ - Tần số
+                    128GB - Màn hình: IPS LCD 6,6 ,Độ phân giải HD+ - Tần số
                     quét: 90Hz - Dung lượng pin: 5000mAh - Bộ xử lý: Unisoc T606
                     - Sạc Type C *Bộ sản phẩm bao gồm: Bộ sạc, sách HDSD, ốp
                     lưng, tai nghe. Xuất xứ: Trung Quốc Giá sản phẩm trên Tiki
@@ -192,7 +192,7 @@ function ProductDetail() {
                     kềnh, thuế nhập khẩu (đối với đơn hàng giao từ nước ngoài có
                     giá trị trên 1 triệu đồng)..... *Thông số kỹ thuật: - Bộ nhớ
                     mở rộng: RAM 8GB(4GB+4GB) ROM: 128GB - Màn hình: IPS LCD
-                    6,6" ,Độ phân giải HD+ - Tần số quét: 90Hz - Dung lượng pin:
+                    6,6 ,Độ phân giải HD+ - Tần số quét: 90Hz - Dung lượng pin:
                     5000mAh - Bộ xử lý: Unisoc T606 - Sạc Type C *Bộ sản phẩm
                     bao gồm: Bộ sạc, sách HDSD, ốp lưng, tai nghe. Xuất xứ:
                     Trung Quốc Giá sản phẩm trên Tiki đã bao gồm thuế theo luật
