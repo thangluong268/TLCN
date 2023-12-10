@@ -10,6 +10,7 @@ import Loading from "@/components/Loading";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ReduxProvider from "@/redux/provider";
+import "react-quill/dist/quill.snow.css";
 
 // const lora = Lora({
 //   weight: ["400", "500", "600", "700"],

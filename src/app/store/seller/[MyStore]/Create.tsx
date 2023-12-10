@@ -4,7 +4,6 @@ import UploadFile from "./UploadFile";
 import Input from "@/components/Input";
 import { CREATEPRODUCT } from "@/constants/CreateProduct";
 import CheckValidInput from "@/utils/CheckValidInput";
-// import ReactQuill from "react-quill";
 const ReactQuill =
   typeof window === "object" ? require("react-quill") : () => false;
 import "react-quill/dist/quill.snow.css";
