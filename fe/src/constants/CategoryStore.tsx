@@ -7,15 +7,15 @@
 // Đơn huỷ
 // Quản lý kho
 
-import Cancel from "@/app/store/[MyStore]/Cancel";
-import Create from "@/app/store/[MyStore]/Create";
-import Home from "@/app/store/[MyStore]/Home";
-import New from "@/app/store/[MyStore]/New";
-import Preparing from "@/app/store/[MyStore]/Preparing";
-import Rebill from "@/app/store/[MyStore]/Rebill";
-import Shipped from "@/app/store/[MyStore]/Shipped";
-import Shipping from "@/app/store/[MyStore]/Shipping";
-import Warehouse from "@/app/store/[MyStore]/Warehouse";
+import Cancel from "@/app/store/seller/[MyStore]/Cancel";
+import Create from "@/app/store/seller/[MyStore]/Create";
+import Home from "@/app/store/seller/[MyStore]/Home";
+import New from "@/app/store/seller/[MyStore]/New";
+import Preparing from "@/app/store/seller/[MyStore]/Preparing";
+import Rebill from "@/app/store/seller/[MyStore]/Rebill";
+import Shipped from "@/app/store/seller/[MyStore]/Shipped";
+import Shipping from "@/app/store/seller/[MyStore]/Shipping";
+import Warehouse from "@/app/store/seller/[MyStore]/Warehouse";
 
 export const CATEGORYSTORE = [
   {

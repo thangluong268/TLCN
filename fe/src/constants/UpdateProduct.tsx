@@ -3,7 +3,7 @@
 // Giá bán
 // Keyword
 // Mô tả
-export const CREATEPRODUCT = [
+export const UPDATEPRODUCT = [
   {
     identify: "blank",
     label: "Tên sản phẩm",
@@ -12,7 +12,7 @@ export const CREATEPRODUCT = [
   },
   {
     identify: "number",
-    label: "Số lượng",
+    label: "Số lượng còn lại",
     placeholder: "Nhập số lượng",
     name: "quantity",
   },

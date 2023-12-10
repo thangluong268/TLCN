@@ -111,6 +111,7 @@ function Payment() {
     const listProductIdChecked = JSON.parse(
       localStorage.getItem("listProductIdChecked") || "[]"
     );
+
     listProductIdChecked.forEach((item: any) => {
       store?.store?.forEach((store: any) => {
         var obj = {
@@ -212,10 +213,9 @@ function Payment() {
     setUser(userLocal.providerData[0]);
     setIsUpdate_Add({ state: false, add: false, edit: false });
 
-    const user = await APIUpdateUser(
-      userLocal.providerData[0]._id,
-      userLocal.providerData[0].address
-    );
+    const user = await APIUpdateUser(userLocal.providerData[0]._id, {
+      address: userLocal.providerData[0].address,
+    });
   };
 
   const HandleOrder = async () => {
@@ -270,6 +270,7 @@ function Payment() {
     //   "deliveryFee": 0
     // }
     const listProducts = [] as any[];
+    console.log(data);
     data?.forEach((item) => {
       const obj = {
         storeId: item.storeId,
@@ -281,10 +282,19 @@ function Payment() {
         obj.listProducts.push({
           productId: product.id,
           quantity: product.quantity,
-          type: product.type,
+          type: product.price === 0 ? "GIVE" : "SELL",
         });
       });
-      listProducts.push(obj);
+      // Tìm xem nếu cửa hàng đã tồn tại thì push vào listProducts
+      const index = listProducts.findIndex(
+        (item) => item.storeId === obj.storeId
+      );
+      if (index !== -1) {
+        listProducts[index].listProducts.push(...obj.listProducts);
+        listProducts[index].totalPrice += obj.totalPrice;
+      } else {
+        listProducts.push(obj);
+      }
     });
     const obj = {
       data: listProducts,
@@ -303,22 +313,6 @@ function Payment() {
         deliveryMethod.find((item) => item.checked)?.price! * data?.length,
     };
     APICreateBill(obj);
-    // Cập nhật lại cart trong database
-    const listProductIdChecked = JSON.parse(
-      localStorage.getItem("listProductIdChecked") || "[]"
-    );
-    listProductIdChecked.forEach((item: any) => {
-      store?.store?.forEach((store: any) => {
-        store.product?.forEach((product: any) => {
-          if (product.id === item.id) {
-            APIRemoveProductInCart(product.id);
-          }
-        });
-      });
-    });
-    // remove cart and listProductIdChecked
-    localStorage.removeItem("cart");
-    localStorage.removeItem("listProductIdChecked");
     Toast("success", "Đặt hàng thành công", 2000);
     setTimeout(() => {
       window.location.href = "/";
@@ -633,7 +627,7 @@ function Payment() {
         <div className="bg-white rounded-md p-4 mb-4">
           <div className="text-lg font-bold mb-3">Đơn hàng</div>
           <div className="flex">
-            <div className="mr-2">1 sản phẩm</div>
+            <div className="mr-2">{data.length} sản phẩm</div>
             <div
               className="text-blue-400 cursor-pointer"
               onClick={(e) => setIsDetail(!isDetail)}

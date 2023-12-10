@@ -2,11 +2,11 @@
 import { CATEGORYSTORE } from "@/constants/CategoryStore";
 import { setCategoryStore } from "@/redux/features/categoryStore/categoryStore-slice";
 import { AppDispatch, useAppSelector } from "@/redux/store";
+import { APIGetCountBillByStatus } from "@/services/Bill";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 function MyStore() {
-  // const [isActive, setIsActive] = React.useState<any>(CATEGORYSTORE[0]);
   const dispatch = useDispatch<AppDispatch>();
   const dataCarts = useAppSelector((state) => state.categoryStoreReducer.items);
 
