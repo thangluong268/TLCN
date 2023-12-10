@@ -235,7 +235,7 @@ function Header() {
         </div>
 
         {user ? (
-          <div className="flex items-center">
+          <div className="flex items-center group py-10">
             <img
               className="rounded-full w-[50px] h-[50px] cursor-pointer"
               src={user.avatar || user.photoURL}
@@ -243,27 +243,25 @@ function Header() {
               onClick={profileToggleDropdown}
             />
             <span className="pl-3">{user.fullName}</span>
-            {isProfileOpen && (
-              <ul className="z-[1] p-2 shadow menu menu-sm dropdown-content bg-[#D2E0FB] rounded-lg absolute w-[158px] top-16">
-                <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <Link href="/user/profile">Tài khoản của tôi</Link>
-                </li>
-                <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <Link href="/bill/user?status='Đã đặt'">Đơn mua</Link>
-                </li>
-                <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <div
-                    onClick={(e) => {
-                      logOut();
-                      localStorage.removeItem("user");
-                      window.location.href = "/login";
-                    }}
-                  >
-                    Đăng xuất
-                  </div>
-                </li>
-              </ul>
-            )}
+            <ul className="z-[1] p-2 shadow menu menu-sm dropdown-content bg-[#D2E0FB] rounded-lg absolute w-[158px] top-16 hidden group-hover:block">
+              <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
+                <Link href="/user/profile">Tài khoản của tôi</Link>
+              </li>
+              <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
+                <Link href="/user/invoice">Đơn mua</Link>
+              </li>
+              <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
+                <div
+                  onClick={(e) => {
+                    logOut();
+                    localStorage.removeItem("user");
+                    window.location.href = "/login";
+                  }}
+                >
+                  Đăng xuất
+                </div>
+              </li>
+            </ul>
           </div>
         ) : (
           <div className="flex items-center">

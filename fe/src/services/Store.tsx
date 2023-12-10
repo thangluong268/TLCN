@@ -31,3 +31,14 @@ export const APIGetMyStore = async () => {
   document.getElementById("loading-page")?.classList.add("hidden");
   return res.data;
 };
+
+// api/store/seller => PUT
+export const APIUpdateMyStore = async (body: any) => {
+  const headers = GetHeaders();
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/seller`,
+    body,
+    { headers }
+  );
+  return res.data;
+};

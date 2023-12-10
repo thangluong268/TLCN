@@ -74,7 +74,7 @@ function Preparing() {
   const [typeMes, setTypeMes] = React.useState<string>("");
   const [currentId, setCurrentId] = React.useState<string>("");
   const UpGrade = async () => {
-    await APIUpdateBill(currentId, "CONFIRMED").then((res) => {
+    await APIUpdateBill(currentId, "DELIVERING").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Chuyển thành thành công", 2000);
         setIsShow(false);
@@ -85,7 +85,7 @@ function Preparing() {
     });
   };
   const Cancel = async () => {
-    await APIUpdateBill(currentId, "CANCEL").then((res) => {
+    await APIUpdateBill(currentId, "CANCELLED").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Chuyển thành thành công", 2000);
         setIsShow(false);
@@ -124,7 +124,7 @@ function Preparing() {
         lstProduct.listProductsFullInfo?.map((item: any, index: number) => {
           if (item.product) {
             arrBill.infoProduct?.push(
-              item.product.productName + " x " + item.product.quantity
+              item.product.productName + " x " + item.subInfo.quantity
             );
           }
         });
