@@ -10,7 +10,7 @@ function CheckValidInput(obInput: any) {
     repassword: "Mật khẩu không khớp",
     length6: "Mật khẩu phải có ít nhất 6 ký tự",
     otp: "Mã OTP không hợp lệ",
-    number: "Không được nhập chữ",
+    number: "Chỉ được nhập số 0-9",
     phone: "Số điện thoại không hợp lệ",
   };
   for (let key in obInput) {

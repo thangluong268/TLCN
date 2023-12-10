@@ -80,19 +80,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div
-              className="bg-white p-2 rounded-xl grid grid-cols-4 items-center hover:bg-slate-100 hover:rounded-xl hover:cursor-pointer mt-2"
-              onClick={(e) => console.log("ssss")}
-            >
-              <div className="mr-2 col-span-1 p-2">
-                <img
-                  src="https://salt.tikicdn.com/cache/100x100/ts/upload/08/2f/14/fd9d34a8f9c4a76902649d04ccd9bbc5.png.webp"
-                  alt={""}
-                  className="rounded-xl w-8 h-8"
-                />
-              </div>
-              <div className="col-span-3 font-bold">Bán cùng DTExchange</div>
-            </div>
           </div>
           <div className="flex flex-col w-10/12">
             <ListProductHomePage

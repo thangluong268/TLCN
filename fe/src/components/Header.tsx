@@ -93,7 +93,7 @@ function Header() {
   const OpenStore = async () => {
     const store = await APIGetMyStore();
     if (store.status == 200 || store.status == 201) {
-      window.location.href = "/store/" + store.metadata.data._id;
+      window.location.href = "/store/seller/" + store.metadata.data._id;
     } else {
       window.location.href = "/store/create";
     }
@@ -246,7 +246,7 @@ function Header() {
             {isProfileOpen && (
               <ul className="z-[1] p-2 shadow menu menu-sm dropdown-content bg-[#D2E0FB] rounded-lg absolute w-[158px] top-16">
                 <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
-                  <Link href="/user/:id">Tài khoản của tôi</Link>
+                  <Link href="/user/profile">Tài khoản của tôi</Link>
                 </li>
                 <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
                   <Link href="/bill/user?status='Đã đặt'">Đơn mua</Link>

@@ -18,24 +18,23 @@ function Create() {
     price: 0,
     avatar: [] as any,
     description: "",
-    category: "",
-    type: "sell",
+    categoryId: "",
     quantity: 0,
     list_keyword: "",
-    keyword: [] as any,
+    keywords: [] as any,
   });
   const dispatch = useDispatch<AppDispatch>();
-  console.log(product);
   // Get category from localStorage
   const category = localStorage.getItem("category")
     ? JSON.parse(localStorage.getItem("category")!)
     : null;
   const CreateProduct = async (product: any) => {
+    document.getElementById("loading-page")?.classList.remove("hidden");
     document
       .getElementById("formCreate-productName")
       ?.classList.remove("border-red-500");
     const objCopied = JSON.parse(JSON.stringify(product));
-    delete objCopied.keyword;
+    delete objCopied.keywords;
     if (CheckValidInput(objCopied) == "") {
       // Upload image
       const listImg: any = [];
@@ -54,8 +53,6 @@ function Create() {
 
       // Change keyword to array
       product.keywords = product.list_keyword.split(",");
-
-      console.log(product);
       const res = await APICreateProduct(product);
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Tạo sản phẩm thành công", 2000);
@@ -88,44 +85,42 @@ function Create() {
       </div>
       <div>
         {CREATEPRODUCT.map((item, index) => {
-          if (item.name != "description") {
-            return (
-              <Input label={item.label} required={true} key={index}>
-                <input
-                  key={index}
-                  id={`formCreate-${item.name}`}
-                  type="text"
-                  className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
-                  placeholder={item.placeholder}
-                  name={item.name}
-                  value={product[item.name as keyof typeof product]}
-                  onChange={(e) => {
-                    setProduct({ ...product, [item.name]: e.target.value });
-                  }}
-                  onBlur={(e) => {
-                    const result = CheckValidInput({
-                      [`${item.identify}`]: e.target.value,
-                    });
-                    if (result !== "") {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.add("border-red-500");
-                    } else {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.remove("border-red-500");
-                    }
-                    document.getElementById(`errMes-${item.name}`)!.innerHTML =
-                      result;
-                  }}
-                />
-                <span
-                  id={`errMes-${item.name}`}
-                  className="text-red-500 text-sm"
-                ></span>
-              </Input>
-            );
-          }
+          return (
+            <Input label={item.label} required={true} key={index}>
+              <input
+                key={index}
+                id={`formCreate-${item.name}`}
+                type="text"
+                className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
+                placeholder={item.placeholder}
+                name={item.name}
+                value={product[item.name as keyof typeof product]}
+                onChange={(e) => {
+                  setProduct({ ...product, [item.name]: e.target.value });
+                }}
+                onBlur={(e) => {
+                  const result = CheckValidInput({
+                    [`${item.identify}`]: e.target.value,
+                  });
+                  if (result !== "") {
+                    document
+                      .getElementById(`formCreate-${item.name}`)
+                      ?.classList.add("border-red-500");
+                  } else {
+                    document
+                      .getElementById(`formCreate-${item.name}`)
+                      ?.classList.remove("border-red-500");
+                  }
+                  document.getElementById(`errMes-${item.name}`)!.innerHTML =
+                    result;
+                }}
+              />
+              <span
+                id={`errMes-${item.name}`}
+                className="text-red-500 text-sm"
+              ></span>
+            </Input>
+          );
         })}
       </div>
       <Input label={"Danh mục"} required={true}>
@@ -133,7 +128,9 @@ function Create() {
           name=""
           id=""
           className={`w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2`}
-          onChange={(e) => setProduct({ ...product, category: e.target.value })}
+          onChange={(e) =>
+            setProduct({ ...product, categoryId: e.target.value })
+          }
         >
           <option value=""> Chọn danh mục</option>
           {category &&
