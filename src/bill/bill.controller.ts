@@ -3,21 +3,21 @@ import { BillService } from './bill.service';
 import { CreateBillDto, ProductInfo } from './dto/create-bill.dto';
 import { BILL_STATUS, Bill } from './schema/bill.schema';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateBillAbility, CreateRoleAbility, ReadBillAbility, UpdateBillAbility } from 'src/ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreateBillAbility, CreateRoleAbility, ReadBillAbility, UpdateBillAbility } from '../ability/decorators/abilities.decorator';
 import { Request } from 'express';
 import { PaymentService } from './payment/payment.service';
 import { GiveGateway, MoMoGateway, PAYMENT_METHOD, VNPayGateway } from './payment/payment.gateway';
-import { UserService } from 'src/user/user.service';
-import { ProductService } from 'src/product/product.service';
-import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
-import { StoreService } from 'src/store/store.service';
-import { NotFoundException } from 'src/core/error.response';
-import { SuccessResponse } from 'src/core/success.response';
+import { UserService } from '../user/user.service';
+import { ProductService } from '../product/product.service';
+import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
+import { StoreService } from '../store/store.service';
+import { NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
 import { BillDto } from './dto/bill.dto';
-import { CartService } from 'src/cart/cart.service';
+import { CartService } from '../cart/cart.service';
 
 @Controller('bill')
 @ApiTags('Bill')

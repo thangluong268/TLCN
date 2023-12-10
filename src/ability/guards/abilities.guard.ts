@@ -3,8 +3,7 @@ import { Reflector } from "@nestjs/core"
 import { AbilityFactory } from "../ability.factory"
 import { CHECK_ABILITY, RequiredRule } from "../decorators/abilities.decorator"
 import { ForbiddenError } from "@casl/ability"
-import { RoleService } from "src/role/role.service"
-import { Types } from "mongoose"
+import { RoleService } from "../../role/role.service"
 import { CHECK_ROLE } from "../decorators/role.decorator"
 
 

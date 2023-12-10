@@ -4,9 +4,9 @@ import { Bill, PRODUCT_TYPE } from './schema/bill.schema';
 import { Model, Error as MongooseError } from 'mongoose';
 import { CartInfo, GiveInfo, ProductInfo, ReceiverInfo } from './dto/create-bill.dto';
 import { ProductBillDto } from './dto/product-bill.dto';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
-import removeVietnameseTones from 'src/utils/removeVietNameseTones';
-import sortByConditions from 'src/utils/sortByContitions';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import removeVietnameseTones from '../utils/removeVietNameseTones';
+import sortByConditions from '../utils/sortByContitions';
 
 @Injectable()
 export class BillService {
@@ -366,6 +366,18 @@ export class BillService {
                 },
             })
             return bill ? true : false
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
+    async getAllByUserId(userId: string): Promise<Bill[]> {
+        try {
+            const bills = await this.billModel.find({ userId })
+            return bills
         }
         catch (err) {
             if (err instanceof MongooseError)

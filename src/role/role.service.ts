@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleName } from './schema/role.schema';
 import { Model, MongooseError, ObjectId, Types } from 'mongoose';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class RoleService {

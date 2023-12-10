@@ -2,13 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Pu
 import { PromotionService } from './promotion.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { Promotion } from './schema/promotion.schema';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreatePromotionAbility, DeletePromotionAbility, ReadPromotionAbility, UpdatePromotionAbility } from 'src/ability/decorators/abilities.decorator';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreatePromotionAbility, DeletePromotionAbility, ReadPromotionAbility, UpdatePromotionAbility } from '../ability/decorators/abilities.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { SuccessResponse } from 'src/core/success.response';
-import { NotFoundException } from 'src/core/error.response';
+import { SuccessResponse } from '../core/success.response';
+import { NotFoundException } from '../core/error.response';
 
 @Controller('promotion')
 @ApiTags('Promotion')

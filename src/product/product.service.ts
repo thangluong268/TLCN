@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schema/product.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto';
-import { Store } from 'src/store/schema/store.schema';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
-import removeVietnameseTones from 'src/utils/removeVietNameseTones';
-import sortByConditions from 'src/utils/sortByContitions';
+import { Store } from '../store/schema/store.schema';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import removeVietnameseTones from '../utils/removeVietNameseTones';
+import sortByConditions from '../utils/sortByContitions';
 
 @Injectable()
 export class ProductService {

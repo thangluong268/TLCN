@@ -1,25 +1,25 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
-import { User } from 'src/user/schema/user.schema';
+import { User } from '../user/schema/user.schema';
 import { LoginDto } from './dto/login.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RoleService } from 'src/role/role.service';
-import { RoleName } from 'src/role/schema/role.schema';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateUserAbility, ManageUserTokenAbility, ReadRoleAbility } from 'src/ability/decorators/abilities.decorator';
+import { RoleService } from '../role/role.service';
+import { RoleName } from '../role/schema/role.schema';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreateUserAbility, ManageUserTokenAbility, ReadRoleAbility } from '../ability/decorators/abilities.decorator';
 import { Request } from 'express';
 import { JwtRTAuthGuard } from './guards/jwt-rt-auth.guard';
 import { Public } from './decorators/public.decorator';
-import { UsertokenService } from 'src/usertoken/usertoken.service';
-import { UserService } from 'src/user/user.service';
+import { UsertokenService } from '../usertoken/usertoken.service';
+import { UserService } from '../user/user.service';
 import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
 import { TokensDto } from './dto/tokens.dto';
-import { ErrorResponseDto } from 'src/responses/error.responseDto';
-import { OK, SuccessResponse } from 'src/core/success.response';
-import { BadRequestException, ForbiddenException } from 'src/core/error.response';
-import { SuccessResponseDto } from 'src/responses/success.responseDto';
+import { ErrorResponseDto } from '../responses/error.responseDto';
+import { OK, SuccessResponse } from '../core/success.response';
+import { BadRequestException, ForbiddenException } from '../core/error.response';
+import { SuccessResponseDto } from '../responses/success.responseDto';
 import { GetCurrentUserId } from './decorators/get-current-userid.decorator';
 
 @Controller('auth')

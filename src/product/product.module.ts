@@ -2,26 +2,26 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
 import { ProductSchema } from './schema/product.schema';
-import { StoreModule } from 'src/store/store.module';
-import { EvaluationModule } from 'src/evaluation/evaluation.module';
-import { UserModule } from 'src/user/user.module';
-import { NotificationModule } from 'src/notification/notification.module';
-import { BillModule } from 'src/bill/bill.module';
-import { CategoryModule } from 'src/category/category.module';
+import { StoreModule } from '../store/store.module';
+import { EvaluationModule } from '../evaluation/evaluation.module';
+import { UserModule } from '../user/user.module';
+import { NotificationModule } from '../notification/notification.module';
+import { BillModule } from '../bill/bill.module';
+import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Product', schema: ProductSchema }]),
+    forwardRef(() => BillModule),
+    forwardRef(() => EvaluationModule),
+    forwardRef(() => UserModule),
     AbilityModule,
     RoleModule,
     StoreModule,
-    forwardRef(() => EvaluationModule),
-    UserModule,
     NotificationModule,
-    forwardRef(() => BillModule),
     CategoryModule,
   ],
   controllers: [ProductController],

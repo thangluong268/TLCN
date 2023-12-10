@@ -4,8 +4,8 @@ import { PolicyService } from './policy.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PolicySchema } from './schema/policy.schema';
 import { ConfigModule } from '@nestjs/config';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports: [

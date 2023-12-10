@@ -1,17 +1,17 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateBillAbility, CreateStoreAbility, DeleteStoreAbility, ReadStoreAbility, UpdateStoreAbility } from 'src/ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreateBillAbility, CreateStoreAbility, DeleteStoreAbility, ReadStoreAbility, UpdateStoreAbility } from '../ability/decorators/abilities.decorator';
 import { CreateStoreDto } from './dto/create-store.dto';
-import { UserService } from 'src/user/user.service';
-import { RoleService } from 'src/role/role.service';
-import { RoleName } from 'src/role/schema/role.schema';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
+import { UserService } from '../user/user.service';
+import { RoleService } from '../role/role.service';
+import { RoleName } from '../role/schema/role.schema';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { UpdateStoreDto } from './dto/update-store.dto';
-import { BadRequestException, ConflicException, NotFoundException } from 'src/core/error.response';
-import { SuccessResponse } from 'src/core/success.response';
+import { BadRequestException, ConflicException, NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
 
 
 @Controller('store')

@@ -4,7 +4,7 @@ import { Policy } from './schema/policy.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { MongooseError } from 'mongoose';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class PolicyService {

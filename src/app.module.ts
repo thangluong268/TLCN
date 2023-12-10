@@ -25,7 +25,6 @@ import { FineModule } from './fine/fine.module';
 import { CategoryModule } from './category/category.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { DatabaseModule } from './database/database.module';
-import { TestModule } from './test/test.module';
 
 
 @Module({
@@ -81,7 +80,6 @@ import { TestModule } from './test/test.module';
     FineModule,
     CategoryModule,
     CloudinaryModule,
-    TestModule,
   ],
   providers: [],
 })

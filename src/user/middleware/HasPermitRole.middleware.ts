@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Request, Response, NextFunction } from 'express';
 import { Model, MongooseError, Types } from 'mongoose';
 import { User } from '../schema/user.schema';
-import { Role, RoleName } from 'src/role/schema/role.schema';
-import { RoleService } from 'src/role/role.service';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
-import { BadRequestException } from 'src/core/error.response';
+import { Role, RoleName } from '../../role/schema/role.schema';
+import { RoleService } from '../../role/role.service';
+import { InternalServerErrorExceptionCustom } from '../../exceptions/InternalServerErrorExceptionCustom.exception';
+import { BadRequestException } from '../../core/error.response';
 
 @Injectable()
 export class HasPermitRoleMiddleware implements NestMiddleware {

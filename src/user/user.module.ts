@@ -1,15 +1,20 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod, forwardRef } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from './schema/user.schema';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
-import { HasPermitRoleMiddleware } from 'src/user/middleware/HasPermitRole.middleware';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
+import { HasPermitRoleMiddleware } from '../user/middleware/HasPermitRole.middleware';
 import { HasSameRoleUserMiddleware } from './middleware/HasSameRoleUser.middleware';
+import { BillModule } from 'src/bill/bill.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), AbilityModule, RoleModule],
+  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), 
+  forwardRef(() => BillModule),
+  AbilityModule, 
+  RoleModule,
+],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

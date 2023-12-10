@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { CheckAbilities, CreateCategoryAbility, ReadCategoryAbility } from "src/ability/decorators/abilities.decorator";
-import { CheckRole } from "src/ability/decorators/role.decorator";
-import { AbilitiesGuard } from "src/ability/guards/abilities.guard";
-import { RoleName } from "src/role/schema/role.schema";
+import { CheckAbilities, CreateCategoryAbility, ReadCategoryAbility } from "../ability/decorators/abilities.decorator";
+import { CheckRole } from "../ability/decorators/role.decorator";
+import { AbilitiesGuard } from "../ability/guards/abilities.guard";
+import { RoleName } from "../role/schema/role.schema";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { CategoryService } from "./category.service";
 import { Category } from "./schema/category.schema";
-import { Public } from "src/auth/decorators/public.decorator";
-import { SuccessResponse } from "src/core/success.response";
+import { Public } from "../auth/decorators/public.decorator";
+import { SuccessResponse } from "../core/success.response";
 
 @Controller('category')
 @ApiTags('Category')

@@ -2,10 +2,10 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { MongooseError } from 'mongoose';
 import { User } from '../schema/user.schema';
-import { Role, RoleName } from 'src/role/schema/role.schema';
-import { RoleService } from 'src/role/role.service';
-import { ForbiddenException } from 'src/core/error.response';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { Role, RoleName } from '../../role/schema/role.schema';
+import { RoleService } from '../../role/role.service';
+import { ForbiddenException } from '../../core/error.response';
+import { InternalServerErrorExceptionCustom } from '../../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class HasSameRoleUserMiddleware implements NestMiddleware {

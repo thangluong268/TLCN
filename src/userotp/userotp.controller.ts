@@ -2,13 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } fro
 import { UserotpService } from './userotp.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateUserotpDto } from './dto/create-userotp.dto';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { CheckUserotpDto } from './dto/check-userotp.dto';
-import { UserService } from 'src/user/user.service';
-import { BadRequestException, ConflicException, NotFoundException } from 'src/core/error.response';
-import { SuccessResponse } from 'src/core/success.response';
+import { UserService } from '../user/user.service';
+import { BadRequestException, ConflicException, NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
 import * as firebase from 'firebase-admin';
-import { FirebaseService } from 'src/firebase/firebase.service';
+import { FirebaseService } from '../firebase/firebase.service';
 
 @Controller('userotp')
 @ApiTags('Userotp')

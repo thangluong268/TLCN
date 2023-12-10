@@ -1,8 +1,8 @@
 import { PAYMENT_METHOD } from "../payment/payment.gateway";
-import { Store } from "src/store/schema/store.schema";
-import { Product } from "src/product/schema/product.schema";
+import { Store } from "../../store/schema/store.schema";
+import { Product } from "../../product/schema/product.schema";
 import { GiveInfo, ProductInfo, ReceiverInfo } from "./create-bill.dto";
-import { User } from "src/user/schema/user.schema";
+import { User } from "../../user/schema/user.schema";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional } from "class-validator";
 

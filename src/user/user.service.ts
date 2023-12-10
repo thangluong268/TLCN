@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SignUpDto } from 'src/auth/dto/signup.dto';
+import { SignUpDto } from '../auth/dto/signup.dto';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError, Types } from 'mongoose';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 
 @Injectable()

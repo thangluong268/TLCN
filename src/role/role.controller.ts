@@ -3,11 +3,11 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Role, RoleName } from './schema/role.schema';
-import { CheckAbilities, CreateRoleAbility, ReadRoleAbility, UpdateRoleAbility } from 'src/ability/decorators/abilities.decorator';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { SuccessResponse } from 'src/core/success.response';
-import { BadRequestException, NotFoundException } from 'src/core/error.response';
+import { CheckAbilities, CreateRoleAbility, ReadRoleAbility, UpdateRoleAbility } from '../ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { SuccessResponse } from '../core/success.response';
+import { BadRequestException, NotFoundException } from '../core/error.response';
 
 @Controller('role/admin')
 @ApiTags('Role')

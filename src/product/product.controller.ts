@@ -1,27 +1,27 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreateProductAbility, DeleteProductAbility, ReadProductAbility, UpdateProductAbility } from 'src/ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreateProductAbility, DeleteProductAbility, ReadProductAbility, UpdateProductAbility } from '../ability/decorators/abilities.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
-import { StoreService } from 'src/store/store.service';
-import { EvaluationService } from 'src/evaluation/evaluation.service';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
-import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { StoreService } from '../store/store.service';
+import { EvaluationService } from '../evaluation/evaluation.service';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
+import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { NotFoundException } from 'src/core/error.response';
-import { SuccessResponse } from 'src/core/success.response';
-import { UserService } from 'src/user/user.service';
-import { NotificationService } from 'src/notification/notification.service';
-import { Notification } from 'src/notification/schema/notification.schema';
+import { NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
+import { UserService } from '../user/user.service';
+import { NotificationService } from '../notification/notification.service';
+import { Notification } from '../notification/schema/notification.schema';
 import { ProductDto } from './dto/product.dto';
 import { Product } from './schema/product.schema';
 import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
-import { BillService } from 'src/bill/bill.service';
-import { PRODUCT_TYPE } from 'src/bill/schema/bill.schema';
-import { CategoryService } from 'src/category/category.service';
+import { BillService } from '../bill/bill.service';
+import { PRODUCT_TYPE } from '../bill/schema/bill.schema';
+import { CategoryService } from '../category/category.service';
 
 
 @Controller('product')

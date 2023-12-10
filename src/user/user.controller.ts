@@ -1,25 +1,29 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CheckAbilities, DeleteUserAbility, ReadUserAbility, UpdateUserAbility } from 'src/ability/decorators/abilities.decorator';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
+import { CheckAbilities, DeleteUserAbility, ReadUserAbility, UpdateUserAbility } from '../ability/decorators/abilities.decorator';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { User } from './schema/user.schema';
-import { RoleService } from 'src/role/role.service';
+import { RoleService } from '../role/role.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddIdDto } from './dto/add-friend-store.dto';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
-import { BadRequestException, ForbiddenException, NotFoundException } from 'src/core/error.response';
-import { SuccessResponse } from 'src/core/success.response';
-import { GetCurrentUserId } from 'src/auth/decorators/get-current-userid.decorator';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
+import { BadRequestException, ForbiddenException, NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
+import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
+import { Public } from '../auth/decorators/public.decorator';
+import { BillService } from 'src/bill/bill.service';
 
 @Controller('user')
 @ApiTags('User')
 @ApiBearerAuth('Authorization')
 export class UserController {
-  constructor(private readonly userService: UserService,
-    private readonly roleService: RoleService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly roleService: RoleService,
+    private readonly billService: BillService
+    ) { }
 
 
   @UseGuards(AbilitiesGuard)
@@ -27,12 +31,28 @@ export class UserController {
   @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/:id')
   async findOne(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+
     const user = await this.userService.getById(id);
     if (!user) return new NotFoundException("Không tìm thấy người dùng này!")
+
+    const billsOfUser = await this.billService.getAllByUserId(id)
+
+    const totalBills = billsOfUser.length 
+    const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0)
+    const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length
+
+    const data: any = {
+      ...user.toObject(),
+      totalBills,
+      totalPricePaid,
+      totalReceived
+    }
+
     return new SuccessResponse({
       message: "Lấy thông tin người dùng thành công!",
-      metadata: { data: user },
+      metadata: { data },
     })
+
   }
 
   // Update user

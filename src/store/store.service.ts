@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Store } from './schema/store.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import { CreateStoreDto } from './dto/create-store.dto';
-import { User } from 'src/user/schema/user.schema';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class StoreService {

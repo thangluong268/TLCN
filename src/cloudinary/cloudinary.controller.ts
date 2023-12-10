@@ -1,10 +1,10 @@
 import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { SuccessResponse } from 'src/core/success.response';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { SuccessResponse } from '../core/success.response';
+import { Public } from '../auth/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { BadRequestException } from 'src/core/error.response';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { BadRequestException } from '../core/error.response';
 
 @Controller('upload')
 @ApiTags('Upload')

@@ -2,12 +2,12 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res, UseGu
 import { PolicyService } from './policy.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AbilitiesGuard } from 'src/ability/guards/abilities.guard';
-import { CheckAbilities, CreatePolicyAbility, DeletePolicyAbility, ReadPolicyAbility, UpdatePolicyAbility } from 'src/ability/decorators/abilities.decorator';
-import { CheckRole } from 'src/ability/decorators/role.decorator';
-import { RoleName } from 'src/role/schema/role.schema';
-import { SuccessResponse } from 'src/core/success.response';
-import { NotFoundException } from 'src/core/error.response';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
+import { CheckAbilities, CreatePolicyAbility, DeletePolicyAbility, ReadPolicyAbility, UpdatePolicyAbility } from '../ability/decorators/abilities.decorator';
+import { CheckRole } from '../ability/decorators/role.decorator';
+import { RoleName } from '../role/schema/role.schema';
+import { SuccessResponse } from '../core/success.response';
+import { NotFoundException } from '../core/error.response';
 
 @Controller('policy')
 @ApiTags('Policy')

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserToken } from './schema/usertoken.schema';
 import { Model, MongooseError, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 @Injectable()
 export class UsertokenService {

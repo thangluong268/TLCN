@@ -3,10 +3,10 @@ import { CartService } from './cart.service';
 import { CartController } from './cart.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CartSchema } from './schema/cart.schema';
-import { AbilityModule } from 'src/ability/ability.module';
-import { RoleModule } from 'src/role/role.module';
-import { ProductModule } from 'src/product/product.module';
-import { StoreModule } from 'src/store/store.module';
+import { AbilityModule } from '../ability/ability.module';
+import { RoleModule } from '../role/role.module';
+import { ProductModule } from '../product/product.module';
+import { StoreModule } from '../store/store.module';
 
 @Module({
   imports: [

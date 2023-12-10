@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Evaluation } from './schema/evaluation.schema';
 import { Model, MongooseError } from 'mongoose';
 import { EmojiDto, HadEvaluation } from './dto/evaluation.dto';
-import { InternalServerErrorExceptionCustom } from 'src/exceptions/InternalServerErrorExceptionCustom.exception';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 
 
 @Injectable()
