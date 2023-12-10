@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [stable]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -26,6 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        script: cd be
     - run: npm ci
     - run: npm run build
     - run: npm run test:e2e
