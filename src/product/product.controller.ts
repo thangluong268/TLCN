@@ -16,7 +16,7 @@ import { SuccessResponse } from '../core/success.response';
 import { UserService } from '../user/user.service';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from '../notification/schema/notification.schema';
-import { ProductDto } from './dto/product.dto';
+import { FilterProduct, ProductDto } from './dto/product.dto';
 import { Product } from './schema/product.schema';
 import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
 import { BillService } from '../bill/bill.service';
@@ -24,7 +24,7 @@ import { PRODUCT_TYPE } from '../bill/schema/bill.schema';
 import { CategoryService } from '../category/category.service';
 
 
-@Controller('product')
+@Controller()
 @ApiTags('Product')
 @ApiBearerAuth('Authorization')
 export class ProductController {
@@ -41,7 +41,7 @@ export class ProductController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Post('seller')
+  @Post('product/seller')
   async create(
     @Body() product: CreateProductDto,
     @GetCurrentUserId() userId: string,
@@ -91,7 +91,7 @@ export class ProductController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Post('sellerCreateMultiple')
+  @Post('product/sellerCreateMultiple')
   async sellerCreateMultiple(
     @Body() products: CreateProductDto[],
     @GetCurrentUserId() userId: string,
@@ -108,7 +108,7 @@ export class ProductController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Get('seller')
+  @Get('product/seller')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
@@ -155,7 +155,7 @@ export class ProductController {
 
 
   @Public()
-  @Get()
+  @Get('product')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
@@ -175,7 +175,7 @@ export class ProductController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Patch('seller/:id')
+  @Patch('product/seller/:id')
   async update(
     @Param('id') id: string,
     @Body() product: UpdateProductDto,
@@ -190,7 +190,7 @@ export class ProductController {
 
 
   @Public()
-  @Get('/listProductLasted')
+  @Get('product/listProductLasted')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async getlistProductLasted(
     @Query('limit') limit: number,
@@ -203,7 +203,7 @@ export class ProductController {
   }
 
   @Public()
-  @Get('/mostProductsInStore')
+  @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(
     @Query('limit') limit: number,
@@ -219,7 +219,7 @@ export class ProductController {
 
   @Public()
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @Get('/random')
+  @Get('product/random')
   async getRandom(
     @Query('limit') limit: number,
   ): Promise<SuccessResponse | NotFoundException> {
@@ -233,7 +233,26 @@ export class ProductController {
 
 
   @Public()
-  @Get('/:id')
+  @Get('product-filter')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllBySearchAndFilterPublic(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+    @Query() filter?: FilterProduct,
+  ): Promise<SuccessResponse> {
+    const products = await this.productService.getAllBySearchAndFilter(page, limit, search, filter)
+    return new SuccessResponse({
+      message: "Lấy danh sách sản phẩm thành công!",
+      metadata: { data: products },
+    })
+  }
+
+
+  @Public()
+  @Get('product/:id')
   async getById(
     @Param('id') id: string
   ): Promise<SuccessResponse | NotFoundException> {
@@ -249,7 +268,7 @@ export class ProductController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
   @CheckRole(RoleName.MANAGER, RoleName.SELLER)
-  @Delete('/:id')
+  @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const product = await this.productService.deleteProduct(id);
     if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
@@ -258,5 +277,6 @@ export class ProductController {
       metadata: { data: product },
     })
   }
+
 
 }
