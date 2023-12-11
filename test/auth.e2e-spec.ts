@@ -25,14 +25,10 @@ describe('Auth Controller E2E Test', () => {
         dbConnection = moduleRef.get<DatabaseService>(DatabaseService).getDbHandle();
         httpServer = app.getHttpServer();
         controller = moduleRef.get<AuthController>(AuthController);
-    })
+    }, 10000)
 
     beforeEach(async () => {
 
-    })
-
-    afterAll(() => {
-        app.close();
     })
 
     it('Auth controller should be defined', () => {
@@ -110,8 +106,13 @@ describe('Auth Controller E2E Test', () => {
 
             expect(response.status).toBe(201);
             expect(response.body.message).toEqual('Lấy lại mật khẩu thành công!');
-            
+
         }, 30000)
+    })
+
+    
+    afterAll(async () => {
+        await app.close();
     })
 
 })

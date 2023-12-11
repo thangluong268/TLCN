@@ -51,8 +51,10 @@ export class ProductService {
             ? {
                 $or: [
                     { productName: { $regex: searchQuery, $options: "i" } },
-                    { category: { $regex: searchQuery, $options: "i" } },
-                    { keywords: { $regex: searchQuery, $options: "i" } }
+                    { description: { $regex: searchQuery, $options: "i" } },
+                    { keywords: { $regex: searchQuery, $options: "i" } },
+                    { type: { $regex: searchQuery, $options: "i" } },
+                    { storeName: { $regex: searchQuery, $options: "i" } },
                 ]
             }
             : {}

@@ -28,19 +28,19 @@ describe('Product Controller E2E Test', () => {
         dbConnection = moduleRef.get<DatabaseService>(DatabaseService).getDbHandle();
         httpServer = app.getHttpServer();
         controller = moduleRef.get<ProductController>(ProductController);
-    })
-
-    beforeEach(async () => {
-        await dbConnection.collection('products').deleteMany({});
-    })
+    }, 10000)
 
     afterAll(async () => {
         await app.close();
-    })
+    }, 10000)
+
+    beforeEach(async () => {
+        await dbConnection.collection('products').deleteMany({});
+    }, 10000)
 
     it('Product controller should be defined', () => {
         expect(controller).toBeDefined();
-    });
+    }, 10000);
 
     // describe('Login', () => {
     //     const URL = '/auth/login'
@@ -169,6 +169,7 @@ describe('Product Controller E2E Test', () => {
     //         expect(response.body.message).toEqual('Xóa sản phẩm thành công!');
     //     }, 10000)
     // })
+
 
 
 })
