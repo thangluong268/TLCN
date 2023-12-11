@@ -4,7 +4,7 @@ export const billMock = (): any => {
     storeId: "656e5ebf3b88272ad608fffd",
     listProducts: [
       {
-        "productId": "65740e698ef5609ff9d8d690",
+        "productId": "657764dd17ee5e295b68e61c",
         "quantity": 2,
         "type": "SELL"
       },
@@ -31,7 +31,7 @@ export const createBillMock = (): any => {
         storeId: "656e5ebf3b88272ad608fffd",
         listProducts: [
           {
-            "productId": "65740e698ef5609ff9d8d690",
+            "productId": "657764dd17ee5e295b68e61c",
             "quantity": 2,
             "type": "SELL"
           },
