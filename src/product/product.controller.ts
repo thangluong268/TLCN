@@ -243,10 +243,20 @@ export class ProductController {
     @Query('search') search: string,
     @Query() filter?: FilterProduct,
   ): Promise<SuccessResponse> {
+
+    const category = await this.categoryService.getById(search.toString())
+
     const products = await this.productService.getAllBySearchAndFilter(page, limit, search, filter)
+
+    const data = {
+      total: products.total,
+      products: products.products,
+      categoryName: category.name,
+    }
+
     return new SuccessResponse({
       message: "Lấy danh sách sản phẩm thành công!",
-      metadata: { data: products },
+      metadata: { data },
     })
   }
 
@@ -261,7 +271,7 @@ export class ProductController {
     const product = await this.productService.getById(id)
     if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
 
-    
+
     return new SuccessResponse({
       message: "Lấy thông tin sản phẩm thành công!",
       metadata: { data: product },
