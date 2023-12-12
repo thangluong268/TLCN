@@ -271,10 +271,13 @@ export class ProductController {
     const product = await this.productService.getById(id)
     if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
 
+    const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
+
+    let quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
 
     return new SuccessResponse({
       message: "Lấy thông tin sản phẩm thành công!",
-      metadata: { data: product },
+      metadata: { data: product, quantityDelivered},
     })
   }
 
