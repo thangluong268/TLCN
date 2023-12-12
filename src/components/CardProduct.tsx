@@ -21,14 +21,14 @@ function CardProduct(props: any) {
           {data.productName}
         </div>
         <div className="flex justify-between items-center font-bold mb-2">
-          <div className={data.type == "sell" ? "" : "hidden"}>
+          <div className={data.price != 0 ? "" : "hidden"}>
             {Number(data.price).toLocaleString("en-US", {})} <sup>đ</sup>
           </div>
           <div className="text-sm leading-7">Còn lại: {data.quantity}</div>
         </div>
         <hr />
         <div className="text-center my-2">
-          {data.type == "sell" ? "Hàng bán" : "Hàng tặng"}
+          {data.price != 0 ? "Hàng bán" : "Hàng tặng"}
         </div>
       </div>
     </div>

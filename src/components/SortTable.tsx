@@ -86,7 +86,7 @@ function SortTable(props: SortTableProps) {
           </li>
           {totalPage > 0 &&
             Array.from(
-              { length: Math.round(totalPage / 2) },
+              { length: Math.ceil(totalPage / 2) },
               (_, index) => index
             ).map((item, index) => (
               <li

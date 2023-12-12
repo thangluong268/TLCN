@@ -10,6 +10,7 @@ import {
   APIGetListProducMostInStore,
   APIGetListProductLasted,
 } from "@/services/Product";
+import ListProductRandomHomePage from "@/components/ListProductRandomHomePage";
 
 export default function Home() {
   const [listProduct, setListProduct] = React.useState([]);
@@ -23,7 +24,6 @@ export default function Home() {
     };
     fetchData();
   }, []);
-  console.log(listProductMost);
   return (
     <main>
       <FrameMainContent>
@@ -90,6 +90,7 @@ export default function Home() {
               title="Cửa hàng nổi bật"
               listHighLight={listProductMost}
             />
+            <ListProductRandomHomePage />
           </div>
         </div>
       </FrameMainContent>

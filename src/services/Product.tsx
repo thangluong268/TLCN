@@ -74,3 +74,28 @@ export const APIDeleteProduct = async (id: string) => {
   );
   return res.data;
 };
+
+// api/product/random
+export const APIGetListProductRandom = async (limit?: any) => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
+
+  var limit = limit ? limit : 10;
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/product/random?limit=${limit}`
+  );
+  document.getElementById("loading-page")?.classList.add("hidden");
+
+  return res.data;
+};
+
+// api/product
+export const APIGetListProductForUser = async (
+  page?: any,
+  limit?: any,
+  search?: any
+) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/product?page=${page}&limit=${limit}&search=${search}`
+  );
+  return res.data;
+};
