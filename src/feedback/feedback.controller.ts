@@ -15,7 +15,7 @@ import { Public } from '../auth/decorators/public.decorator';
 import { FeedbackDto } from './dto/feedback.dto';
 import { User } from '../user/schema/user.schema';
 
-@Controller('feedback')
+@Controller()
 @ApiTags('FeedBack')
 @ApiBearerAuth('Authorization')
 export class FeedbackController {
@@ -28,7 +28,7 @@ export class FeedbackController {
   @CheckAbilities(new CreateFeedBackAbility())
   @CheckRole(RoleName.USER)
   @ApiQuery({ name: 'productId', type: String, required: true })
-  @Post('user')
+  @Post('feedback/user')
   async create(
     @Query('productId') productId: string,
     @Body() feedback: CreateFeedbackDto,
@@ -43,19 +43,19 @@ export class FeedbackController {
   }
 
   @Public()
-  @Get()
+  @Get('feedback')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'productId', type: String, required: true })
   @ApiQuery({ name: 'userId', type: String, required: false })
-  async getAllByProductId(
+  async getAllByProductIdPaging(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('productId') productId: string,
     @Query('userId') userId: string,
   ): Promise<SuccessResponse> {
 
-    const feedbacks = await this.feedbackService.getAllByProductId(page, limit, productId)
+    const feedbacks = await this.feedbackService.getAllByProductIdPaging(page, limit, productId)
 
     const data: FeedbackDto[] = await Promise.all(feedbacks.feedbacks.map(async (feedback: Feedback) => {
 
@@ -82,6 +82,52 @@ export class FeedbackController {
     return new SuccessResponse({
       message: "Lấy danh sách đánh giá thành công!",
       metadata: { total: feedbacks.total,  data },
+    })
+  }
+
+  @Public()
+  @Get('feedback-star')
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  async getAllByProductIdStar(
+    @Query('productId') productId: string,
+  ): Promise<SuccessResponse> {
+
+    const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(productId)
+
+    const star = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    }
+
+    feedbacks.forEach(feedback => {
+      star[feedback.star]++
+    })
+
+    const startPercent = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    }
+
+    Object.keys(star).forEach(key => {
+      startPercent[key] = Math.round((star[key] / feedbacks.length) * 100)
+    })
+
+    let averageStar = 0
+    Object.keys(star).forEach(key => {
+      averageStar += star[key] * Number(key)
+    })
+
+    averageStar = Number((averageStar / feedbacks.length).toFixed(2))
+
+    return new SuccessResponse({
+      message: "Lấy danh sách đánh giá sao thành công!",
+      metadata: { startPercent, averageStar },
     })
   }
 
