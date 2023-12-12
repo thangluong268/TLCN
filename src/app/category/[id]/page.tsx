@@ -75,8 +75,8 @@ function Category() {
           <div className="flex flex-col bg-white p-4 rounded-xl mb-2">
             <div className="flex justify-between">
               <div>
-                Các sản phẩm liên quan đến "
-                <i className="font-bold text-">{categoryName}</i>"
+                Các sản phẩm liên quan đến &ldquo;
+                <i className="font-bold text-">{categoryName}</i>&ldquo;
               </div>
             </div>
             <div className="grid grid-cols-5 gap-y-4 mt-5">

@@ -5,6 +5,7 @@ import { AppDispatch, useAppSelector } from "@/redux/store";
 import { APIAddProductInCart } from "@/services/Cart";
 import { APIGetProduct } from "@/services/Product";
 import { Product } from "@/types/Cart";
+import { UserInterface } from "@/types/User";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
 import Toast from "@/utils/Toast";
 import Link from "next/link";
@@ -23,10 +24,15 @@ import { useDispatch } from "react-redux";
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
+  const [user, setUser] = React.useState<UserInterface>();
   const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
 
   React.useEffect(() => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+      : null;
+    setUser(user);
     const fetchData = async () => {
       const pd = await APIGetProduct(params.ProductDetail).then((res) => res);
       setProduct(pd.metadata.data);
@@ -73,6 +79,50 @@ function ProductDetail() {
     }
   };
 
+  const PayProduct = async () => {
+    // let isProductInCart = false;
+    // carts?.store?.map((data) => {
+    //   if (data.id == product.storeId) {
+    //     data?.product?.map((item) => {
+    //       if (item.id == product._id) {
+    //         isProductInCart = true;
+    //       }
+    //     });
+    //   }
+    // });
+
+    // if (!isProductInCart) {
+    //   Toast("success", "Đã thêm sản phẩm vào giỏ hàng", 2000);
+    //   dispatch(
+    //     addItemtoCartPopup({
+    //       product: {
+    //         id: product._id,
+    //         name: product.productName,
+    //         avatar: product.avatar[0],
+    //         price: product.price,
+    //         type: product.type,
+    //         quantity: 1,
+    //         quantityInStock: product.quantity,
+    //         isChecked: false,
+    //       },
+    //       store: {
+    //         id: product.storeId,
+    //         name: product.storeName,
+    //         isChecked: false,
+    //       },
+    //     })
+    //   );
+    //   await APIAddProductInCart(product._id);
+    // } else {
+    //   Toast("success", "Sản phẩm đã có trong giỏ hàng", 2000);
+    // }
+    console.log("pay product");
+  };
+
+  const Heart = async () => {
+    console.log("heart");
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-[160px] my-4">
       {product._id && (
@@ -109,7 +159,21 @@ function ProductDetail() {
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-around items-center my-2">
-                  <div className="flex">
+                  <div
+                    className="flex cursor-pointer"
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        Toast(
+                          "error",
+                          "Bạn cần đăng nhập để yêu thích sản phẩm này",
+                          2000
+                        );
+                      } else {
+                        Heart();
+                      }
+                    }}
+                  >
                     <FaHeart className="text-red-500 text-lg" />
                     <span className="text-sm ms-2">
                       ({ConvertToShortFormat(2102)})
@@ -128,7 +192,14 @@ function ProductDetail() {
                   <button
                     type="button"
                     className="flex justify-center mr-2 text-white items-center w-full bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg py-3  dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                    onClick={(e) => AddToCart()}
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                      } else {
+                        AddToCart();
+                      }
+                    }}
                   >
                     <FaShoppingCart className="mr-3" />
                     <span>Thêm vào giỏ hàng</span>
@@ -140,6 +211,14 @@ function ProductDetail() {
                     <Link
                       href="/payment"
                       className="flex justify-center items-center "
+                      onClick={(e) => {
+                        if (!user) {
+                          e.preventDefault();
+                          Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                        } else {
+                          PayProduct();
+                        }
+                      }}
                     >
                       <FaShopify className="mr-3" />
                       <span>Mua ngay</span>
