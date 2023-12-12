@@ -3,6 +3,7 @@ import Star from "@/components/Star";
 import { addItemtoCartPopup } from "@/redux/features/cart/cartpopup-slice";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { APIAddProductInCart } from "@/services/Cart";
+import { APIGetEvaluation, APIGetEvaluationUser } from "@/services/Evaluation";
 import { APIGetProduct } from "@/services/Product";
 import { Product } from "@/types/Cart";
 import { UserInterface } from "@/types/User";
@@ -20,13 +21,29 @@ import {
   FaTelegramPlane,
 } from "react-icons/fa";
 import { useDispatch } from "react-redux";
+import {
+  FacebookShareButton,
+  FacebookIcon,
+  FacebookMessengerShareButton,
+  FacebookMessengerIcon,
+} from "next-share";
+import { APIGetFeedback, APIGetFeedbackStar } from "@/services/Feedback";
 
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const [user, setUser] = React.useState<UserInterface>();
+  const [page, setPage] = React.useState(1);
+  const [quantityDelivered, setQuantityDelivered] = React.useState(0);
+  const [totalPage, setTotalPage] = React.useState(1);
   const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
+  const [evaluation, setEvaluation] = React.useState({
+    total: 0,
+    isReaction: false,
+  });
+  const [star, setStar] = React.useState({} as any);
+  const [feedback, setFeedback] = React.useState([]);
 
   React.useEffect(() => {
     const user = localStorage.getItem("user")
@@ -35,7 +52,53 @@ function ProductDetail() {
     setUser(user);
     const fetchData = async () => {
       const pd = await APIGetProduct(params.ProductDetail).then((res) => res);
+      console.log(pd);
+      setQuantityDelivered(pd.metadata.quantityDelivered);
       setProduct(pd.metadata.data);
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+        : null;
+      console.log(params.ProductDetail, user?._id);
+      await APIGetEvaluation(params.ProductDetail, user?._id || "").then(
+        (res) => {
+          console.log(res);
+          setEvaluation({
+            total: res.metadata.data.total,
+            isReaction: res.metadata.data.isReaction,
+          });
+        }
+      );
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+        : null;
+      await APIGetFeedback(page, 5, params.ProductDetail, user?._id || "").then(
+        (res) => {
+          console.log(res);
+          setTotalPage(res.metadata.total);
+          setFeedback(res.metadata.data.data);
+        }
+      );
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      await APIGetFeedbackStar(params.ProductDetail).then((res) => {
+        setStar(res.metadata);
+      });
     };
     fetchData();
   }, []);
@@ -120,7 +183,11 @@ function ProductDetail() {
   };
 
   const Heart = async () => {
-    console.log("heart");
+    await APIGetEvaluationUser(params.ProductDetail, {
+      body: "Heart",
+    }).then((res) => {
+      console.log(res);
+    });
   };
 
   return (
@@ -174,15 +241,35 @@ function ProductDetail() {
                       }
                     }}
                   >
-                    <FaHeart className="text-red-500 text-lg" />
+                    <FaHeart
+                      className={`${
+                        evaluation.isReaction && "text-red-500"
+                      } text-lg`}
+                    />
                     <span className="text-sm ms-2">
-                      ({ConvertToShortFormat(2102)})
+                      ({ConvertToShortFormat(evaluation.total)})
                     </span>
                   </div>
                   <div>
-                    <div className="flex cursor-pointer">
+                    <div className="flex cursor-pointer items-center justify-center">
                       <FaShareAlt className="text-blue-500 text-lg" />
-                      <span className="text-sm ms-2">Chia sẻ</span>
+                      <span className="text-sm ml-2 mr-2">Chia sẻ</span>
+                      <div className="mr-2">
+                        <FacebookShareButton
+                          url={"https://dtexchange-hcmute.netlify.app/product"}
+                          hashtag={"#DTExchange"}
+                        >
+                          <FacebookIcon size={32} round />
+                        </FacebookShareButton>
+                      </div>
+                      <div>
+                        <FacebookMessengerShareButton
+                          url={"https://dtexchange-hcmute.netlify.app"}
+                          appId={"285854217141142"}
+                        >
+                          <FacebookMessengerIcon size={32} round />
+                        </FacebookMessengerShareButton>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -241,17 +328,21 @@ function ProductDetail() {
                     <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
                   </svg>
                   <p className="ml-1 font-bold text-gray-900 dark:text-white">
-                    4.95
+                    {star?.averageStar || 0}
                   </p>
                   <span className="w-1 h-1 mx-1.5 bg-gray-500 rounded-full dark:bg-gray-400"></span>
                   <a
                     href="#"
                     className="font-medium text-gray-900 underline hover:no-underline dark:text-white"
                   >
-                    73 đánh giá
+                    {totalPage} đánh giá
                   </a>
                   <span className="mx-2">|</span>
-                  <span className="">Đã bán: 56</span>
+                  {product.price > 0 ? (
+                    <span className="">Đã bán: {quantityDelivered}</span>
+                  ) : (
+                    <span className="">Đã tặng: {quantityDelivered}</span>
+                  )}
                 </div>
                 <div className="flex items-center mt-4 text-3xl font-bold">
                   {Number(product.price).toLocaleString("vi-VN", {})}
@@ -259,28 +350,10 @@ function ProductDetail() {
                 </div>
                 <div className="flex flex-col mt-4">
                   <div className="font-bold">Mô tả sản phẩm:</div>
-                  <div className="ml-3 text-justify indent-8">
-                    *Thông số kỹ thuật: - Bộ nhớ mở rộng: RAM 8GB(4GB+4GB) ROM:
-                    128GB - Màn hình: IPS LCD 6,6&quot; ,Độ phân giải HD+ - Tần
-                    số quét: 90Hz - Dung lượng pin: 5000mAh - Bộ xử lý: Unisoc
-                    T606 - Sạc Type C *Bộ sản phẩm bao gồm: Bộ sạc, sách HDSD,
-                    ốp lưng, tai nghe. Xuất xứ: Trung Quốc Giá sản phẩm trên
-                    Tiki đã bao gồm thuế theo luật hiện hành. Bên cạnh đó, tuỳ
-                    vào loại sản phẩm, hình thức và địa chỉ giao hàng mà có thể
-                    phát sinh thêm chi phí khác như phí vận chuyển, phụ phí hàng
-                    cồng kềnh, thuế nhập khẩu (đối với đơn hàng giao từ nước
-                    ngoài có giá trị trên 1 triệu đồng)..... *Thông số kỹ thuật:
-                    - Bộ nhớ mở rộng: RAM 8GB(4GB+4GB) ROM: 128GB - Màn hình:
-                    IPS LCD 6,6&quot; ,Độ phân giải HD+ - Tần số quét: 90Hz -
-                    Dung lượng pin: 5000mAh - Bộ xử lý: Unisoc T606 - Sạc Type C
-                    *Bộ sản phẩm bao gồm: Bộ sạc, sách HDSD, ốp lưng, tai nghe.
-                    Xuất xứ: Trung Quốc Giá sản phẩm trên Tiki đã bao gồm thuế
-                    theo luật hiện hành. Bên cạnh đó, tuỳ vào loại sản phẩm,
-                    hình thức và địa chỉ giao hàng mà có thể phát sinh thêm chi
-                    phí khác như phí vận chuyển, phụ phí hàng cồng kềnh, thuế
-                    nhập khẩu (đối với đơn hàng giao từ nước ngoài có giá trị
-                    trên 1 triệu đồng).....
-                  </div>
+                  <div
+                    className="text-justify indent-8"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -412,102 +485,146 @@ function ProductDetail() {
                 </svg>
 
                 <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  4.95
-                </p>
-                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  out of
-                </p>
-                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  5
+                  {star?.averageStar || 0} / 5
                 </p>
               </div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                1,745 lượt đánh giá
+                {totalPage} lượt đánh giá
               </p>
-              <div className="flex items-center mt-4 justify-center w-full">
+              <div className="flex items-end mt-4 justify-center w-full">
                 <a
                   href="#"
                   className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                 >
                   5 star
                 </a>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mx-2">
+                  (
+                  {star?.startPercent?.["5"]
+                    ? (star?.startPercent?.["5"] / totalPage) * 100
+                    : 0}{" "}
+                  %)
+                </span>
                 <div className="w-2/4 h-5 mx-4 bg-gray-200 rounded dark:bg-gray-700">
                   <div
                     className="h-5 bg-yellow-300 rounded"
-                    style={{ width: "70%" }} //Tang giam phan tram
+                    style={{
+                      width: `${
+                        star?.startPercent?.["5"]
+                          ? (star?.startPercent?.["5"] / totalPage) * 100
+                          : 0
+                      }%`,
+                    }}
                   ></div>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  70%
-                </span>
               </div>
-              <div className="flex items-center mt-4 justify-center w-full">
+              <div className="flex items-end mt-4 justify-center w-full">
                 <a
                   href="#"
                   className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                 >
                   4 star
                 </a>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mx-2">
+                  (
+                  {star?.startPercent?.["4"]
+                    ? (star?.startPercent?.["4"] / totalPage) * 100
+                    : 0}{" "}
+                  %)
+                </span>
                 <div className="w-2/4 h-5 mx-4 bg-gray-200 rounded dark:bg-gray-700">
                   <div
                     className="h-5 bg-yellow-300 rounded"
-                    style={{ width: "17%" }}
+                    style={{
+                      width: `${
+                        star?.startPercent?.["4"]
+                          ? (star?.startPercent?.["4"] / totalPage) * 100
+                          : 0
+                      }%`,
+                    }}
                   ></div>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  17%
-                </span>
               </div>
-              <div className="flex items-center mt-4 justify-center w-full">
+              <div className="flex items-end mt-4 justify-center w-full">
                 <a
                   href="#"
                   className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                 >
                   3 star
                 </a>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mx-2">
+                  (
+                  {star?.startPercent?.["3"]
+                    ? (star?.startPercent?.["3"] / totalPage) * 100
+                    : 0}{" "}
+                  %)
+                </span>
                 <div className="w-2/4 h-5 mx-4 bg-gray-200 rounded dark:bg-gray-700">
                   <div
                     className="h-5 bg-yellow-300 rounded"
-                    style={{ width: "8%" }}
+                    style={{
+                      width: `${
+                        star?.startPercent?.["3"]
+                          ? (star?.startPercent?.["3"] / totalPage) * 100
+                          : 0
+                      }%`,
+                    }}
                   ></div>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  8%
-                </span>
               </div>
-              <div className="flex items-center mt-4 justify-center w-full">
+              <div className="flex items-end mt-4 justify-center w-full">
                 <a
                   href="#"
                   className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                 >
                   2 star
                 </a>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mx-2">
+                  (
+                  {star?.startPercent?.["2"]
+                    ? (star?.startPercent?.["2"] / totalPage) * 100
+                    : 0}{" "}
+                  %)
+                </span>
                 <div className="w-2/4 h-5 mx-4 bg-gray-200 rounded dark:bg-gray-700">
                   <div
                     className="h-5 bg-yellow-300 rounded"
-                    style={{ width: "4%" }}
+                    style={{
+                      width: `${
+                        star?.startPercent?.["2"]
+                          ? (star?.startPercent?.["2"] / totalPage) * 100
+                          : 0
+                      }%`,
+                    }}
                   ></div>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  4%
-                </span>
               </div>
-              <div className="flex items-center mt-4 justify-center w-full">
+              <div className="flex items-end mt-4 justify-center w-full">
                 <a
                   href="#"
                   className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                 >
                   1 star
                 </a>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mx-2">
+                  (
+                  {star?.startPercent?.["1"]
+                    ? (star?.startPercent?.["1"] / totalPage) * 100
+                    : 0}{" "}
+                  %)
+                </span>
                 <div className="w-2/4 h-5 mx-4 bg-gray-200 rounded dark:bg-gray-700">
                   <div
                     className="h-5 bg-yellow-300 rounded"
-                    style={{ width: "1%" }}
+                    style={{
+                      width: `${
+                        star?.startPercent?.["1"]
+                          ? (star?.startPercent?.["1"] / totalPage) * 100
+                          : 0
+                      }%`,
+                    }}
                   ></div>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  1%
-                </span>
               </div>
             </div>
             <hr className="my-6 w-full" />

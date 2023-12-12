@@ -67,6 +67,7 @@ function Create() {
     }
   };
   const handleDescriptionChange = (value: string) => {
+    console.log(value);
     setProduct({ ...product, description: value });
   };
   return (
