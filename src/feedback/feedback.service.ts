@@ -26,4 +26,26 @@ export class FeedbackService {
             throw err
         }
     }
+
+    async getAllByProductId(page: number = 1, limit: number = 5, productId: string)
+    : Promise<{ total: number, feedbacks: Feedback[] }> {
+
+    const skip = limit * (page - 1);
+
+    try {
+        const total = await this.feedbackModel.countDocuments({ productId });
+        const feedbacks = await this.feedbackModel.find({ productId })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(skip);
+
+        return { total, feedbacks };
+
+    } catch (err) {
+        if (err instanceof MongooseError) {
+            throw new InternalServerErrorExceptionCustom();
+        }
+        throw err;
+    }
+}
 }

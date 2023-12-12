@@ -16,6 +16,9 @@ export class Feedback extends Document {
 
     @Prop()
     star: number;
+
+    @Prop()
+    consensus: string[];
 }
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
