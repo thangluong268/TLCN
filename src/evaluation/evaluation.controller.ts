@@ -54,7 +54,7 @@ export class EvaluationController {
     if (!result) return new NotFoundException("Không tìm thấy sản phẩm này!")
 
     if (userId !== store.userId && !hadEvaluation) {
-      const createNotiData: CreateNotificationDto  = {
+      const createNotiData: CreateNotificationDto = {
         userIdFrom: userId,
         userIdTo: store.userId,
         content: "đã bày tỏ cảm xúc về sản phẩm của bạn!",
@@ -77,15 +77,59 @@ export class EvaluationController {
 
   @Public()
   @ApiQuery({ name: 'productId', type: String, required: true })
+  @ApiQuery({ name: 'userId', type: String, required: false })
   @Get()
   async getByProductId(
     @Query('productId') productId: string,
+    @Query('userId') userId: string,
   ): Promise<SuccessResponse | NotFoundException> {
+
     const evaluation = await this.evaluationService.getByProductId(productId)
     if (!evaluation) return new NotFoundException("Không tìm thấy sản phẩm này!")
+
+    const total: number = evaluation.emojis.length
+
+    const emoji = {
+      Haha: 0,
+      Love: 0,
+      Wow: 0,
+      Sad: 0,
+      Angry: 0,
+      like: 0,
+    }
+
+    evaluation.emojis.forEach(e => {
+      switch (e.name) {
+        case "Haha": emoji.Haha++; break;
+        case "Love": emoji.Love++; break;
+        case "Wow": emoji.Wow++; break;
+        case "Sad": emoji.Sad++; break;
+        case "Angry": emoji.Angry++; break;
+        case "like": emoji.like++; break;
+      }
+    })
+
+    let isReaction = false
+
+    if (userId) {
+      let evaluationOfUser = evaluation.emojis.find(emoji => emoji.userId.toString() === userId.toString())
+      evaluationOfUser ? isReaction = true : isReaction = false
+    }
+
+    const data = {
+      total,
+      haha: emoji.Haha,
+      love: emoji.Love,
+      wow: emoji.Wow,
+      sad: emoji.Sad,
+      angry: emoji.Angry,
+      like: emoji.like,
+      isReaction,
+    }
+
     return new SuccessResponse({
       message: "Lấy danh sách đánh giá thành công!",
-      metadata: { data: evaluation },
+      metadata: { data },
     })
   }
 }

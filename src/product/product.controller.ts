@@ -256,8 +256,12 @@ export class ProductController {
   async getById(
     @Param('id') id: string
   ): Promise<SuccessResponse | NotFoundException> {
+
+
     const product = await this.productService.getById(id)
     if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
+
+    
     return new SuccessResponse({
       message: "Lấy thông tin sản phẩm thành công!",
       metadata: { data: product },

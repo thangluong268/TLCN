@@ -61,6 +61,7 @@ export class AbilityFactory {
                 can(Action.Delete, User)
                 can(Action.Create, Feedback)
                 can(Action.Update, Evaluation)
+                can(Action.Read, Evaluation)
                 can(Action.Manage, Notification)
                 cannot(Action.Read, Role).because('Không cho đọc role!')
                 cannot(Action.Create, Product).because('Không cho tạo sản phẩm!')
