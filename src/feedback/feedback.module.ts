@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { FeedbackController } from './feedback.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -12,9 +12,10 @@ import { UserModule } from '../user/user.module';
     MongooseModule.forFeature([{ name: 'Feedback', schema: FeedbackSchema }]),
     AbilityModule,
     RoleModule,
-    UserModule,
+    forwardRef(() => UserModule),
   ],
   controllers: [FeedbackController],
   providers: [FeedbackService],
+  exports: [FeedbackService],
 })
 export class FeedbackModule {}

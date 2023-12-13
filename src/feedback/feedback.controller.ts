@@ -81,7 +81,7 @@ export class FeedbackController {
 
     return new SuccessResponse({
       message: "Lấy danh sách đánh giá thành công!",
-      metadata: { total: feedbacks.total,  data },
+      metadata: { total: feedbacks.total, data },
     })
   }
 
@@ -94,25 +94,18 @@ export class FeedbackController {
 
     const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(productId)
 
-    const star = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0
-    }
+    const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
+    const startPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
+    if (feedbacks.length === 0) return new SuccessResponse({
+      message: "Lấy danh sách đánh giá sao thành công!",
+      metadata: { startPercent, averageStar: 0 },
+    })
 
     feedbacks.forEach(feedback => {
       star[feedback.star]++
     })
-
-    const startPercent = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0
-    }
 
     Object.keys(star).forEach(key => {
       startPercent[key] = Math.round((star[key] / feedbacks.length) * 100)

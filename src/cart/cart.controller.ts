@@ -11,6 +11,7 @@ import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorato
 import { SuccessResponse } from '../core/success.response';
 import { BadRequestException, ConflicException, InternalServerErrorException, NotFoundException } from '../core/error.response';
 import { StoreService } from '../store/store.service';
+import { Cart } from './schema/cart.schema';
 
 @Controller('cart/user')
 @ApiTags('Cart')
@@ -104,6 +105,24 @@ export class CartController {
     return new SuccessResponse({
       message: "Xóa sản phẩm khỏi giỏ hàng thành công!",
       metadata: { },
+    })
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadCartAbility())
+  @CheckRole(RoleName.USER)
+  @Get('/get-new')
+  async getNewCartByUserId(
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse> {
+
+    const carts = await this.cartService.getAllByUserId(userId)
+
+    const data: Cart = carts[0]
+
+    return new SuccessResponse({
+      message: "Lấy giỏ hàng mới nhất thành công!",
+      metadata: { data },
     })
   }
 

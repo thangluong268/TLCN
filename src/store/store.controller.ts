@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StoreService } from './store.service';
-import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { CheckAbilities, CreateBillAbility, CreateStoreAbility, DeleteStoreAbility, ReadStoreAbility, UpdateStoreAbility } from '../ability/decorators/abilities.decorator';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -12,9 +12,13 @@ import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorato
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { BadRequestException, ConflicException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
+import { Feedback } from '../feedback/schema/feedback.schema';
+import { FeedbackService } from '../feedback/feedback.service';
+import { Public } from '../auth/decorators/public.decorator';
+import { ProductService } from '../product/product.service';
 
 
-@Controller('store')
+@Controller()
 @ApiTags('Store')
 @ApiBearerAuth('Authorization')
 export class StoreController {
@@ -22,12 +26,14 @@ export class StoreController {
     private readonly storeService: StoreService,
     private readonly userService: UserService,
     private readonly roleService: RoleService,
+    private readonly feedbackService: FeedbackService,
+    private readonly productService: ProductService,
   ) { }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateStoreAbility())
   @CheckRole(RoleName.USER)
-  @Post('user')
+  @Post('store/user')
   async create(
     @Body() store: CreateStoreDto,
     @GetCurrentUserId() userId: string,
@@ -50,19 +56,76 @@ export class StoreController {
     })
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new ReadStoreAbility())
-  @CheckRole(RoleName.USER)
-  @Get('user/:id')
+  @Public()
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  @Get('store-reputation')
+  async getReputation(
+    @Query('storeId') storeId: string,
+  ): Promise<SuccessResponse | NotFoundException> {
+
+    const store = await this.storeService.getById(storeId)
+    if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+
+    const products = await this.productService.getProductsByStoreId(storeId)
+
+    let totalFeedback = 0
+
+    let totalProductsHasFeedback = 0
+    let totalAverageStar = 0
+
+    let averageStar = 0
+
+    const data = await Promise.all(products.map(async product => {
+
+      const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id)
+
+      if (feedbacks.length === 0) return
+
+      totalFeedback += feedbacks.length
+
+      let star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
+      feedbacks.forEach(feedback => { star[feedback.star]++ })
+
+      let averageStar = 0
+
+      Object.keys(star).forEach(key => { averageStar += star[key] * Number(key) })
+
+      averageStar = Number((averageStar / feedbacks.length).toFixed(2))
+
+      totalAverageStar += averageStar
+
+      totalProductsHasFeedback++
+    }
+    ))
+
+    if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2))
+
+    let totalFollow = await this.userService.countTotalFollowStoresByStoreId(storeId)
+
+    return new SuccessResponse({
+      message: "Lấy thông tin độ uy tín cửa hàng thành công!",
+      metadata: { averageStar, totalFeedback, totalFollow },
+    })
+
+  }
+
+  @Public()
+  @Get('store/:id')
   async getById(
     @Param('id') id: string
   ): Promise<SuccessResponse | NotFoundException> {
+
     const store = await this.storeService.getById(id)
     if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+
+    delete store.__v
+
     return new SuccessResponse({
       message: "Lấy thông tin cửa hàng thành công!",
       metadata: { data: store },
     })
+
   }
 
   @UseGuards(AbilitiesGuard)

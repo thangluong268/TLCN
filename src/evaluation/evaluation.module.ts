@@ -13,12 +13,12 @@ import { StoreModule } from '../store/store.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Evaluation', schema: EvaluationSchema }]),
-    forwardRef(() => UserModule),
-    forwardRef(() => ProductModule),
     AbilityModule,
     RoleModule,
     NotificationModule,
-    StoreModule,
+    forwardRef(() => StoreModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => ProductModule)
   ],
   controllers: [EvaluationController],
   providers: [EvaluationService],

@@ -11,9 +11,9 @@ import { BillModule } from '../bill/bill.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), 
-  forwardRef(() => BillModule),
   AbilityModule, 
   RoleModule,
+  BillModule,
 ],
   controllers: [UserController],
   providers: [UserService],

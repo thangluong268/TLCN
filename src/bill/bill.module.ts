@@ -16,13 +16,13 @@ import { CartModule } from '../cart/cart.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Bill', schema: BillSchema }]),
-    forwardRef(() => UserModule),
-    forwardRef(() => ProductModule),
     AbilityModule,
     RoleModule,
     PaymentModule,
-    StoreModule,
     CartModule,
+    ProductModule,
+    StoreModule,
+    forwardRef(() => UserModule),
   ],
   controllers: [BillController],
   providers: [BillService],

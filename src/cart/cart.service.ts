@@ -53,7 +53,7 @@ export class CartService {
 
     async getAllByUserId(userId: string): Promise<Cart[]> {
         try {
-            const carts = await this.cartModel.find({ userId })
+            const carts = await this.cartModel.find({ userId }).sort({ createdAt: -1 })
             return carts
         }
         catch (err) {

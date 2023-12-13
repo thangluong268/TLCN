@@ -171,6 +171,25 @@ export class ProductController {
     })
   }
 
+  @Public()
+  @Get('products-other-in-store')
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  async getAllOtherProductByStoreId(
+    @Query('storeId') storeId: string,
+    @Query('productId') productId: string,
+  ): Promise<SuccessResponse> {
+
+    const products = await this.productService.getProductsByStoreId(storeId)
+
+    const relateProducts = products.filter(product => product._id.toString() !== productId)
+
+    return new SuccessResponse({
+      message: "Lấy danh sách tất cả sản phẩm khác cùng cửa hàng thành công!",
+      metadata: { total: relateProducts.length, data: relateProducts },
+    })
+  }
+
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())

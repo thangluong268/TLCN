@@ -237,4 +237,16 @@ export class UserService {
     }
   }
 
+  async countTotalFollowStoresByStoreId(storeId: string): Promise<number> {
+    try {
+
+      return await this.userModel.countDocuments({ followStores: storeId })
+      
+    } catch (err) {
+      if (err instanceof MongooseError)
+        throw new InternalServerErrorExceptionCustom()
+      throw err
+    }
+  }
+
 }

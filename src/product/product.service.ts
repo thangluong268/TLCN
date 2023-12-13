@@ -271,4 +271,16 @@ export class ProductService {
         return filter;
     }
 
+    async getProductsByStoreId(storeId: string): Promise<Product[]> {
+        try {
+            const products = await this.productModel.find({ storeId })
+            return products
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
 }
