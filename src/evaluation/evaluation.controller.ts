@@ -51,6 +51,9 @@ export class EvaluationController {
     const hadEvaluation = await this.evaluationService.checkEvaluationByUserIdAndProductId(userId, productId)
 
     const result = await this.evaluationService.update(userId, productId, body.body)
+
+    console.log(result)
+
     if (!result) return new NotFoundException("Không tìm thấy sản phẩm này!")
 
     if (userId !== store.userId && !hadEvaluation) {

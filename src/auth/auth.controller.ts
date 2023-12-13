@@ -72,9 +72,12 @@ export class AuthController {
     const userToken = await this.userTokenService.getUserTokenById(user._id)
     userToken ? await this.userTokenService.updateUserToken(user._id, tokens.refreshToken)
       : await this.userTokenService.createUserToken(user._id, tokens.refreshToken)
+
+    const role = await this.roleService.getRoleNameByUserId(user._id)
+    
     return new SuccessResponse({
       message: "Đăng nhập thành công!",
-      metadata: { data: { providerData: [userWithoutPass], stsTokenManager: tokens } },
+      metadata: { data: { providerData: [userWithoutPass], stsTokenManager: tokens, role } },
     })
   }
 
