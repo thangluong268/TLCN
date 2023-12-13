@@ -16,9 +16,8 @@ import { SuccessResponse } from '../core/success.response';
 import { UserService } from '../user/user.service';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from '../notification/schema/notification.schema';
-import { FilterProduct, ProductDto } from './dto/product.dto';
+import { ExcludeIds, FilterDate, FilterProduct, ProductDto } from './dto/product.dto';
 import { Product } from './schema/product.schema';
-import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
 import { BillService } from '../bill/bill.service';
 import { PRODUCT_TYPE } from '../bill/schema/bill.schema';
 import { CategoryService } from '../category/category.service';
@@ -238,15 +237,22 @@ export class ProductController {
 
   @Public()
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @Get('product/random')
+  @Post('product/random')
   async getRandom(
+    @Body() excludeIds: ExcludeIds,
     @Query('limit') limit: number,
+    @Query() cursor?: FilterDate,
   ): Promise<SuccessResponse | NotFoundException> {
-    const products: Product[] = await this.productService.getRandomProducts(limit)
+
+    const products: Product[] = await this.productService.getRandomProducts(limit, excludeIds, cursor)
+
     if (!products) return new NotFoundException("Không tìm thấy sản phẩm!")
+
+     const nextCursor = products.length > 0 ? products[products.length - 1]['createdAt'] : null;
+
     return new SuccessResponse({
       message: "Lấy thông tin sản phẩm thành công!",
-      metadata: { data: products },
+      metadata: { nextCursor, data: products },
     })
   }
 

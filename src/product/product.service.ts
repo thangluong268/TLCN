@@ -7,7 +7,7 @@ import { Store } from '../store/schema/store.schema';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import removeVietnameseTones from '../utils/removeVietNameseTones';
 import sortByConditions from '../utils/sortByContitions';
-import { FilterProduct } from './dto/product.dto';
+import { ExcludeIds, FilterDate, FilterProduct } from './dto/product.dto';
 
 @Injectable()
 export class ProductService {
@@ -32,7 +32,7 @@ export class ProductService {
 
     async getById(id: string): Promise<Product> {
         try {
-            const product = await this.productModel.findOne({_id: id})
+            const product = await this.productModel.findOne({ _id: id })
             return product
         }
         catch (err) {
@@ -171,38 +171,44 @@ export class ProductService {
     }
 
 
-    async getRandomProducts(limit: number = 3): Promise<Product[]> {
+    async getRandomProducts(limit: number = 5, excludeIdsBody: ExcludeIds, cursor?: FilterDate): Promise<Product[]> {
         try {
-            const products = await this.productModel.aggregate([
-                { $match: { status: true } },
+
+            const excludeIds: string[] = [...excludeIdsBody.ids]
+
+            const cursorQuery = cursor ? { createdAt: { $gt: new Date(cursor.date) } } : {}
+
+            const products: Product[] = await this.productModel.aggregate([
+                {
+                    $match: {
+                        _id: { $nin: excludeIds },
+                        ...cursorQuery,
+                        status: true
+                    }
+                },
                 { $sample: { size: Number(limit) } }
             ])
+
+            let remainingLimit: number = limit - products.length
+
+            if (remainingLimit < limit) {
+
+                let currentExcludeIds: string[] = products.map(product => product._id.toString())
+                excludeIds.push(...currentExcludeIds)
+
+                let otherProducts: Product[] = await this.productModel.aggregate([
+                    {
+                        $match: {
+                            _id: { $nin: excludeIds },
+                            status: true
+                        }
+                    },
+                    { $sample: { size: remainingLimit } }
+                ])
+                products.push(...otherProducts)
+            }
+
             return products
-
-            // const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
-            // const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
-            // const search = {
-            //         $or: [
-            //             { productName: { $regex: searchQuery, $options: "i" } },
-            //             { description: { $regex: searchQuery, $options: "i" } },
-            //             { keywords: { $regex: searchQuery, $options: "i" } },
-            //             { type: { $regex: searchQuery, $options: "i" } },
-            //             { storeName: { $regex: searchQuery, $options: "i" } },
-            //             { categoryId: { $regex: searchQuery, $options: "i" } },
-            //         ]
-            //     }
-            //     : {}
-            // const skip = limit * (page - 1)
-
-            // const total = await this.productModel.countDocuments({ ...search, ...storeId, ...status })
-            // const products = await this.productModel.find({ ...search, ...storeId, ...status })
-            //     .sort({ createdAt: -1 })
-            //     .limit(limit)
-            //     .skip(skip)
-
-            // sortByConditions(products, sortTypeQuery, sortValueQuery)
-
-            // return { total, products }
 
         }
         catch (err) {

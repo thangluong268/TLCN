@@ -61,6 +61,12 @@ export class ProductDto {
 
 }
 
+export class ExcludeIds {
+    @ApiProperty({type: [String], required: true, example: ['65773c715dd856a17de6fc97', '65773c715dd856a17de6fc91']})
+    @IsNotEmpty()
+    ids: string[];
+}
+
 
 export class FilterProduct {
     @ApiProperty({ description: 'Filter Price Min', type: Number, required: false, example: 100000 })
@@ -83,4 +89,10 @@ export class FilterProduct {
     @Transform(({ value }) => (value ? new Date(value) : null))
     createdAtMax?: Date;
 
+  }
+
+  export class FilterDate {
+    @ApiProperty({ description: 'Next element', required: false, example: '2023-01-01' })
+    @Transform(({ value }) => (value ? new Date(value) : null))
+    date?: Date;
   }
