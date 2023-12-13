@@ -401,4 +401,23 @@ export class BillService {
         }
     }
 
+    async checkUserPurchasedByProductId(userId: string, productId: string): Promise<boolean> {
+        try {
+            const bill = await this.billModel.findOne({
+                userId,
+                'listProducts': {
+                    $elemMatch: {
+                        'productId': productId.toString(),
+                    }
+                },
+            })
+            return bill ? true : false
+        }
+        catch (err) {
+            if (err instanceof MongooseError)
+                throw new InternalServerErrorExceptionCustom()
+            throw err
+        }
+    }
+
 }

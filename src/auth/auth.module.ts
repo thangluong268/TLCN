@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
 import { UsertokenModule } from '../usertoken/usertoken.module';
 import { FirebaseModule } from '../firebase/firebase.module';
+import { StoreModule } from 'src/store/store.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { FirebaseModule } from '../firebase/firebase.module';
     RoleModule,
     AbilityModule,
     UsertokenModule,
-    FirebaseModule
+    FirebaseModule,
+    StoreModule,
   ],
   controllers: [AuthController],
   providers: [

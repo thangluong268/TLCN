@@ -3,7 +3,6 @@ import { EvaluationService } from './evaluation.service';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { CheckAbilities, UpdateEvaluationAbility } from '../ability/decorators/abilities.decorator';
-import { BodyDto } from './dto/body.dto';
 import { CheckRole } from '../ability/decorators/role.decorator';
 import { RoleName } from '../role/schema/role.schema';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
@@ -15,6 +14,8 @@ import { ProductService } from '../product/product.service';
 import { UserService } from '../user/user.service';
 import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
 import { StoreService } from '../store/store.service';
+import { BillService } from '../bill/bill.service';
+import { EvaluationDto } from './dto/body.dto';
 
 @Controller('evaluation')
 @ApiTags('Evaluation')
@@ -26,6 +27,7 @@ export class EvaluationController {
     private readonly productService: ProductService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
+    private readonly billService: BillService,
   ) { }
 
   @UseGuards(AbilitiesGuard)
@@ -35,7 +37,7 @@ export class EvaluationController {
   @Put('user')
   async create(
     @Query('productId') productId: string,
-    @Body() body: BodyDto,
+    @Body() evaluationDto: EvaluationDto,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException> {
 
@@ -50,7 +52,7 @@ export class EvaluationController {
 
     const hadEvaluation = await this.evaluationService.checkEvaluationByUserIdAndProductId(userId, productId)
 
-    const result = await this.evaluationService.update(userId, productId, body.body)
+    const result = await this.evaluationService.update(userId, productId, evaluationDto.name)
 
     console.log(result)
 
@@ -61,7 +63,7 @@ export class EvaluationController {
         userIdFrom: userId,
         userIdTo: store.userId,
         content: "đã bày tỏ cảm xúc về sản phẩm của bạn!",
-        type: body.body,
+        type: evaluationDto.name,
         sub: {
           fullName: user.fullName,
           avatar: user.avatar,
@@ -113,10 +115,13 @@ export class EvaluationController {
     })
 
     let isReaction = false
+    let isPurchased = false
 
     if (userId) {
       let evaluationOfUser = evaluation.emojis.find(emoji => emoji.userId.toString() === userId.toString())
       evaluationOfUser ? isReaction = true : isReaction = false
+
+      isPurchased = await this.billService.checkUserPurchasedByProductId(userId, productId)
     }
 
     const data = {
@@ -128,6 +133,7 @@ export class EvaluationController {
       angry: emoji.Angry,
       like: emoji.like,
       isReaction,
+      isPurchased,
     }
 
     return new SuccessResponse({

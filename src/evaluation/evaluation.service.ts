@@ -25,7 +25,7 @@ export class EvaluationService {
         }
     }
 
-    async update(userId: string, productId: string, body: string): Promise<boolean> {
+    async update(userId: string, productId: string, name: string): Promise<boolean> {
 
         const evaluation = await this.evaluationModel.findOne({ productId })
         if (!evaluation) {
@@ -40,21 +40,21 @@ export class EvaluationService {
             evaluation.hadEvaluation.push(newHadEvaluation)
         }
 
-        return await this.updateEmoji(userId, body, evaluation)
+        return await this.updateEmoji(userId, name, evaluation)
 
     }
 
-    async updateEmoji(userId: string, body: string, evaluation: Evaluation): Promise<boolean> {
+    async updateEmoji(userId: string, name: string, evaluation: Evaluation): Promise<boolean> {
         try {
             const index = evaluation.emojis.findIndex(emoji => emoji.userId.toString() === userId.toString())
             const newEmoji = new EmojiDto()
             newEmoji.userId = userId
-            newEmoji.name = body
+            newEmoji.name = name
             if (index == -1) {
                 evaluation.emojis.push(newEmoji)
             }
             else {
-                if (evaluation.emojis[index].name == body) {
+                if (evaluation.emojis[index].name == name) {
                     evaluation.emojis.splice(index, 1)
                 }
                 else {
