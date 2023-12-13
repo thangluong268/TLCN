@@ -174,15 +174,18 @@ export class ProductService {
     async getRandomProducts(limit: number = 5, excludeIdsBody: ExcludeIds, cursor?: FilterDate): Promise<Product[]> {
         try {
 
-            const excludeIds: string[] = [...excludeIdsBody.ids]
+            const excludeIds: Types.ObjectId[] = excludeIdsBody.ids.map(id => new Types.ObjectId(id))
 
-            const cursorQuery = cursor ? { createdAt: { $gt: new Date(cursor.date) } } : {}
+            let query: any = {};
+
+            if (cursor.date)
+                query = { createdAt: { $gt: new Date(cursor.date) } }
 
             const products: Product[] = await this.productModel.aggregate([
                 {
                     $match: {
+                        ...query,
                         _id: { $nin: excludeIds },
-                        ...cursorQuery,
                         status: true
                     }
                 },
@@ -193,7 +196,7 @@ export class ProductService {
 
             if (remainingLimit < limit) {
 
-                let currentExcludeIds: string[] = products.map(product => product._id.toString())
+                let currentExcludeIds: Types.ObjectId[] = products.map(product => product._id)
                 excludeIds.push(...currentExcludeIds)
 
                 let otherProducts: Product[] = await this.productModel.aggregate([
