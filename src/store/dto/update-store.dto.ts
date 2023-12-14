@@ -1,19 +1,18 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateStoreDto {
-    @ApiProperty()
-    avatar: string;
+  @ApiProperty()
+  avatar: string;
 
-    @ApiProperty()
-    name: string;
+  @ApiProperty()
+  name: string;
 
-    @ApiProperty()
-    description: string;
+  @ApiProperty()
+  description: string;
 
-    @ApiProperty()
-    address: string;
+  @ApiProperty()
+  address: string;
 
-    @ApiProperty({type: [String]})
-    phoneNumber: string[];
+  @ApiProperty({ type: [String] })
+  phoneNumber: string[];
 }

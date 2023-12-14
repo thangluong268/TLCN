@@ -1,19 +1,19 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { FeedbackService } from './feedback.service';
-import { Request } from 'express';
-import { Feedback } from './schema/feedback.schema';
+import { Body, Controller, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CreateFeedbackDto } from './dto/create-feedback.dto';
-import { AbilitiesGuard } from '../ability/guards/abilities.guard';
-import { CheckAbilities, CreateFeedBackAbility } from '../ability/decorators/abilities.decorator';
+import { BadRequestException, NotFoundException } from '../core/error.response';
+import { CheckAbilities, CreateFeedBackAbility, UpdateFeedBackAbility } from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
-import { RoleName } from '../role/schema/role.schema';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
-import { UserService } from '../user/user.service';
-import { SuccessResponse } from '../core/success.response';
 import { Public } from '../auth/decorators/public.decorator';
-import { FeedbackDto } from './dto/feedback.dto';
+import { SuccessResponse } from '../core/success.response';
+import { RoleName } from '../role/schema/role.schema';
 import { User } from '../user/schema/user.schema';
+import { UserService } from '../user/user.service';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
+import { FeedbackDto } from './dto/feedback.dto';
+import { FeedbackService } from './feedback.service';
+import { Feedback } from './schema/feedback.schema';
 
 @Controller()
 @ApiTags('FeedBack')
@@ -22,7 +22,7 @@ export class FeedbackController {
   constructor(
     private readonly feedbackService: FeedbackService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateFeedBackAbility())
@@ -34,12 +34,12 @@ export class FeedbackController {
     @Body() feedback: CreateFeedbackDto,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse> {
-    const newFeedback = await this.feedbackService.create(userId, productId, feedback)
-    await this.userService.updateWallet(userId, 5000, "plus")
+    const newFeedback = await this.feedbackService.create(userId, productId, feedback);
+    await this.userService.updateWallet(userId, 5000, 'plus');
     return new SuccessResponse({
-      message: "Đánh giá thành công!",
+      message: 'Đánh giá thành công!',
       metadata: { data: newFeedback },
-    })
+    });
   }
 
   @Public()
@@ -54,76 +54,97 @@ export class FeedbackController {
     @Query('productId') productId: string,
     @Query('userId') userId: string,
   ): Promise<SuccessResponse> {
+    const feedbacks = await this.feedbackService.getAllByProductIdPaging(page, limit, productId);
 
-    const feedbacks = await this.feedbackService.getAllByProductIdPaging(page, limit, productId)
+    const data: FeedbackDto[] = await Promise.all(
+      feedbacks.feedbacks.map(async (feedback: Feedback) => {
+        const user: User = await this.userService.getById(feedback.userId);
 
-    const data: FeedbackDto[] = await Promise.all(feedbacks.feedbacks.map(async (feedback: Feedback) => {
-
-      let user: User = await this.userService.getById(feedback.userId)
-
-      return {
-        star: feedback.star,
-        content: feedback.content,
-        avatar: user.avatar,
-        name: user.fullName,
-        consensus: feedback.consensus,
-        isConsensus: false,
-        createdAt: feedback['createdAt'],
-        userId: feedback.userId,
-      }
-    }))
+        return {
+          star: feedback.star,
+          content: feedback.content,
+          avatar: user.avatar,
+          name: user.fullName,
+          consensus: feedback.consensus,
+          isConsensus: false,
+          createdAt: feedback['createdAt'],
+          userId: feedback.userId,
+        };
+      }),
+    );
 
     if (userId) {
       data.forEach((feedback: FeedbackDto) => {
         if (feedback.consensus.includes(userId)) {
-          feedback.isConsensus = true
+          feedback.isConsensus = true;
         }
-      })
+      });
     }
 
     return new SuccessResponse({
-      message: "Lấy danh sách đánh giá thành công!",
+      message: 'Lấy danh sách đánh giá thành công!',
       metadata: { total: feedbacks.total, data },
-    })
+    });
   }
 
   @Public()
   @Get('feedback-star')
   @ApiQuery({ name: 'productId', type: String, required: true })
-  async getAllByProductIdStar(
-    @Query('productId') productId: string,
-  ): Promise<SuccessResponse> {
+  async getAllByProductIdStar(@Query('productId') productId: string): Promise<SuccessResponse> {
+    const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(productId);
 
-    const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(productId)
+    const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    const startPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    const startPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-
-    if (feedbacks.length === 0) return new SuccessResponse({
-      message: "Lấy danh sách đánh giá sao thành công!",
-      metadata: { startPercent, averageStar: 0 },
-    })
+    if (feedbacks.length === 0)
+      return new SuccessResponse({
+        message: 'Lấy danh sách đánh giá sao thành công!',
+        metadata: { startPercent, averageStar: 0 },
+      });
 
     feedbacks.forEach(feedback => {
-      star[feedback.star]++
-    })
+      star[feedback.star]++;
+    });
 
     Object.keys(star).forEach(key => {
-      startPercent[key] = Math.round((star[key] / feedbacks.length) * 100)
-    })
+      startPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+    });
 
-    let averageStar = 0
+    let averageStar = 0;
     Object.keys(star).forEach(key => {
-      averageStar += star[key] * Number(key)
-    })
+      averageStar += star[key] * Number(key);
+    });
 
-    averageStar = Number((averageStar / feedbacks.length).toFixed(2))
+    averageStar = Number((averageStar / feedbacks.length).toFixed(2));
 
     return new SuccessResponse({
-      message: "Lấy danh sách đánh giá sao thành công!",
+      message: 'Lấy danh sách đánh giá sao thành công!',
       metadata: { startPercent, averageStar },
-    })
+    });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateFeedBackAbility())
+  @CheckRole(RoleName.USER)
+  @ApiQuery({ name: 'userId', type: String, required: true })
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  @Put('feedback-consensus')
+  async updateConsensus(
+    @Query('userId') userId: string,
+    @Query('productId') productId: string,
+    @GetCurrentUserId() userIdConsensus: string,
+  ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
+
+    if (userId === userIdConsensus) return new BadRequestException('Bạn không thể đồng thuận với chính mình!');
+
+    const result: boolean = await this.feedbackService.updateConsensus(userId, productId, userIdConsensus);
+
+    if (!result) return new NotFoundException('Không tìm thấy đánh giá này!');
+
+    return new SuccessResponse({
+      message: 'Đồng thuận thành công!',
+      metadata: { data: { result } },
+    });
+  }
 }
