@@ -23,6 +23,8 @@ import { SuccessResponseDto } from '../responses/success.responseDto';
 import { GetCurrentUserId } from './decorators/get-current-userid.decorator';
 import { StoreService } from '../store/store.service';
 import { SeedDto } from './dto/seed.dto';
+import { ProductService } from '../product/product.service';
+import { EvaluationService } from '../evaluation/evaluation.service';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -34,6 +36,8 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly userTokenService: UsertokenService,
     private readonly storeService: StoreService,
+    private readonly productService: ProductService,
+    private readonly evaluationService: EvaluationService,
   ) { }
 
   @Public()
@@ -180,23 +184,27 @@ export class AuthController {
 
     // Create multi stores
     const dataStores: any = await Promise.all(seedDto.stores.map(async (store, index) => {
-      const newStore = await this.storeService.create(userIds[index], store)  
+      store.phoneNumber = [dataUsers[index].phone]
+      const newStore = await this.storeService.create(userIds[index], store)
       await this.roleService.addUserToRole(userIds[index], { name: RoleName.SELLER })
       return newStore
     }))
 
-    console.log(userIds)
-
-
     const storeIds = dataStores.map((store: any) => store._id)
 
-    console.log(storeIds)
+    // Create multi products
+    const dataProducts: any = await Promise.all(seedDto.products.map(async (product, index) => {
+      const newProduct = await this.productService.create(storeIds[index], product)
+      await this.evaluationService.create(newProduct._id)
+      return newProduct
+    }
+    ))
 
-
+    const productIds = dataProducts.map((product: any) => product._id)
 
     return new SuccessResponse({
       message: "Tạo nhiều data thành công!",
-      metadata: { userIds, storeIds },
+      metadata: { userIds, storeIds, productIds},
     })
 
   }

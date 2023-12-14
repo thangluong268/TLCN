@@ -16,10 +16,10 @@ export class ProductService {
         private readonly productModel: Model<Product>
     ) { }
 
-    async create(store: Store, product: CreateProductDto): Promise<Product> {
+    async create(storeId: string, product: CreateProductDto): Promise<Product> {
         try {
             const newProduct = await this.productModel.create(product)
-            newProduct.storeId = store._id
+            newProduct.storeId = storeId
             await newProduct.save()
             return newProduct
         }

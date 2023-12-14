@@ -52,7 +52,7 @@ export class ProductController {
     const category = await this.categoryService.getById(product.categoryId)
     if (!category) return new NotFoundException("Không tìm thấy danh mục này!")
 
-    const newProduct = await this.productService.create(store, product)
+    const newProduct = await this.productService.create(store._id, product)
 
     await this.evaluationService.create(newProduct._id)
 
@@ -98,7 +98,7 @@ export class ProductController {
     const store = await this.storeService.getByUserId(userId)
     if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
     products.forEach(async product => {
-      const newProduct = await this.productService.create(store, product)
+      const newProduct = await this.productService.create(store._id, product)
       await this.evaluationService.create(newProduct._id)
     })
   }

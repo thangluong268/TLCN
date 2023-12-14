@@ -23,7 +23,7 @@ export class UserController {
     private readonly userService: UserService,
     private readonly roleService: RoleService,
     private readonly billService: BillService
-    ) { }
+  ) { }
 
 
   @UseGuards(AbilitiesGuard)
@@ -37,7 +37,7 @@ export class UserController {
 
     const billsOfUser = await this.billService.getAllByUserId(id)
 
-    const totalBills = billsOfUser.length 
+    const totalBills = billsOfUser.length
     const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0)
     const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length
 
@@ -130,9 +130,12 @@ export class UserController {
   @CheckAbilities(new UpdateUserAbility())
   @CheckRole(RoleName.USER)
   @Post('user/followStore/:id')
-  async addStore(@Param('id') id: string, @Body() req: AddIdDto): Promise<SuccessResponse | BadRequestException> {
+  async addStore(@Param('id') id: string, @Body() req: AddIdDto)
+    : Promise<SuccessResponse | BadRequestException> {
+
     const user = await this.userService.followStore(id, req.id);
     if (!user) return new BadRequestException("Không thể theo dõi cửa hàng!")
+    
     return new SuccessResponse({
       message: "Theo dõi cửa hàng thành công!",
       metadata: { data: user },
