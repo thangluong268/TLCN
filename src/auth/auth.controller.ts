@@ -193,18 +193,23 @@ export class AuthController {
     const storeIds = dataStores.map((store: any) => store._id)
 
     // Create multi products
-    const dataProducts: any = await Promise.all(seedDto.products.map(async (product, index) => {
-      const newProduct = await this.productService.create(storeIds[index], product)
-      await this.evaluationService.create(newProduct._id)
-      return newProduct
+    const productIds: any = await Promise.all(seedDto.products.map(async (productOfStore, index) => {
+
+      let productOfStoreIds: any = await Promise.all(productOfStore.productsOfStore.map(async (product) => {
+        const newProduct = await this.productService.create(storeIds[index], product)
+        await this.evaluationService.create(newProduct._id)
+        return newProduct
+      }))
+
+      let ids = productOfStoreIds.map((product: any) => product._id)
+      return ids
     }
     ))
 
-    const productIds = dataProducts.map((product: any) => product._id)
 
     return new SuccessResponse({
       message: "Tạo nhiều data thành công!",
-      metadata: { userIds, storeIds, productIds},
+      metadata: { userIds, storeIds, productIds },
     })
 
   }

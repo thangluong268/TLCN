@@ -47,6 +47,13 @@ export class SeedStoreDto {
     phoneNumber: string[];
 }
 
+export class SeedProductDto {
+    @Type(() => CreateProductDto)
+    @ApiProperty({ type: [CreateProductDto] })
+    @IsNotEmpty()
+    productsOfStore: CreateProductDto[];
+}
+
 export class SeedDto {
 
     @Type(() => SeedUserDto)
@@ -59,8 +66,8 @@ export class SeedDto {
     @IsNotEmpty()
     stores: SeedStoreDto[];
 
-    @Type(() => CreateProductDto)
-    @ApiProperty({ type: [CreateProductDto] })
+    @Type(() => SeedProductDto)
+    @ApiProperty({ type: [SeedProductDto] })
     @IsNotEmpty()
-    products: CreateProductDto[];
+    products: SeedProductDto[];
 }
