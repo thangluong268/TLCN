@@ -91,7 +91,12 @@ function Feedback(props: Props) {
             </div>
             <div className="flex items-center mb-1 space-x-1 rtl:space-x-reverse">
               {Array.from({ length: 5 }, (_, index) => {
-                return <Star state={index + 1 <= item.star ? true : false} />;
+                return (
+                  <Star
+                    key={index}
+                    state={index + 1 <= item.star ? true : false}
+                  />
+                );
               })}
             </div>
 
