@@ -69,6 +69,7 @@ export class FeedbackController {
         consensus: feedback.consensus,
         isConsensus: false,
         createdAt: feedback['createdAt'],
+        userId: feedback.userId,
       }
     }))
 
