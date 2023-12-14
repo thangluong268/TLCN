@@ -181,7 +181,7 @@ export class ProductController {
 
     const products = await this.productService.getProductsByStoreId(storeId)
 
-    const relateProducts = products.filter(product => product._id.toString() !== productId)
+    const relateProducts = products.filter(product => product._id.toString() !== productId).slice(0, 12)
 
     return new SuccessResponse({
       message: "Lấy danh sách tất cả sản phẩm khác cùng cửa hàng thành công!",

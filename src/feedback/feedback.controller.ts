@@ -67,7 +67,8 @@ export class FeedbackController {
         avatar: user.avatar,
         name: user.fullName,
         consensus: feedback.consensus,
-        isConsensus: false
+        isConsensus: false,
+        createdAt: feedback['createdAt'],
       }
     }))
 
