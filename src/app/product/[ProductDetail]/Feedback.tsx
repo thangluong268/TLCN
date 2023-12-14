@@ -72,7 +72,7 @@ function Feedback(props: Props) {
   return (
     <>
       {feedbacks!.map((item: any, index: any) => (
-        <>
+        <div key={index}>
           <article>
             <div className="flex items-center mb-4">
               <img
@@ -122,7 +122,7 @@ function Feedback(props: Props) {
             )}
           </article>
           <hr className="w-full my-5" />
-        </>
+        </div>
       ))}
       <Paging
         totalPage={total}
