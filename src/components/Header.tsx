@@ -73,7 +73,7 @@ function Header() {
         dispatch(setCartPopUp(carts));
       }
     };
-    if (user) {
+    if (user && user.role != "admin") {
       fetchAllCart();
     }
   }, []);

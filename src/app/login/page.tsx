@@ -82,13 +82,15 @@ function Login() {
         Toast("error", "Tài khoản hoặc mật khẩu không đúng", 5000);
         return;
       }
+      console.log(res.metadata.data);
       localStorage.setItem("user", JSON.stringify(res.metadata.data));
       axios.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${res.metadata.data.stsTokenManager.accessToken}`;
       Toast("success", "Đăng nhập thành công", 2000);
       setTimeout(() => {
-        window.location.href = "/";
+        if (res.metadata.data.role == "Admin") window.location.href = "/admin";
+        else window.location.href = "/";
       }, 2000);
     }
   };

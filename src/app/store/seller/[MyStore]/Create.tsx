@@ -59,7 +59,7 @@ function Create() {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Tạo sản phẩm thành công", 2000);
         setTimeout(() => {
-          dispatch(setCategoryStore(CATEGORYSTORE[CATEGORYSTORE.length - 1]));
+          dispatch(setCategoryStore(CATEGORYSTORE[CATEGORYSTORE.length - 2]));
         }, 2000);
       }
     } else {

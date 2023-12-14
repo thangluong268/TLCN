@@ -267,6 +267,7 @@ function Home(props: HomeProps) {
         new Date().getFullYear() + ""
       ).then((res) => res);
       // Set data for dataSellState
+      console.log(data);
       const labels = Object.keys(data.metadata.data.data);
       const value = Object.values(data.metadata.data.data);
 
@@ -279,8 +280,8 @@ function Home(props: HomeProps) {
             borderColor: "#bfbfbf",
           },
         ],
-        maxRevenue: data.metadata.data.maxRevenue,
-        minRevenue: data.metadata.data.minRevenue,
+        maxRevenue: data.metadata.data.maxRevenue || 0,
+        minRevenue: data.metadata.data.minRevenue || 0,
         revenueTotalAllTime: data.metadata.data.revenueTotalAllTime,
         revenueTotalInYear: data.metadata.data.revenueTotalInYear,
       };

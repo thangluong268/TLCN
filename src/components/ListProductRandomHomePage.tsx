@@ -8,17 +8,27 @@ interface Props {
 function ListProductRandomHomePage(props: Props) {
   const { showButton } = props;
   const [lstProduct, setLstProduct] = React.useState<any[]>([]); // Update the type of lstProduct to any[]
-  const [showMore, setShowMore] = React.useState<boolean>(false); // Update the type of lstProduct to any[
+  const [showMore, setShowMore] = React.useState<boolean>(false); // Update the type of lstProduct to any[]
+  const [nextCursor, setNextCursor] = React.useState<string>(""); // Update the type of lstProduct to any[
+  const [listIdCurrent, setListIdCurrent] = React.useState<any[]>([]);
   React.useEffect(() => {
     const fetchData = async () => {
-      await APIGetListProductRandom(30).then((res: any) => {
-        const lst = JSON.parse(JSON.stringify(lstProduct));
-        lst.push(...res.metadata.data);
-        setLstProduct(lst); // Update the type of lstProduct to any[]
-      });
+      await APIGetListProductRandom(30, nextCursor || "", listIdCurrent).then(
+        (res: any) => {
+          setNextCursor(res.metadata.nextCursor);
+          var listId = res.metadata.data
+            .map((item: any) => item._id)
+            .concat(listIdCurrent);
+          setListIdCurrent(listId);
+          const lst = JSON.parse(JSON.stringify(lstProduct));
+          lst.push(...res.metadata.data);
+          setLstProduct(lst);
+        }
+      );
     };
     fetchData();
   }, [showMore]);
+  console.log(listIdCurrent);
   return (
     <div className="flex flex-col bg-white p-4 rounded-xl mb-2">
       <div className="flex justify-between font-bold">

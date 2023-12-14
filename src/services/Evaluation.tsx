@@ -15,7 +15,7 @@ export const APIGetEvaluationUser = async (productId: any, body: any) => {
   const headers = GetHeaders();
   const res = await axios.put(
     `${process.env.NEXT_PUBLIC_API_URL}/evaluation/user?productId=${productId}`,
-    { body },
+    body,
     { headers }
   );
   return res.data;

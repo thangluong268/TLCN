@@ -42,3 +42,23 @@ export const APIUpdateMyStore = async (body: any) => {
   );
   return res.data;
 };
+
+// /api/store-reputation?storeId=654736b154e5a9481f44b86d
+export const APIGetStoreReputation = async (storeId: string) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store-reputation?storeId=${storeId}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/store/123
+export const APIGetStoreById = async (id: string) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/${id}`,
+    { headers }
+  );
+  return res.data;
+};
