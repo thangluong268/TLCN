@@ -115,13 +115,13 @@ export class StoreController {
     });
   }
 
-  @Public()
-  @Get('store/:id')
-  async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
-    const store = await this.storeService.getById(id);
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @Get('store/seller')
+  async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getByUserId(userId);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
-
-    delete store.__v;
 
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
@@ -129,14 +129,13 @@ export class StoreController {
     });
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new ReadStoreAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
-  @Get('store/seller')
-  async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-
-    const store = await this.storeService.getByUserId(userId);
+  @Public()
+  @Get('store/:id')
+  async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getById(id);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
+
+    delete store.__v;
 
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
