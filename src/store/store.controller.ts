@@ -132,10 +132,12 @@ export class StoreController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadStoreAbility())
   @CheckRole(RoleName.SELLER, RoleName.USER)
-  @Get('seller')
+  @Get('store/seller')
   async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+
     const store = await this.storeService.getByUserId(userId);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
+
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
       metadata: { data: store },
@@ -145,7 +147,7 @@ export class StoreController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateStoreAbility())
   @CheckRole(RoleName.SELLER)
-  @Put('seller')
+  @Put('store/seller')
   async update(@Body() store: UpdateStoreDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const newStore = await this.storeService.update(userId, store);
     if (!newStore) return new NotFoundException('Không tìm thấy cửa hàng này!');
@@ -158,7 +160,7 @@ export class StoreController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteStoreAbility())
   @CheckRole(RoleName.SELLER)
-  @Delete('seller')
+  @Delete('store/seller')
   async delete(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     const result = await this.storeService.delete(userId);
     if (!result) return new NotFoundException('Không tìm thấy cửa hàng này!');
@@ -173,7 +175,7 @@ export class StoreController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateStoreAbility())
   @CheckRole(RoleName.MANAGER)
-  @Put('manager/warningcount/:id')
+  @Put('store/manager/warningcount/:id')
   async updateWarningCount(@Param('id') id: string, @Param('action') action: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.updateWarningCount(id, action);
     if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
