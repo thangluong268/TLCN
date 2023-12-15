@@ -205,10 +205,15 @@ export class ProductController {
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
     const products = await this.productService.mostProductsInStore(limit);
-
+    const data = await Promise.all(
+      products.map(async product => {
+        const store = await this.storeService.getById(product.storeId);
+        return { ...product, storeName: store.name };
+      }),
+    );
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data: products },
+      metadata: { data },
     });
   }
 
