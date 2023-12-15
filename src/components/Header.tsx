@@ -285,7 +285,7 @@ function Header() {
               </span>
             </Link>
             <div className="border-r border-gray-400 mx-3 h-6"></div>
-            <Link href="/signup">
+            <Link href="/sign-up">
               <span className="text-[14px] font-medium cursor-pointer">
                 Đăng Ký
               </span>

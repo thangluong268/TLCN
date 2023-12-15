@@ -30,7 +30,49 @@ function Info() {
   const [data, setData] = React.useState<TableInvoice[]>([] as TableInvoice[]);
   const [isShow, setIsShow] = React.useState(false);
   const [changed, setChanged] = React.useState(false);
+  const [typeMes, setTypeMes] = React.useState<string>("");
+
   const [currentId, setCurrentId] = React.useState("");
+  interface TypeObject {
+    [key: string]: {
+      mes: string;
+      func: () => void;
+    };
+  }
+
+  const type: TypeObject = {
+    upGrade: {
+      mes: "Bạn có chắc chắn muốn HOÀN ĐƠN này không?",
+      func: () => UpGrade(),
+    },
+    cancel: {
+      mes: "Bạn có muốn HUỶ ĐƠN này không?",
+      func: () => Cancel(),
+    },
+  };
+  const Cancel = async () => {
+    await APIUpdateBill(currentId, "CANCELLED").then((res) => {
+      if (res.status == 200 || res.status == 201) {
+        Toast("success", "Huỷ đơn thành công", 2000);
+        setIsShow(false);
+        setChanged(!changed);
+        setStatus("CANCELLED");
+      } else {
+        Toast("error", "Chuyển thất bại", 2000);
+      }
+    });
+  };
+  const UpGrade = async () => {
+    await APIUpdateBill(currentId, "RETURNED").then((res) => {
+      if (res.status == 200 || res.status == 201) {
+        Toast("success", "Hoàn đơn thành công", 2000);
+        setIsShow(false);
+        setChanged(!changed);
+      } else {
+        Toast("error", "Hoàn đơn thất bại", 2000);
+      }
+    });
+  };
   React.useEffect(() => {
     const getInvoice = async () => {
       const res = await APIGetCountBillByStatusUser();
@@ -99,18 +141,7 @@ function Info() {
     };
     getBill();
   }, [status, page]);
-  const Cancel = async () => {
-    await APIUpdateBill(currentId, "CANCELLED").then((res) => {
-      if (res.status == 200 || res.status == 201) {
-        Toast("success", "Chuyển thành thành công", 2000);
-        setIsShow(false);
-        setChanged(!changed);
-        setStatus("CANCELLED");
-      } else {
-        Toast("error", "Chuyển thất bại", 2000);
-      }
-    });
-  };
+
   return (
     <div className="min-h-screen px-[150px] my-4">
       <div className=" bg-white rounded-md py-2 px-4 mb-5">
@@ -181,10 +212,21 @@ function Info() {
               {status == "NEW" && (
                 <td className="px-6 py-4 text-center">
                   <div
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer mb-2"
+                    onClick={(e) => {
+                      setIsShow(true);
+                      setCurrentId(item.id);
+                      setTypeMes("upGrade");
+                    }}
+                  >
+                    Hoàn đơn
+                  </div>
+                  <div
                     className="font-medium text-red-600 dark:text-red-500 hover:underline cursor-pointer mb-2"
                     onClick={(e) => {
                       setIsShow(true);
                       setCurrentId(item.id);
+                      setTypeMes("cancel");
                     }}
                   >
                     Huỷ đơn
@@ -199,12 +241,12 @@ function Info() {
           isShow={isShow}
           setIsShow={(data: any) => setIsShow(data)}
           confirm={() => {
-            Cancel();
+            type[typeMes]?.func();
           }}
-          title="Huỷ đơn hàng"
+          title="Thay đổi trạng thái"
         >
           <div className="font-bold text-lg text-center">
-            Bạn có chắc chắn muốn huỷ đơn hàng này?
+            {type[typeMes]?.mes}
           </div>
         </Modal>
       </div>

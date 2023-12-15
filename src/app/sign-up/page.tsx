@@ -9,6 +9,7 @@ import FrameInit from "@/components/FrameInit";
 import { FaLongArrowAltLeft, FaRedo } from "react-icons/fa";
 import { APISignUp } from "@/services/Auth";
 import Toast from "@/utils/Toast";
+import Link from "next/link";
 
 interface SignUpForm {
   name: string;
@@ -248,13 +249,21 @@ function SignUp() {
             </div>
             <div className="w-full mt-4">
               <button
-                className="py-3 bg-gray-600 text-white rounded-[10px] w-full px-4 font-bold text-lg"
+                className="py-3 bg-gray-600 text-white rounded-[10px] w-full px-4 font-bold text-lg mb-2"
                 onClick={(e) => {
                   checkState.isSendOTP ? ConfirmOTP() : SendOTP();
                 }}
               >
                 {checkState.titleButton}
               </button>
+              <Link href="/" className=" font-bold cursor-pointer">
+                <div className="flex items-center justify-center">
+                  <div className="mr-2">
+                    <FaLongArrowAltLeft></FaLongArrowAltLeft>
+                  </div>
+                  Trở về trang chủ
+                </div>
+              </Link>
             </div>
           </FrameFormInit>
         </div>

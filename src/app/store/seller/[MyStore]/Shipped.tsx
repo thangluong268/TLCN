@@ -60,11 +60,6 @@ function Shipped() {
       sort: true,
       name: "totalPrice",
     },
-    {
-      title: "Thao tác",
-      sort: false,
-      name: "action",
-    },
   ];
   const [data, setData] = React.useState<ArrBill[]>();
   const [changed, setChanged] = React.useState<boolean>(false);
@@ -92,7 +87,7 @@ function Shipped() {
   };
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await APIGetListBill(page || 1, 2, "SHIPPED").then(
+      const data = await APIGetListBill(page || 1, 2, "DELIVERED").then(
         (res) => res
       );
       var arr = [] as ArrBill[];
@@ -156,19 +151,6 @@ function Shipped() {
             <td className="px-6 py-4 text-center">{item.date}</td>
             <td className="px-6 py-4 text-center">
               {FormatMoney(item.totalPrice)}
-            </td>
-
-            <td className="px-6 py-4 text-center">
-              <div
-                className="font-medium text-red-600 dark:text-red-500 hover:underline cursor-pointer mb-2"
-                onClick={(e) => {
-                  setIsShow(true);
-                  setTypeMes("cancel");
-                  setCurrentId(item.id);
-                }}
-              >
-                Huỷ đơn
-              </div>
             </td>
           </tr>
         ))}
