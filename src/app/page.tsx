@@ -18,9 +18,9 @@ export default function Home() {
   React.useEffect(() => {
     const fetchData = async () => {
       const lst = await APIGetListProductLasted().then((res) => res);
-      const lst1 = await APIGetListProducMostInStore().then((res) => res);
+      // const lst1 = await APIGetListProducMostInStore().then((res) => res);
       setListProduct(lst.metadata.data);
-      setListProductMost(lst1.metadata.data);
+      // setListProductMost(lst1.metadata.data);
     };
     fetchData();
   }, []);
