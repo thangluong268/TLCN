@@ -207,10 +207,12 @@ export class ProductController {
     const products = await this.productService.mostProductsInStore(limit);
     const data = await Promise.all(
       products.map(async product => {
-        const store = await this.storeService.getById(product.storeId);
+        const store = await this.storeService.getById(products[0].storeId);
         return { ...product, storeName: store.name };
       }),
     );
+
+
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
       metadata: { data },

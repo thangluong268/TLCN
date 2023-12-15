@@ -135,10 +135,12 @@ export class ProductService {
       const storeIds = products.map(product => product._id);
       const arr = [];
       for (let i = 0; i < storeIds.length; i++) {
-        const product = await this.productModel.find({ storeId: storeIds[i] }).limit(10);
+        const product = await this.productModel.find({ storeId: storeIds[i].toString() }).limit(10);
         arr.push(product);
       }
+
       return arr;
+
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
