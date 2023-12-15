@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
 import { Body, Controller, Delete, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -177,17 +179,18 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dataUsers: any = await Promise.all(
       seedDto.users.map(async user => {
-        const hashedPassword = await this.authService.hashData(user.password);
+        let hashedPassword = await this.authService.hashData(user.password);
         user.password = hashedPassword;
-        const newUser: UserWithoutPassDto = await this.userService.create(user);
-        const payload = { userId: newUser._id };
-        const tokens = await this.authService.getTokens(payload);
+        let newUser: any = await this.userService.create(user);
+        let payload = { userId: newUser._id };
+        let tokens = await this.authService.getTokens(payload);
         await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken);
-        const resultAddRole = await this.roleService.addUserToRole(newUser._id, { name: RoleName.USER });
+        let resultAddRole = await this.roleService.addUserToRole(newUser._id, { name: RoleName.USER });
         if (!resultAddRole) return new BadRequestException('Không thể tạo user này!');
         return newUser;
       }),
     );
+
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userIds = dataUsers.map((user: any) => user._id);
@@ -197,7 +200,7 @@ export class AuthController {
     const dataStores: any = await Promise.all(
       seedDto.stores.map(async (store, index) => {
         store.phoneNumber = [dataUsers[index].phone];
-        const newStore = await this.storeService.create(userIds[index], store);
+        let newStore = await this.storeService.create(userIds[index], store);
         await this.roleService.addUserToRole(userIds[index], {
           name: RoleName.SELLER,
         });
