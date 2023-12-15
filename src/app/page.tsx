@@ -86,10 +86,10 @@ export default function Home() {
               title="Có thể bạn sẽ thích"
               listProduct={listProduct}
             />
-            <ListProductHomePage
+            {/* <ListProductHomePage
               title="Cửa hàng nổi bật"
               listHighLight={listProductMost}
-            />
+            /> */}
             <ListProductRandomHomePage />
           </div>
         </div>
