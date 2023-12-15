@@ -5,6 +5,10 @@ import { IsEmail, IsNotEmpty, IsPhoneNumber, Length, MinLength } from 'class-val
 export class SeedUserDto {
   @ApiProperty()
   @IsNotEmpty()
+  avatar: string;
+  
+  @ApiProperty()
+  @IsNotEmpty()
   fullName: string;
 
   @ApiProperty()
