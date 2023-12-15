@@ -61,6 +61,20 @@ export class StoreController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @Get('store/seller')
+  async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getByUserId(userId);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin cửa hàng thành công!',
+      metadata: { data: store },
+    });
+  }
+
   @Public()
   @ApiQuery({ name: 'storeId', type: String, required: true })
   @Get('store-reputation')
@@ -115,20 +129,6 @@ export class StoreController {
     });
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new ReadStoreAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
-  @Get('store/seller')
-  async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-    const store = await this.storeService.getByUserId(userId);
-    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
-
-    return new SuccessResponse({
-      message: 'Lấy thông tin cửa hàng thành công!',
-      metadata: { data: store },
-    });
-  }
-
   @Public()
   @Get('store/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
@@ -144,19 +144,6 @@ export class StoreController {
   }
 
   @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.SELLER)
-  @Put('store/seller')
-  async update(@Body() store: UpdateStoreDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-    const newStore = await this.storeService.update(userId, store);
-    if (!newStore) return new NotFoundException('Không tìm thấy cửa hàng này!');
-    return new SuccessResponse({
-      message: 'Cập nhật thông tin cửa hàng thành công!',
-      metadata: { data: newStore },
-    });
-  }
-
-  @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteStoreAbility())
   @CheckRole(RoleName.SELLER)
   @Delete('store/seller')
@@ -168,6 +155,19 @@ export class StoreController {
     return new SuccessResponse({
       message: 'Xóa cửa hàng thành công!',
       metadata: { data: result },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateStoreAbility())
+  @CheckRole(RoleName.SELLER)
+  @Put('store/seller')
+  async update(@Body() store: UpdateStoreDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const newStore = await this.storeService.update(userId, store);
+    if (!newStore) return new NotFoundException('Không tìm thấy cửa hàng này!');
+    return new SuccessResponse({
+      message: 'Cập nhật thông tin cửa hàng thành công!',
+      metadata: { data: newStore },
     });
   }
 
