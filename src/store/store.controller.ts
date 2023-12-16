@@ -129,7 +129,9 @@ export class StoreController {
     });
   }
 
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.ADMIN)
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @Get('stores-most-products')
   async getListStoreHaveMostProducts(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
