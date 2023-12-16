@@ -14,12 +14,12 @@ import { ProductModule } from '../product/product.module';
     MongooseModule.forFeature([{ name: 'Store', schema: StoreSchema }]),
     AbilityModule,
     RoleModule,
-    ProductModule,
+    forwardRef(() => ProductModule),
     FeedbackModule,
     forwardRef(() => UserModule),
   ],
   controllers: [StoreController],
   providers: [StoreService],
-  exports: [StoreService]
+  exports: [StoreService],
 })
 export class StoreModule {}
