@@ -43,6 +43,7 @@ export class ProductService {
     searchQuery: string,
     sortTypeQuery: string = 'desc',
     sortValueQuery: string = 'productName',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     status: any,
   ): Promise<{ total: number; products: Product[] }> {
     const storeId = storeIdInput ? { storeId: storeIdInput } : {};
@@ -78,6 +79,7 @@ export class ProductService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async update(id: string, product: any): Promise<Product> {
     try {
       const updatedProduct = await this.productModel.findByIdAndUpdate({ _id: id }, { ...product }, { new: true });
@@ -140,7 +142,6 @@ export class ProductService {
       }
 
       return arr;
-
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -165,6 +166,7 @@ export class ProductService {
     try {
       const excludeIds: Types.ObjectId[] = excludeIdsBody.ids.map(id => new Types.ObjectId(id));
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query: any = {};
 
       if (cursor.date) query = { createdAt: { $gt: new Date(cursor.date) } };
@@ -216,6 +218,7 @@ export class ProductService {
     const skip = limit * (page - 1);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query: any = {};
 
       if (searchQuery) {
@@ -245,6 +248,7 @@ export class ProductService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private buildFilterQuery(filterQuery: FilterProduct): any {
     const filter = {};
 
@@ -276,6 +280,32 @@ export class ProductService {
   async deleteProductByCategory(categoryId: string): Promise<void> {
     try {
       await this.productModel.deleteMany({ categoryId });
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getListStoreHaveMostProducts(limit: number = 5): Promise<any> {
+    try {
+      const products = await this.productModel.aggregate([
+        {
+          $group: {
+            _id: '$storeId',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: limit,
+        },
+      ]);
+
+      return products;
+
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

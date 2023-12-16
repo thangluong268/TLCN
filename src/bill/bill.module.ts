@@ -1,17 +1,15 @@
-import {  Module, forwardRef } from '@nestjs/common';
-import { BillService } from './bill.service';
-import { BillController } from './bill.controller';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BillSchema } from './schema/bill.schema';
 import { AbilityModule } from '../ability/ability.module';
-import { RoleModule } from '../role/role.module';
-import { PaymentModule } from './payment/payment.module';
-import { UserModule } from '../user/user.module';
-import { StoreModule } from '../store/store.module';
-import { ProductModule } from '../product/product.module';
-import { FirebaseService } from '../firebase/firebase.service';
-import { FirebaseModule } from '../firebase/firebase.module';
 import { CartModule } from '../cart/cart.module';
+import { ProductModule } from '../product/product.module';
+import { RoleModule } from '../role/role.module';
+import { StoreModule } from '../store/store.module';
+import { UserModule } from '../user/user.module';
+import { BillController } from './bill.controller';
+import { BillService } from './bill.service';
+import { PaymentModule } from './payment/payment.module';
+import { BillSchema } from './schema/bill.schema';
 
 @Module({
   imports: [

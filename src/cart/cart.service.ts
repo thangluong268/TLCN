@@ -1,200 +1,181 @@
 import { Injectable } from '@nestjs/common';
-import { Model, MongooseError, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cart } from './schema/cart.schema';
-import { CreateCartDto } from './dto/cart-create.dto';
-import { ProductBillDto } from '../bill/dto/product-bill.dto';
-import { Product } from '../product/schema/product.schema';
-import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
-import { Store } from '../store/schema/store.schema';
+import { Model, MongooseError } from 'mongoose';
 import { ProductInfo } from '../bill/dto/create-bill.dto';
+import { ProductBillDto } from '../bill/dto/product-bill.dto';
+import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import { Product } from '../product/schema/product.schema';
+import { Store } from '../store/schema/store.schema';
+import { CreateCartDto } from './dto/cart-create.dto';
+import { Cart } from './schema/cart.schema';
 
 @Injectable()
 export class CartService {
-    constructor(
-        @InjectModel(Cart.name)
-        private readonly cartModel: Model<Cart>
-    ) { }
+  constructor(
+    @InjectModel(Cart.name)
+    private readonly cartModel: Model<Cart>,
+  ) {}
 
-    getTotalPrice(listProducts: ProductBillDto[]): number {
-        const totalPrice = listProducts.reduce((total: number, product: ProductBillDto) => {
-            const productTotal = product.quantity * product.price;
-            return total + productTotal;
-        }, 0)
-        return totalPrice
+  getTotalPrice(listProducts: ProductBillDto[]): number {
+    const totalPrice = listProducts.reduce((total: number, product: ProductBillDto) => {
+      const productTotal = product.quantity * product.price;
+      return total + productTotal;
+    }, 0);
+    return totalPrice;
+  }
+
+  async create(userId: string, store: Store, product: Product): Promise<Cart> {
+    try {
+      const cart = new CreateCartDto();
+      cart.userId = userId;
+      cart.storeId = product.storeId;
+      cart.storeAvatar = store.avatar;
+      cart.storeName = store.name;
+      const productInfo = new ProductBillDto();
+      productInfo.avatar = product.avatar;
+      productInfo.productId = product._id;
+      productInfo.productName = product.productName;
+      productInfo.quantity = 1;
+      productInfo.price = product.price;
+      productInfo.quantityInStock = product.quantity;
+      cart.listProducts = [productInfo];
+      cart.totalPrice = this.getTotalPrice(cart.listProducts);
+
+      const newCart = await this.cartModel.create(cart);
+      return newCart;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async create(userId: string, store: Store, product: Product): Promise<Cart> {
-        try {
-            const cart = new CreateCartDto()
-            cart.userId = userId
-            cart.storeId = product.storeId
-            cart.storeAvatar = store.avatar
-            cart.storeName = store.name
-            const productInfo = new ProductBillDto()
-            productInfo.avatar = product.avatar
-            productInfo.productId = product._id
-            productInfo.productName = product.productName
-            productInfo.quantity = 1
-            productInfo.price = product.price
-            productInfo.quantityInStock = product.quantity
-            cart.listProducts = [productInfo]
-            cart.totalPrice = this.getTotalPrice(cart.listProducts)
-
-            const newCart = await this.cartModel.create(cart)
-            return newCart
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+  async getAllByUserId(userId: string): Promise<Cart[]> {
+    try {
+      const carts = await this.cartModel.find({ userId }).sort({ createdAt: -1 });
+      return carts;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async getAllByUserId(userId: string): Promise<Cart[]> {
-        try {
-            const carts = await this.cartModel.find({ userId }).sort({ createdAt: -1 })
-            return carts
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+  async update(product: Product, cart: Cart): Promise<Cart> {
+    try {
+      const productInfo = new ProductBillDto();
+      productInfo.avatar = product.avatar;
+      productInfo.productId = product._id;
+      productInfo.productName = product.productName;
+      productInfo.quantity = 1;
+      productInfo.price = product.price;
+      productInfo.quantityInStock = product.quantity;
+      cart.listProducts.push(productInfo);
+      cart.totalPrice = this.getTotalPrice(cart.listProducts);
+      await cart.save();
+      return cart;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async update(product: Product, cart: Cart): Promise<Cart> {
-        try {
-            const productInfo = new ProductBillDto()
-            productInfo.avatar = product.avatar
-            productInfo.productId = product._id
-            productInfo.productName = product.productName
-            productInfo.quantity = 1
-            productInfo.price = product.price
-            productInfo.quantityInStock = product.quantity
-            cart.listProducts.push(productInfo)
-            cart.totalPrice = this.getTotalPrice(cart.listProducts)
-            await cart.save()
-            return cart
+  async updateQuantity(product: Product, cart: Cart): Promise<Cart> {
+    try {
+      cart.listProducts.map(productCart => {
+        if (productCart.productId.toString() === product._id.toString()) {
+          productCart.quantity++;
         }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+        return productCart;
+      });
+      cart.totalPrice = this.getTotalPrice(cart.listProducts);
+
+      return await this.cartModel.findByIdAndUpdate(cart._id, cart);
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async updateQuantity(product: Product, cart: Cart): Promise<Cart> {
-        try {
-            cart.listProducts.map(productCart => {
-                if (productCart.productId.toString() === product._id.toString()) {
-                    productCart.quantity++
-                }
-                return productCart
-            })
-            cart.totalPrice = this.getTotalPrice(cart.listProducts)
-
-            return await this.cartModel.findByIdAndUpdate(cart._id, cart)
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+  async addProductIntoCart(userId: string, store: Store, product: Product): Promise<Cart | boolean> {
+    const allCart = await this.getAllByUserId(userId);
+    if (!allCart) {
+      const newCart = await this.create(userId, store, product);
+      return newCart;
+    } else {
+      const cart = allCart.find(cart => cart.storeId.toString() === product.storeId.toString());
+      if (!cart) {
+        const newCart = await this.create(userId, store, product);
+        return newCart;
+      } else {
+        const hasProduct = cart.listProducts.find(productCart => productCart.productId.toString() === product._id.toString());
+        const updatedCart = hasProduct ? await this.updateQuantity(product, cart) : await this.update(product, cart);
+        return updatedCart;
+      }
     }
-    
+  }
 
-    async addProductIntoCart(userId: string, store: Store, product: Product): Promise<Cart | boolean> {
-        const allCart = await this.getAllByUserId(userId)
-        if (!allCart) {
-            const newCart = await this.create(userId, store, product)
-            return newCart
+  async getByUserId(userId: string, pageQuery: number, limitQuery: number, searchQuery: string): Promise<{ total: number; carts: Cart[] }> {
+    const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT);
+    const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT);
+    const search = searchQuery
+      ? {
+          $or: [
+            { storeName: { $regex: searchQuery, $options: 'i' } },
+            { listProducts: { $elemMatch: { productName: { $regex: searchQuery, $options: 'i' } } } },
+          ],
         }
-        else {
-            const cart = allCart.find(cart => cart.storeId.toString() === product.storeId.toString())
-            if (!cart) {
-                const newCart = await this.create(userId, store, product)
-                return newCart
-            }
-            else {
-                const hasProduct = cart.listProducts.find(productCart => productCart.productId.toString() === product._id.toString())
-                const updatedCart = hasProduct ? await this.updateQuantity(product, cart) : await this.update(product, cart)
-                return updatedCart
-            }
-        }
+      : {};
+    const skip = limit * (page - 1);
+    try {
+      const total = await this.cartModel.countDocuments({ ...search, userId });
+      const carts = await this.cartModel
+        .find({ ...search, userId })
+        .sort({ updatedAt: -1 })
+        .limit(limit)
+        .skip(skip);
+      return { total, carts };
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async getByUserId(userId: string, pageQuery: number, limitQuery: number, searchQuery: string)
-        : Promise<{ total: number, carts: Cart[] }> {
-        const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT)
-        const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT)
-        const search = searchQuery
-            ? {
-                $or: [
-                    { storeName: { $regex: searchQuery, $options: "i" } },
-                    { listProducts: { $elemMatch: { productName: { $regex: searchQuery, $options: "i" } } } }
-                ]
-            }
-            : {}
-        const skip = limit * (page - 1)
-        try {
-            const total = await this.cartModel.countDocuments({ ...search, userId })
-            const carts = await this.cartModel.find({ ...search, userId }).sort({ updatedAt: -1 }).limit(limit).skip(skip)
-            return { total, carts }
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+  async removeProductInCart(userId: string, productId: string, storeId: string): Promise<void> {
+    try {
+      const cart: Cart = await this.cartModel.findOne({ userId, storeId });
+
+      if (cart.listProducts.length === 1) {
+        await this.cartModel.findByIdAndDelete(cart._id);
+        return;
+      }
+      const index = cart.listProducts.findIndex(product => product.productId.toString() === productId.toString());
+      cart.listProducts.splice(index, 1);
+      cart.totalPrice = this.getTotalPrice(cart.listProducts);
+      await cart.save();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
+  }
 
-    async removeProductInCart(userId: string, productId: string, storeId: string): Promise<void> {
-        try {
+  async removeMultiProductInCart(userId: string, listProduct: ProductInfo[], storeId: string): Promise<void> {
+    try {
+      const cart: Cart = await this.cartModel.findOne({ userId, storeId });
 
-            const cart: Cart = await this.cartModel.findOne({ userId, storeId })
-            
-            if (cart.listProducts.length === 1) {
-                await this.cartModel.findByIdAndDelete(cart._id)
-                return
-            }
-            const index = cart.listProducts.findIndex(product => product.productId.toString() === productId.toString())
-            cart.listProducts.splice(index, 1)
-            cart.totalPrice = this.getTotalPrice(cart.listProducts)
-            await cart.save()
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
+      listProduct.forEach(product => {
+        const index = cart.listProducts.findIndex(productCart => productCart.productId.toString() === product.productId.toString());
+        cart.listProducts.splice(index, 1);
+      });
+
+      if (cart.listProducts.length === 0) {
+        await this.cartModel.findByIdAndDelete(cart._id);
+        return;
+      }
+
+      cart.totalPrice = this.getTotalPrice(cart.listProducts);
+      await cart.save();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
     }
-
-
-    async removeMultiProductInCart(userId: string, listProduct: ProductInfo[], storeId: string): Promise<void> {
-        try {
-
-            const cart: Cart = await this.cartModel.findOne({ userId, storeId })
-            
-            listProduct.forEach(product => {
-                const index = cart.listProducts.findIndex(productCart => productCart.productId.toString() === product.productId.toString())
-                cart.listProducts.splice(index, 1)
-            })
-
-            if (cart.listProducts.length === 0) {
-                await this.cartModel.findByIdAndDelete(cart._id)
-                return
-            }
-
-            cart.totalPrice = this.getTotalPrice(cart.listProducts)
-            await cart.save()
-            
-        }
-        catch (err) {
-            if (err instanceof MongooseError)
-                throw new InternalServerErrorExceptionCustom()
-            throw err
-        }
-    }
-
+  }
 }

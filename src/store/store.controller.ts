@@ -11,7 +11,7 @@ import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { BadRequestException, ConflicException, NotFoundException } from '../core/error.response';
+import { BadRequestException, ConflictException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { FeedbackService } from '../feedback/feedback.service';
 import { Feedback } from '../feedback/schema/feedback.schema';
@@ -42,12 +42,12 @@ export class StoreController {
   async create(
     @Body() store: CreateStoreDto,
     @GetCurrentUserId() userId: string,
-  ): Promise<SuccessResponse | NotFoundException | ConflicException | BadRequestException> {
+  ): Promise<SuccessResponse | NotFoundException | ConflictException | BadRequestException> {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
     const hasStore = await this.storeService.getByUserId(userId);
-    if (hasStore) return new ConflicException('Người dùng này đã có cửa hàng!');
+    if (hasStore) return new ConflictException('Người dùng này đã có cửa hàng!');
 
     const newStore = await this.storeService.create(userId, store);
     if (!newStore) return new BadRequestException('Tạo cửa hàng thất bại!');
@@ -126,6 +126,33 @@ export class StoreController {
     return new SuccessResponse({
       message: 'Lấy thông tin độ uy tín cửa hàng thành công!',
       metadata: { averageStar, totalFeedback, totalFollow },
+    });
+  }
+
+  @Public()
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @Get('stores-most-products')
+  async getListStoreHaveMostProducts(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
+    const stores = await this.productService.getListStoreHaveMostProducts(Number(limit));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      stores.map(async (item: any) => {
+        let store = await this.storeService.getById(item._id);
+        if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
+        store = store.toObject();
+        delete store.status;
+        delete store.__v;
+        delete store['createdA'];
+        delete store['updatedAt'];
+        return { store, totalProducts: item.count };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin danh sách cửa hàng có nhiều sản phẩm nhất thành công!',
+      metadata: { data },
     });
   }
 

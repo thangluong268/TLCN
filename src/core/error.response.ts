@@ -28,10 +28,10 @@ export class NotFoundException extends HttpException {
   }
 }
 
-export class ConflicException extends HttpException {
+export class ConflictException extends HttpException {
   constructor(message: string, rootError?: Error) {
     super({ message, rootError }, HttpStatus.CONFLICT);
-    this.name = 'ConflicException';
+    this.name = 'ConflictException';
   }
 }
 

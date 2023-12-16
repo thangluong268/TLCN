@@ -6,7 +6,7 @@ import { Request } from 'express';
 import { CheckAbilities, CreateUserAbility, ManageUserTokenAbility } from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
-import { BadRequestException, ForbiddenException } from '../core/error.response';
+import { BadRequestException, ConflictException, ForbiddenException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { EvaluationService } from '../evaluation/evaluation.service';
 import { ProductService } from '../product/product.service';
@@ -15,7 +15,7 @@ import { SuccessResponseDto } from '../responses/success.responseDto';
 import { RoleService } from '../role/role.service';
 import { RoleName } from '../role/schema/role.schema';
 import { StoreService } from '../store/store.service';
-import { UserWithoutPassDto } from '../user/dto/user-without-pass.dto';
+import { User } from '../user/schema/user.schema';
 import { UserService } from '../user/user.service';
 import { UsertokenService } from '../usertoken/usertoken.service';
 import { AuthService } from './auth.service';
@@ -45,7 +45,10 @@ export class AuthController {
   async signUp(
     @Body()
     signUpDto: SignUpDto,
-  ): Promise<SuccessResponse | BadRequestException> {
+  ): Promise<SuccessResponse | BadRequestException | ConflictException> {
+    const user: User = await this.userService.getByEmail(signUpDto.email);
+    if (user) return new ConflictException('Email đã tồn tại!');
+
     const hashedPassword = await this.authService.hashData(signUpDto.password);
     signUpDto.password = hashedPassword;
     const newUser = await this.userService.create(signUpDto);
@@ -64,20 +67,9 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Get list users',
-    type: SuccessResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid user data',
-    type: ErrorResponseDto,
-  })
-  async login(
-    @Body()
-    loginDto: LoginDto,
-  ): Promise<SuccessResponse | BadRequestException> {
+  @ApiResponse({ status: HttpStatus.OK, description: 'Get list users', type: SuccessResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid user data', type: ErrorResponseDto })
+  async login( @Body() loginDto: LoginDto ): Promise<SuccessResponse | BadRequestException> {
     const user = await this.userService.getByEmail(loginDto.email);
     if (!user) return new BadRequestException('Email hoặc mật khẩu không chính xác!');
     const { password, ...userWithoutPass } = user['_doc'];
@@ -190,7 +182,6 @@ export class AuthController {
         return newUser;
       }),
     );
-
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userIds = dataUsers.map((user: any) => user._id);
