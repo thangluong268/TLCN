@@ -193,10 +193,10 @@ export class ProductController {
   @Get('product/listProductLasted')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async getlistProductLasted(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const products = await this.productService.getListProductLasted(limit);
+    const data = await this.productService.getListProductLasted(Number(limit));
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data: products },
+      metadata: { data },
     });
   }
 
@@ -204,14 +204,35 @@ export class ProductController {
   @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const products = await this.productService.mostProductsInStore(limit);
+    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(Number(limit));
+
     const data = await Promise.all(
-      products.map(async product => {
-        const store = await this.storeService.getById(products[0].storeId);
-        return { ...product, storeName: store.name };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      storeHaveMostProducts.map(async (item: any) => {
+        const store = await this.storeService.getById(item._id);
+        if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
+
+        let products: Product[] = await this.productService.getProductsByStoreId(item._id.toString());
+
+        products = products.map(product => {
+          product = product.toObject();
+          delete product.storeId;
+          delete product.status;
+          delete product['createdAt'];
+          delete product['updatedAt'];
+          delete product.__v;
+          return product;
+        });
+
+        return {
+          storeId: store._id,
+          storeName: store.name,
+          storeAvatar: store.avatar,
+          listProducts: products.slice(0, 10),
+        };
+
       }),
     );
-
 
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',

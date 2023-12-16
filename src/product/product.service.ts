@@ -114,40 +114,6 @@ export class ProductService {
     }
   }
 
-  async mostProductsInStore(limit: number): Promise<Product[]> {
-    try {
-      const limitQuery = Number(limit) || Number(process.env.LIMIT_DEFAULT);
-      const products = await this.productModel.aggregate([
-        {
-          $match: { status: true },
-        },
-        {
-          $group: {
-            _id: '$storeId',
-            count: { $sum: 1 },
-          },
-        },
-        {
-          $sort: { count: -1 },
-        },
-        {
-          $limit: limitQuery,
-        },
-      ]);
-      const storeIds = products.map(product => product._id);
-      const arr = [];
-      for (let i = 0; i < storeIds.length; i++) {
-        const product = await this.productModel.find({ storeId: storeIds[i].toString() }).limit(10);
-        arr.push(product);
-      }
-
-      return arr;
-    } catch (err) {
-      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
-      throw err;
-    }
-  }
-
   async updateQuantity(id: string, quantitySold: number): Promise<void> {
     try {
       const product: Product = await this.getById(id);
