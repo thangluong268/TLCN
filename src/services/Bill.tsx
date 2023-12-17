@@ -114,3 +114,13 @@ export const APIGetBillUser = async (id: string): Promise<any> => {
   );
   return res.data;
 };
+
+// /api/bill/admin/count-total-data
+export const APIGetCountBillAdmin = async (): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/admin/count-total-data`,
+    { headers }
+  );
+  return res.data;
+};

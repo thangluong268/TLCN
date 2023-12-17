@@ -10,6 +10,7 @@ import { UserAuth } from "../authContext";
 import Toast from "@/utils/Toast";
 import { APILogin } from "@/services/Auth";
 import axios from "axios";
+import { set } from "firebase/database";
 interface LoginForm {
   email: string;
   password: string;
@@ -77,8 +78,9 @@ function Form(props: FormProps) {
       ] = `Bearer ${res.metadata.data.stsTokenManager.accessToken}`;
       Toast("success", "Đăng nhập thành công", 2000);
       setTimeout(() => {
-        if (res.metadata.data.role == "Admin") window.location.href = "/admin";
-        else {
+        if (res.metadata.data.role.toUpperCase() == "ADMIN") {
+          window.location.href = "/admin";
+        } else {
           if (window.location.pathname === "/login") {
             window.location.href = "/";
           } else {

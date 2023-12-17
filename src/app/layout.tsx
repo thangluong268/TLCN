@@ -18,17 +18,16 @@ import "react-quill/dist/quill.snow.css";
 //   style: ["normal", "italic"],
 //   subsets: ["latin"],
 // });
-
 const lora = Roboto({
   weight: ["400", "500", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-//   title: "DTExchange",
-//   description: "This is a website for DTExchange",
-// };
+export const metadata: Metadata = {
+  title: "DTExchange",
+  description: "This is a website for DTExchange",
+};
 
 export default async function RootLayout({
   children,

@@ -11,6 +11,7 @@ import {
   APIGetListProductLasted,
 } from "@/services/Product";
 import ListProductRandomHomePage from "@/components/ListProductRandomHomePage";
+import protectRoute from "./protectRoute";
 
 export default function Home() {
   const [listProduct, setListProduct] = React.useState([]);
@@ -25,6 +26,7 @@ export default function Home() {
     };
     fetchData();
   }, []);
+  protectRoute();
   return (
     <main>
       <FrameMainContent>
