@@ -146,7 +146,10 @@ function Review(props: Props) {
 
               <ul className="mt-3 flex flex-col">
                 {bill.listProductsFullInfo?.map((item: any, index: number) => (
-                  <li className=" py-3 px-4 text-sm border text-gray-800  first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200">
+                  <li
+                    key={index}
+                    className=" py-3 px-4 text-sm border text-gray-800  first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-gray-200"
+                  >
                     <div className="flex items-center justify-between w-full">
                       <span>
                         {item.product.productName} x{" "}
