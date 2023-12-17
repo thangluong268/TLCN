@@ -331,7 +331,7 @@ export class BillController {
 
         let userInfo = await this.userService.getById(bill.userId);
 
-        userInfo = userInfo.toObject();
+        userInfo = userInfo?.toObject();
 
         delete userInfo.password;
 
@@ -412,7 +412,7 @@ export class BillController {
 
     let userInfo = await this.userService.getById(bill.userId);
 
-    userInfo = userInfo.toObject();
+    userInfo = userInfo?.toObject();
 
     delete userInfo.password;
 
