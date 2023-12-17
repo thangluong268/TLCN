@@ -1,0 +1,31 @@
+import { Request } from 'express';
+import { BadRequestException, ConflictException, ForbiddenException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
+import { EvaluationService } from '../evaluation/evaluation.service';
+import { ProductService } from '../product/product.service';
+import { RoleService } from '../role/role.service';
+import { StoreService } from '../store/store.service';
+import { UserService } from '../user/user.service';
+import { UsertokenService } from '../usertoken/usertoken.service';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { SeedDto, SeedProductDto } from './dto/seed.dto';
+import { SignUpDto } from './dto/signup.dto';
+export declare class AuthController {
+    private readonly authService;
+    private readonly roleService;
+    private readonly userService;
+    private readonly userTokenService;
+    private readonly storeService;
+    private readonly productService;
+    private readonly evaluationService;
+    constructor(authService: AuthService, roleService: RoleService, userService: UserService, userTokenService: UsertokenService, storeService: StoreService, productService: ProductService, evaluationService: EvaluationService);
+    signUp(signUpDto: SignUpDto): Promise<SuccessResponse | BadRequestException | ConflictException>;
+    login(loginDto: LoginDto): Promise<SuccessResponse | BadRequestException>;
+    forgetPassword(loginDto: LoginDto): Promise<SuccessResponse>;
+    logout(userId: string): Promise<SuccessResponse | ForbiddenException>;
+    refreshToken(userId: string, req: Request): Promise<SuccessResponse | ForbiddenException>;
+    createUser(signUpDto: SignUpDto): Promise<SuccessResponse>;
+    createMultiUsers(seedDto: SeedDto): Promise<SuccessResponse | BadRequestException>;
+    createMultiProducts(seedProductDto: SeedProductDto[]): Promise<SuccessResponse | BadRequestException>;
+}
