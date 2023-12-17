@@ -1,9 +1,11 @@
+"use client";
 import React from "react";
 import UploadFile from "./UploadFile";
 import Input from "@/components/Input";
 import { CREATEPRODUCT } from "@/constants/CreateProduct";
 import CheckValidInput from "@/utils/CheckValidInput";
-import ReactQuill from "react-quill";
+const ReactQuill =
+  typeof window === "object" ? require("react-quill") : () => false;
 import "react-quill/dist/quill.snow.css";
 import Toast from "@/utils/Toast";
 import { APICreateProduct } from "@/services/Product";
@@ -57,7 +59,7 @@ function Create() {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Tạo sản phẩm thành công", 2000);
         setTimeout(() => {
-          dispatch(setCategoryStore(CATEGORYSTORE[CATEGORYSTORE.length - 1]));
+          dispatch(setCategoryStore(CATEGORYSTORE[CATEGORYSTORE.length - 2]));
         }, 2000);
       }
     } else {
@@ -65,6 +67,7 @@ function Create() {
     }
   };
   const handleDescriptionChange = (value: string) => {
+    console.log(value);
     setProduct({ ...product, description: value });
   };
   return (

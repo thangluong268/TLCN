@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsNumberString, MinLength } from "class-validator";
-import mongoose, { Types } from "mongoose";
+import { IsEmail, IsNotEmpty, IsNumberString, IsString, MinLength } from "class-validator";
 
-export class BodyDto {
+export class EvaluationDto {
     @ApiProperty()
+    @IsString()
     @IsNotEmpty()
-    body: string;
+    name: string;
 }

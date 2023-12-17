@@ -10,6 +10,7 @@ import {
   APIGetListProducMostInStore,
   APIGetListProductLasted,
 } from "@/services/Product";
+import ListProductRandomHomePage from "@/components/ListProductRandomHomePage";
 
 export default function Home() {
   const [listProduct, setListProduct] = React.useState([]);
@@ -17,13 +18,12 @@ export default function Home() {
   React.useEffect(() => {
     const fetchData = async () => {
       const lst = await APIGetListProductLasted().then((res) => res);
-      const lst1 = await APIGetListProducMostInStore().then((res) => res);
+      // const lst1 = await APIGetListProducMostInStore().then((res) => res);
       setListProduct(lst.metadata.data);
-      setListProductMost(lst1.metadata.data);
+      // setListProductMost(lst1.metadata.data);
     };
     fetchData();
   }, []);
-  console.log(listProductMost);
   return (
     <main>
       <FrameMainContent>
@@ -86,10 +86,11 @@ export default function Home() {
               title="Có thể bạn sẽ thích"
               listProduct={listProduct}
             />
-            <ListProductHomePage
+            {/* <ListProductHomePage
               title="Cửa hàng nổi bật"
               listHighLight={listProductMost}
-            />
+            /> */}
+            <ListProductRandomHomePage />
           </div>
         </div>
       </FrameMainContent>

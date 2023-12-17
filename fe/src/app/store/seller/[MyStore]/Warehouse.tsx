@@ -12,7 +12,8 @@ import FormatMoney from "@/utils/FormatMoney";
 import RemoveVietnameseTones from "@/utils/RemoveVietnameseTones";
 import Toast from "@/utils/Toast";
 import React from "react";
-import ReactQuill from "react-quill";
+const ReactQuill =
+  typeof window === "object" ? require("react-quill") : () => false;
 interface ProductProps {
   _id: string;
   avatar: string[];
@@ -272,6 +273,7 @@ function Warehouse() {
                   Đã có đơn đặt
                 </div>
               )}
+              
             </td>
           </tr>
         ))}

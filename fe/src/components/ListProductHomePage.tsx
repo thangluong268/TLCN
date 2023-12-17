@@ -10,7 +10,7 @@ function ListProductHomePage(props: any) {
     <div className="flex flex-col bg-white p-4 rounded-xl mb-2">
       <div className="flex justify-between font-bold">
         <div>{title}</div>
-        <div
+        {/* <div
           className="text-blue-600 cursor-pointer"
           onClick={(e) => {
             if (listHighLight) {
@@ -22,7 +22,7 @@ function ListProductHomePage(props: any) {
           }}
         >
           Xem tất cả
-        </div>
+        </div> */}
       </div>
       <div className="flex my-2 ms-2">
         {listHighLight &&

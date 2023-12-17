@@ -74,3 +74,48 @@ export const APIDeleteProduct = async (id: string) => {
   );
   return res.data;
 };
+
+// api/product/random
+export const APIGetListProductRandom = async (
+  limit?: any,
+  date?: any,
+  ids?: any
+) => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
+  var limit = limit ? limit : 10;
+  var date = date ? date : "";
+  var ids = ids ? ids : [];
+  const res = await axios.post(
+    `${process.env.NEXT_PUBLIC_API_URL}/product/random?limit=${limit}&date=${date}`,
+    {
+      ids: ids,
+    }
+  );
+  document.getElementById("loading-page")?.classList.add("hidden");
+
+  return res.data;
+};
+
+// api/product
+export const APIGetListProductForUser = async (
+  page?: any,
+  limit?: any,
+  search?: any
+) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/product?page=${page}&limit=${limit}&search=${search}`
+  );
+  return res.data;
+};
+
+// 3. Lấy các sản phẩm khác trừ sản phẩm đang xem
+// /api/products-other-in-store/storeId=&productId=
+export const APIGetListProductOtherInStore = async (
+  storeId: any,
+  productId: any
+) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/products-other-in-store?storeId=${storeId}&productId=${productId}`
+  );
+  return res.data;
+};

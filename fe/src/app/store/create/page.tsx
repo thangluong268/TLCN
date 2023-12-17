@@ -6,13 +6,17 @@ import { APIUploadImage } from "@/services/UploadImage";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
 import React from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+const ReactQuill =
+  typeof window === "object" ? require("react-quill") : () => false;
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
-  const user = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")!)
-    : null;
+  const [user, setUser] = React.useState<any>(null);
+  React.useEffect(() => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user")!)
+      : null;
+    setUser(user);
+  }, []);
   const [store, setStore] = React.useState({
     address:
       user?.providerData[0].address?.filter(

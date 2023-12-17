@@ -15,17 +15,17 @@ import { CategoryModule } from '../category/category.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Product', schema: ProductSchema }]),
-    forwardRef(() => BillModule),
-    forwardRef(() => EvaluationModule),
-    forwardRef(() => UserModule),
     AbilityModule,
     RoleModule,
-    StoreModule,
     NotificationModule,
     CategoryModule,
+    forwardRef(() => BillModule),
+    EvaluationModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => StoreModule),
   ],
   controllers: [ProductController],
   providers: [ProductService],
   exports: [ProductService]
 })
-export class ProductModule {}
+export class ProductModule { }

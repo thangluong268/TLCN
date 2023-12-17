@@ -82,13 +82,15 @@ function Login() {
         Toast("error", "Tài khoản hoặc mật khẩu không đúng", 5000);
         return;
       }
+      console.log(res.metadata.data);
       localStorage.setItem("user", JSON.stringify(res.metadata.data));
       axios.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${res.metadata.data.stsTokenManager.accessToken}`;
       Toast("success", "Đăng nhập thành công", 2000);
       setTimeout(() => {
-        window.location.href = "/";
+        if (res.metadata.data.role == "Admin") window.location.href = "/admin";
+        else window.location.href = "/";
       }, 2000);
     }
   };
@@ -156,14 +158,15 @@ function Login() {
                 </div>
               </Link>
             </div>
-            <div className="w-full mt-4">
+
+            <div className="w-full mt-2">
               <button
                 className="py-3 bg-gray-600 text-white rounded-[10px] mb-2 w-full px-4 font-bold text-lg"
                 onClick={(e) => Login()}
               >
                 Đăng nhập
               </button>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-2">
                 <div
                   className="py-3 bg-red-600 rounded-[10px] w-[49%] px-4 font-bold text-lg"
                   onClick={(e) => handleSignIn(googleSignIn)}
@@ -183,6 +186,14 @@ function Login() {
                   </div>
                 </div>
               </div>
+              <Link href="/" className=" font-bold cursor-pointer">
+                <div className="flex items-center justify-center">
+                  <div className="mr-2">
+                    <FaLongArrowAltLeft></FaLongArrowAltLeft>
+                  </div>
+                  Trở về trang chủ
+                </div>
+              </Link>
             </div>
           </FrameFormInit>
         </div>

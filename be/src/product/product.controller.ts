@@ -1,30 +1,34 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ProductService } from './product.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AbilitiesGuard } from '../ability/guards/abilities.guard';
-import { CheckAbilities, CreateProductAbility, DeleteProductAbility, ReadProductAbility, UpdateProductAbility } from '../ability/decorators/abilities.decorator';
-import { CreateProductDto } from './dto/create-product.dto';
-import { StoreService } from '../store/store.service';
-import { EvaluationService } from '../evaluation/evaluation.service';
+import {
+  CheckAbilities,
+  CreateProductAbility,
+  DeleteProductAbility,
+  ReadProductAbility,
+  UpdateProductAbility,
+} from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
-import { RoleName } from '../role/schema/role.schema';
+import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { NotFoundException } from '../core/error.response';
-import { SuccessResponse } from '../core/success.response';
-import { UserService } from '../user/user.service';
-import { NotificationService } from '../notification/notification.service';
-import { Notification } from '../notification/schema/notification.schema';
-import { ProductDto } from './dto/product.dto';
-import { Product } from './schema/product.schema';
-import { clearGlobalAppDefaultCred } from 'firebase-admin/lib/app/credential-factory';
 import { BillService } from '../bill/bill.service';
 import { PRODUCT_TYPE } from '../bill/schema/bill.schema';
 import { CategoryService } from '../category/category.service';
+import { NotFoundException } from '../core/error.response';
+import { SuccessResponse } from '../core/success.response';
+import { EvaluationService } from '../evaluation/evaluation.service';
+import { NotificationService } from '../notification/notification.service';
+import { Notification } from '../notification/schema/notification.schema';
+import { RoleName } from '../role/schema/role.schema';
+import { StoreService } from '../store/store.service';
+import { UserService } from '../user/user.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ExcludeIds, FilterDate, FilterProduct, ProductDto } from './dto/product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductService } from './product.service';
+import { Product } from './schema/product.schema';
 
-
-@Controller('product')
+@Controller()
 @ApiTags('Product')
 @ApiBearerAuth('Authorization')
 export class ProductController {
@@ -36,79 +40,70 @@ export class ProductController {
     private readonly notificationService: NotificationService,
     private readonly billService: BillService,
     private readonly categoryService: CategoryService,
-  ) { }
+  ) {}
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Post('seller')
-  async create(
-    @Body() product: CreateProductDto,
-    @GetCurrentUserId() userId: string,
-  ): Promise<SuccessResponse | NotFoundException> {
+  @Post('product/seller')
+  async create(@Body() product: CreateProductDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getByUserId(userId);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
-    const store = await this.storeService.getByUserId(userId)
-    if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+    const category = await this.categoryService.getById(product.categoryId);
+    if (!category) return new NotFoundException('Không tìm thấy danh mục này!');
 
-    const category = await this.categoryService.getById(product.categoryId)
-    if (!category) return new NotFoundException("Không tìm thấy danh mục này!")
+    const newProduct = await this.productService.create(store._id, product);
 
-    const newProduct = await this.productService.create(store, product)
+    await this.evaluationService.create(newProduct._id);
 
-    await this.evaluationService.create(newProduct._id)
-
-    const userHasFollowStores = await this.userService.getFollowStoresByStoreId(store._id)
+    const userHasFollowStores = await this.userService.getFollowStoresByStoreId(store._id);
 
     const notificationPromises: Promise<Notification>[] = [];
 
     for (const user of userHasFollowStores) {
-      if (userId === user._id) continue
-  
+      if (userId === user._id) continue;
+
       const notificationPromise = this.notificationService.create({
         userIdFrom: userId,
         userIdTo: user._id,
         content: `đã đăng sản phẩm mới. ${newProduct.productName}`,
-        type: "Thêm sản phẩm",
+        type: 'Thêm sản phẩm',
         sub: {
           fullName: store.name,
           avatar: store.avatar,
           productId: newProduct._id.toString(),
         },
-      })
-  
-      notificationPromises.push(notificationPromise)
+      });
+
+      notificationPromises.push(notificationPromise);
     }
-    await Promise.all(notificationPromises)
+    await Promise.all(notificationPromises);
 
     return new SuccessResponse({
-      message: "Tạo sản phẩm thành công!",
+      message: 'Tạo sản phẩm thành công!',
       metadata: { data: newProduct },
-    })
-
+    });
   }
 
   // để tạo nhiều data một lúc (để test)
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Post('sellerCreateMultiple')
-  async sellerCreateMultiple(
-    @Body() products: CreateProductDto[],
-    @GetCurrentUserId() userId: string,
-  ): Promise<void | NotFoundException> {
-    const store = await this.storeService.getByUserId(userId)
-    if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+  @Post('product/sellerCreateMultiple')
+  async sellerCreateMultiple(@Body() products: CreateProductDto[], @GetCurrentUserId() userId: string): Promise<void | NotFoundException> {
+    const store = await this.storeService.getByUserId(userId);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
     products.forEach(async product => {
-      const newProduct = await this.productService.create(store, product)
-      await this.evaluationService.create(newProduct._id)
-    })
+      const newProduct = await this.productService.create(store._id, product);
+      await this.evaluationService.create(newProduct._id);
+    });
   }
-
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Get('seller')
+  @Get('product/seller')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
@@ -122,141 +117,214 @@ export class ProductController {
     @Query('sortValue') sortValue: string,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getByUserId(userId);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
-    const store = await this.storeService.getByUserId(userId)
-    if (!store) return new NotFoundException("Không tìm thấy cửa hàng này!")
+    const products = await this.productService.getAllBySearch(store._id, page, limit, search, sortType, sortValue, {});
 
-    const products = await this.productService.getAllBySearch(store._id, page, limit, search, sortType, sortValue, {})
+    const fullInfoProducts: ProductDto[] = await Promise.all(
+      products.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const quantitySold: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
+        const isPurchased: boolean = await this.billService.checkProductPurchased(product._id);
 
-    const fullInfoProducts: ProductDto[] = await Promise.all(products.products.map(async (product: Product) => {
-      let category = await this.categoryService.getById(product.categoryId);
-      let quantitySold: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.SELL, 'DELIVERED');
-      let quantityGive: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
-      let revenue: number = quantitySold * product.price;
-      let isPurchased: boolean = await this.billService.checkProductPurchased(product._id);
-
-      return {
-        ...product.toObject(),
-        categoryName: category.name,
-        storeName: store.name,
-        quantitySold,
-        quantityGive,
-        revenue,
-        isPurchased,
-      }
-    }));
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
+          isPurchased,
+        };
+      }),
+    );
 
     return new SuccessResponse({
-      message: "Lấy danh sách sản phẩm thành công!",
-      metadata: { data: {total: products.total, products: fullInfoProducts} },
-    })
-
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data: { total: products.total, products: fullInfoProducts } },
+    });
   }
 
-
   @Public()
-  @Get()
+  @Get('product')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
-  async getAllBySearchPublic(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('search') search: string,
-  ): Promise<SuccessResponse> {
-    const products = await this.productService.getAllBySearch(null, page, limit, search, null, null, {status: true})
+  async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
+    const products = await this.productService.getAllBySearch(null, page, limit, search, null, null, { status: true });
     return new SuccessResponse({
-      message: "Lấy danh sách sản phẩm thành công!",
+      message: 'Lấy danh sách sản phẩm thành công!',
       metadata: { data: products },
-    })
+    });
   }
 
+  @Public()
+  @Get('products-other-in-store')
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  async getAllOtherProductByStoreId(@Query('storeId') storeId: string, @Query('productId') productId: string): Promise<SuccessResponse> {
+    const products = await this.productService.getProductsByStoreId(storeId);
+
+    const relateProducts = products.filter(product => product._id.toString() !== productId).slice(0, 12);
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách tất cả sản phẩm khác cùng cửa hàng thành công!',
+      metadata: { total: relateProducts.length, data: relateProducts },
+    });
+  }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())
   @CheckRole(RoleName.SELLER)
-  @Patch('seller/:id')
-  async update(
-    @Param('id') id: string,
-    @Body() product: UpdateProductDto,
-  ): Promise<SuccessResponse | NotFoundException> {
-    const newProduct = await this.productService.update(id, product)
-    if (!newProduct) return new NotFoundException("Không tìm thấy sản phẩm này!")
+  @Patch('product/seller/:id')
+  async update(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
+    const newProduct = await this.productService.update(id, product);
+    if (!newProduct) return new NotFoundException('Không tìm thấy sản phẩm này!');
     return new SuccessResponse({
-      message: "Cập nhật sản phẩm thành công!",
+      message: 'Cập nhật sản phẩm thành công!',
       metadata: { data: newProduct },
-    })
+    });
   }
 
-
   @Public()
-  @Get('/listProductLasted')
+  @Get('product/listProductLasted')
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  async getlistProductLasted(
-    @Query('limit') limit: number,
-  ): Promise<SuccessResponse> {
-    const products = await this.productService.getListProductLasted(limit)
+  async getlistProductLasted(@Query('limit') limit: number): Promise<SuccessResponse> {
+    const data = await this.productService.getListProductLasted(Number(limit));
     return new SuccessResponse({
-      message: "Lấy danh sách sản phẩm thành công!",
-      metadata: { data: products },
-    })
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data },
+    });
   }
 
   @Public()
-  @Get('/mostProductsInStore')
+  @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  async mostProductsInStore(
-    @Query('limit') limit: number,
-  ): Promise<SuccessResponse> {
+  async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
+    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(Number(limit));
 
-    const products = await this.productService.mostProductsInStore(limit)
+    const data = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      storeHaveMostProducts.map(async (item: any) => {
+        const store = await this.storeService.getById(item._id);
+        if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
+
+        let products: Product[] = await this.productService.getProductsByStoreId(item._id.toString());
+
+        products = products.map(product => {
+          product = product.toObject();
+          delete product.storeId;
+          delete product.status;
+          delete product['createdAt'];
+          delete product['updatedAt'];
+          delete product.__v;
+          return product;
+        });
+
+        return {
+          storeId: store._id,
+          storeName: store.name,
+          storeAvatar: store.avatar,
+          listProducts: products.slice(0, 10),
+        };
+
+      }),
+    );
 
     return new SuccessResponse({
-      message: "Lấy danh sách sản phẩm thành công!",
-      metadata: { data: products },
-    })
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data },
+    });
   }
 
   @Public()
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @Get('/random')
+  @Post('product/random')
   async getRandom(
+    @Body() excludeIds: ExcludeIds,
     @Query('limit') limit: number,
+    @Query() cursor?: FilterDate,
   ): Promise<SuccessResponse | NotFoundException> {
-    const products: Product[] = await this.productService.getRandomProducts(limit)
-    if (!products) return new NotFoundException("Không tìm thấy sản phẩm!")
-    return new SuccessResponse({
-      message: "Lấy thông tin sản phẩm thành công!",
-      metadata: { data: products },
-    })
-  }
+    const products: Product[] = await this.productService.getRandomProducts(limit, excludeIds, cursor);
 
+    if (!products) return new NotFoundException('Không tìm thấy sản phẩm!');
+
+    const nextCursor = products.length > 0 ? products[products.length - 1]['createdAt'] : null;
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin sản phẩm thành công!',
+      metadata: { nextCursor, data: products },
+    });
+  }
 
   @Public()
-  @Get('/:id')
-  async getById(
-    @Param('id') id: string
-  ): Promise<SuccessResponse | NotFoundException> {
-    const product = await this.productService.getById(id)
-    if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
+  @Get('product-filter')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllBySearchAndFilterPublic(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+    @Query() filter?: FilterProduct,
+  ): Promise<SuccessResponse> {
+    const category = await this.categoryService.getById(search.toString());
+
+    const products = await this.productService.getAllBySearchAndFilter(page, limit, search, filter);
+
+    const data = {
+      total: products.total,
+      products: products.products,
+      categoryName: category.name,
+    };
+
     return new SuccessResponse({
-      message: "Lấy thông tin sản phẩm thành công!",
-      metadata: { data: product },
-    })
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data },
+    });
   }
 
+  @Public()
+  @Get('product/:id')
+  async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const product = await this.productService.getById(id);
+    if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
+
+    const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
+
+    const quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin sản phẩm thành công!',
+      metadata: { data: product, quantityDelivered },
+    });
+  }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
   @CheckRole(RoleName.MANAGER, RoleName.SELLER)
-  @Delete('/:id')
+  @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const product = await this.productService.deleteProduct(id);
-    if (!product) return new NotFoundException("Không tìm thấy sản phẩm này!")
+    if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
     return new SuccessResponse({
-      message: "Xóa sản phẩm thành công!",
+      message: 'Xóa sản phẩm thành công!',
       metadata: { data: product },
-    })
+    });
   }
 
+  @Public()
+  @ApiQuery({ name: 'categoryId', type: String, required: false })
+  @Delete('product')
+  async deleteCategory(@Query('categoryId') categoryId: string): Promise<SuccessResponse | NotFoundException> {
+    const product = await this.productService.deleteProductByCategory(categoryId);
+
+    return new SuccessResponse({
+      message: 'Xóa sản phẩm thành công!',
+      metadata: { data: product },
+    });
+  }
 }

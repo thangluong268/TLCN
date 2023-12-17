@@ -9,16 +9,18 @@ import { NotificationModule } from '../notification/notification.module';
 import { ProductModule } from '../product/product.module';
 import { UserModule } from '../user/user.module';
 import { StoreModule } from '../store/store.module';
+import { BillModule } from '../bill/bill.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Evaluation', schema: EvaluationSchema }]),
-    forwardRef(() => UserModule),
-    forwardRef(() => ProductModule),
     AbilityModule,
     RoleModule,
     NotificationModule,
-    StoreModule,
+    forwardRef(() => StoreModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => ProductModule),
+    forwardRef(() => BillModule),
   ],
   controllers: [EvaluationController],
   providers: [EvaluationService],

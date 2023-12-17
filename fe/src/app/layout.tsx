@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import React from "react";
+import { Metadata } from "next";
 import { AuthContextProvider } from "../app/authContext";
 import { Roboto, Lora } from "next/font/google";
 import "./globals.css";
@@ -10,6 +11,7 @@ import Loading from "@/components/Loading";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ReduxProvider from "@/redux/provider";
+import "react-quill/dist/quill.snow.css";
 
 // const lora = Lora({
 //   weight: ["400", "500", "600", "700"],
@@ -23,10 +25,10 @@ const lora = Roboto({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "DTExchange",
-  description: "This is a website for DTExchange",
-};
+// export const metadata: Metadata = {
+//   title: "DTExchange",
+//   description: "This is a website for DTExchange",
+// };
 
 export default async function RootLayout({
   children,

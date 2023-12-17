@@ -80,3 +80,27 @@ export const APIUpdateBill = async (
   );
   return res.data;
 };
+
+// /api/bill/user/count-total-by-status
+export const APIGetCountBillByStatusUser = async (): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user/count-total-by-status`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/bill/user?page=&limit=&status
+export const APIGetListBillUser = async (
+  page: number,
+  limit: number,
+  status: string = ""
+): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user?page=${page}&limit=${limit}&status=${status}`,
+    { headers }
+  );
+  return res.data;
+};

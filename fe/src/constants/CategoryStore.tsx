@@ -10,6 +10,7 @@
 import Cancel from "@/app/store/seller/[MyStore]/Cancel";
 import Create from "@/app/store/seller/[MyStore]/Create";
 import Home from "@/app/store/seller/[MyStore]/Home";
+import Info from "@/app/store/seller/[MyStore]/Info";
 import New from "@/app/store/seller/[MyStore]/New";
 import Preparing from "@/app/store/seller/[MyStore]/Preparing";
 import Rebill from "@/app/store/seller/[MyStore]/Rebill";
@@ -62,5 +63,10 @@ export const CATEGORYSTORE = [
     title: "Quản lý kho",
     value: "warehouse",
     element: Warehouse,
+  },
+  {
+    title: "Cài đặt thông tin",
+    value: "info",
+    element: Info,
   },
 ];
