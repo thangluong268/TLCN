@@ -7,6 +7,8 @@ import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorato
 import { BillService } from '../bill/bill.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
+import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
+import { NotificationService } from '../notification/notification.service';
 import { RoleService } from '../role/role.service';
 import { RoleName } from '../role/schema/role.schema';
 import { Store } from '../store/schema/store.schema';
@@ -24,6 +26,7 @@ export class UserController {
     private readonly roleService: RoleService,
     private readonly billService: BillService,
     private readonly storeService: StoreService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @UseGuards(AbilitiesGuard)
@@ -160,6 +163,19 @@ export class UserController {
 
     const updatedUser = await this.userService.update(id, updateUserDto);
 
+    const createNotiData: CreateNotificationDto = {
+      userIdFrom: userId,
+      userIdTo: userId,
+      content: 'đã cập nhật thông tin cá nhân.',
+      type: 'Cập nhật thông tin',
+      sub: {
+        fullName: updatedUser.fullName,
+        avatar: updatedUser.avatar,
+        productId: '',
+      },
+    };
+    await this.notificationService.create(createNotiData);
+
     return new SuccessResponse({
       message: 'Cập nhật thông tin người dùng thành công!',
       metadata: { data: updatedUser },
@@ -192,5 +208,4 @@ export class UserController {
       metadata: { data },
     });
   }
-
 }

@@ -9,9 +9,10 @@ import { UserSchema } from './schema/user.schema';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { StoreModule } from '../store/store.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), AbilityModule, RoleModule, BillModule, StoreModule],
+  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), AbilityModule, RoleModule, BillModule, StoreModule, NotificationModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
