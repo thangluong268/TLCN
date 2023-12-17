@@ -15,7 +15,6 @@ import {
 } from "@/services/Notification";
 import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
-import { NotiData } from "@/types/Notification";
 import { APIGetAllCart } from "@/services/Cart";
 import { Cart, Order } from "@/types/Cart";
 import Toast from "@/utils/Toast";
@@ -29,6 +28,7 @@ import { UserAuth } from "@/app/authContext";
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [countNewNoti, setCountNewNoti] = React.useState(0);
+  const [dataNoti, setDataNoti] = React.useState([]);
   const { logOut } = UserAuth();
 
   const [user, setUser] = React.useState<UserInterface>();
@@ -73,11 +73,36 @@ function Header() {
         dispatch(setCartPopUp(carts));
       }
     };
+
     if (user && user.role != "admin") {
       fetchAllCart();
     }
   }, []);
 
+  React.useEffect(() => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+      : null;
+    const fetchAllNoti = async () => {
+      const res = await APIGetAllNotification({
+        page: 1,
+        limit: 10,
+      });
+      if (res.status == 200 || res.status == 201) {
+        console.log("NOTI", res.metadata.data);
+
+        setDataNoti(res.metadata.data.notifications);
+        setCountNewNoti(
+          res.metadata.data.notifications.filter(
+            (item: any) => item.status == false
+          ).length
+        );
+      }
+    };
+    if (user && user.role != "admin") {
+      fetchAllNoti();
+    }
+  }, []);
   React.useEffect(() => {
     if (window.location.pathname == "/cart") {
       setIsShowCart(false);
@@ -210,38 +235,35 @@ function Header() {
                 )}
               </div>
 
-              <div className="flex flex-col justify-center items-center mr-10">
-                <FaComments className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-                <div className="flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]">
-                  <span className="text-[12px] text-white">1</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center items-center">
+              <div className="group py-6 flex flex-col justify-center items-center">
                 <FaBell className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-                {/* {isNotiOpen && user && (
-              <FramePopup total={dataNoti.total} component="notification">
-                {dataNoti.notifications.length > 0 ? (
+                {dataNoti && isShowCart && (
                   <>
-                    {dataNoti.notifications.map((item) => (
-                      <Notification props={item} />
-                    ))}
+                    <div className="group-hover:block group-hover:shadow-inner hidden">
+                      <FramePopup>
+                        <>
+                          {dataNoti.map((item, index) => (
+                            <Notification
+                              key={index}
+                              data={item}
+                              setCountNewNoti={() =>
+                                setCountNewNoti((prev) => prev - 1)
+                              }
+                            />
+                          ))}
+                        </>
+                      </FramePopup>
+                    </div>
+                    {countNewNoti > 0 && (
+                      <div
+                        className={`flex justify-center items-center w-[20px] h-[20px] ${"bg-[#6499FF]"} rounded-full absolute mt-[-24px] ml-[30px]`}
+                      >
+                        <span className="text-[12px] text-white">
+                          {countNewNoti}
+                        </span>
+                      </div>
+                    )}
                   </>
-                ) : (
-                  <div className="flex justify-center items-center w-[300px] hover:bg-[#c1d2f6] p-2 rounded-lg">
-                    <span className="text-[14px] cursor-default">
-                      Không có thông báo mới
-                    </span>
-                  </div>
-                )}
-              </FramePopup>
-            )} */}
-                {countNewNoti > 0 && (
-                  <div className="flex justify-center items-center w-[20px] h-[20px] bg-[#6499FF] rounded-full absolute mt-[-24px] ml-[30px]">
-                    <span className="text-[12px] text-white">
-                      {countNewNoti}
-                    </span>
-                  </div>
                 )}
               </div>
             </div>
