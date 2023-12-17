@@ -133,7 +133,7 @@ export class StoreController {
   @CheckAbilities(new ReadStoreAbility())
   @CheckRole(RoleName.ADMIN)
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @Get('stores-most-products')
+  @Get('store/admin/stores-most-products')
   async getListStoreHaveMostProducts(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
     const stores = await this.productService.getListStoreHaveMostProducts(limit);
 
