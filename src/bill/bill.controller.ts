@@ -450,7 +450,6 @@ export class BillController {
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     if (status !== 'CANCELLED' && status !== 'RETURNED') return new BadRequestException('Trạng thái không hợp lệ!');
-
     const bill = await this.billService.getById(id);
     if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
 

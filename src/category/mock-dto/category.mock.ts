@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const createCategoryMock = (): any => {
     return {
       name: "Điện Thoại - Máy Tính Bảng",

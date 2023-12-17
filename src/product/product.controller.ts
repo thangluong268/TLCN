@@ -193,7 +193,7 @@ export class ProductController {
   @Get('product/listProductLasted')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async getlistProductLasted(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const data = await this.productService.getListProductLasted(Number(limit));
+    const data = await this.productService.getListProductLasted(limit);
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
       metadata: { data },
@@ -204,7 +204,8 @@ export class ProductController {
   @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(Number(limit));
+
+    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(limit);
 
     const data = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -264,7 +265,7 @@ export class ProductController {
   @Get('product-filter')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @ApiQuery({ name: 'search', type: String, required: false })
+  @ApiQuery({ name: 'search', type: String, required: true })
   async getAllBySearchAndFilterPublic(
     @Query('page') page: number,
     @Query('limit') limit: number,

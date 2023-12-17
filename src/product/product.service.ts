@@ -104,9 +104,9 @@ export class ProductService {
     }
   }
 
-  async getListProductLasted(limit: number): Promise<Product[]> {
+  async getListProductLasted(limit: number = 5): Promise<Product[]> {
     try {
-      const products = await this.productModel.find({ status: true }).sort({ createdAt: -1 }).limit(limit);
+      const products = await this.productModel.find({ status: true }).sort({ createdAt: -1 }).limit(Number(limit));
       return products;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
