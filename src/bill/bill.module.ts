@@ -10,6 +10,7 @@ import { BillController } from './bill.controller';
 import { BillService } from './bill.service';
 import { PaymentModule } from './payment/payment.module';
 import { BillSchema } from './schema/bill.schema';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BillSchema } from './schema/bill.schema';
     ProductModule,
     StoreModule,
     forwardRef(() => UserModule),
+    NotificationModule,
   ],
   controllers: [BillController],
   providers: [BillService],

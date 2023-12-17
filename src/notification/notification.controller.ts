@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CheckAbilities, ReadNotificationAbility, UpdateNotificationAbility } from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
@@ -49,7 +49,7 @@ export class NotificationController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateNotificationAbility())
   @CheckRole(RoleName.SELLER, RoleName.USER)
-  @Put('/:id')
+  @Patch('/:id')
   async update(@Param('id') id: string, @Body() updateNoti: UpdateNotificationDto): Promise<SuccessResponse | NotFoundException> {
     const result = await this.notificationService.update(id, updateNoti);
     if (!result) return new NotFoundException('Không tìm thấy thông báo này!');

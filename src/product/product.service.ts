@@ -28,7 +28,7 @@ export class ProductService {
 
   async getById(id: string): Promise<Product> {
     try {
-      const product = await this.productModel.findOne({ _id: id });
+      const product = await this.productModel.findOne({ _id: id.toString() });
       return product;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();

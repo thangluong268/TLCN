@@ -6,6 +6,9 @@ import { AbilityModule } from '../ability/ability.module';
 import { RoleModule } from '../role/role.module';
 import { FeedbackSchema } from './schema/feedback.schema';
 import { UserModule } from '../user/user.module';
+import { StoreModule } from '../store/store.module';
+import { ProductModule } from '../product/product.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { UserModule } from '../user/user.module';
     AbilityModule,
     RoleModule,
     forwardRef(() => UserModule),
+    forwardRef(() => StoreModule),
+    forwardRef(() => ProductModule),
+    NotificationModule,
   ],
   controllers: [FeedbackController],
   providers: [FeedbackService],

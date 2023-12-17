@@ -6,8 +6,10 @@ import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { CartService } from '../cart/cart.service';
-import { NotFoundException } from '../core/error.response';
+import { BadRequestException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
+import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
+import { NotificationService } from '../notification/notification.service';
 import { ProductService } from '../product/product.service';
 import { RoleName } from '../role/schema/role.schema';
 import { StoreService } from '../store/store.service';
@@ -17,7 +19,7 @@ import { BillDto } from './dto/bill.dto';
 import { CreateBillDto, ProductInfo } from './dto/create-bill.dto';
 import { GiveGateway, MoMoGateway, PAYMENT_METHOD, VNPayGateway } from './payment/payment.gateway';
 import { PaymentService } from './payment/payment.service';
-import { BILL_STATUS, BILL_STATUS_TRANSITION } from './schema/bill.schema';
+import { BILL_STATUS, BILL_STATUS_TRANSITION, ContentNotiByStatus } from './schema/bill.schema';
 
 @Controller('bill')
 @ApiTags('Bill')
@@ -30,6 +32,7 @@ export class BillController {
     private readonly productService: ProductService,
     private readonly storeService: StoreService,
     private readonly cartService: CartService,
+    private readonly notificationService: NotificationService,
   ) {
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.VNPAY, new VNPayGateway());
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.MOMO, new MoMoGateway());
@@ -63,6 +66,35 @@ export class BillController {
           createBillDto.giveInfo,
           createBillDto.deliveryFee,
         );
+
+        // Gửi thông báo cho người bán
+        const store = await this.storeService.getById(billDto.storeId);
+        const createNotiDataToSeller: CreateNotificationDto = {
+          userIdFrom: userId,
+          userIdTo: store.userId,
+          content: `đã đặt hàng thành công. Mã đơn: #${newBill._id.toString()}.`,
+          type: 'Đặt hàng',
+          sub: {
+            fullName: user.fullName,
+            avatar: user.avatar,
+            productId: newBill._id.toString(),
+          },
+        };
+        await this.notificationService.create(createNotiDataToSeller);
+
+        // Gửi thông báo cho người dùng
+        const createNotiDataToUser: CreateNotificationDto = {
+          userIdFrom: userId,
+          userIdTo: userId,
+          content: `Bạn đã đặt hàng thành công. Mã đơn: #${newBill._id.toString()}.`,
+          type: 'Đặt hàng',
+          sub: {
+            fullName: user.fullName,
+            avatar: user.avatar,
+            productId: newBill._id.toString(),
+          },
+        };
+        await this.notificationService.create(createNotiDataToUser);
 
         return newBill;
       }),
@@ -410,18 +442,64 @@ export class BillController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
   @CheckRole(RoleName.USER)
-  @Put('user/:id')
-  async cancelBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+  @ApiQuery({ name: 'status', type: String, required: true })
+  @Put('/user/:id')
+  async updateStatusUser(
+    @Param('id') id: string,
+    @Query('status') status: string,
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
+    if (status !== 'CANCELLED' && status !== 'RETURNED') return new BadRequestException('Trạng thái không hợp lệ!');
+
     const bill = await this.billService.getById(id);
+    if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
 
-    const result = await this.billService.update(id, 'CANCELLED');
+    const store = await this.storeService.getById(bill.storeId);
 
-    if (!result) return new NotFoundException('Không tìm thấy đơn hàng này!');
+    const userSend = await this.userService.getById(userId);
 
-    await this.userService.updateWallet(userId, bill.totalPrice, 'sub');
+    const result = await this.billService.update(id, status);
+    if (!result) return new NotFoundException('Cập nhật trạng thái đơn hàng thất bại!');
+
+    if (status === 'CANCELLED') {
+      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
+
+      // Gửi thông báo cho người bán
+      const createNotiDataToSeller: CreateNotificationDto = {
+        userIdFrom: userId,
+        userIdTo: store.userId,
+        content: `đã hủy đơn hàng #${bill._id.toString()}.`,
+        type: 'Cập nhật đơn hàng',
+        sub: {
+          fullName: userSend.fullName,
+          avatar: userSend.avatar,
+          productId: bill._id.toString(),
+        },
+      };
+      await this.notificationService.create(createNotiDataToSeller);
+
+      // Gửi thông báo cho người dùng
+      const createNotiDataToUser: CreateNotificationDto = {
+        userIdFrom: userId,
+        userIdTo: userId,
+        content: `Bạn đã hủy đơn hàng #${bill._id.toString()}.`,
+        type: 'Cập nhật đơn hàng',
+        sub: {
+          fullName: userSend.fullName,
+          avatar: userSend.avatar,
+          productId: bill._id.toString(),
+        },
+      };
+      await this.notificationService.create(createNotiDataToUser);
+    }
+
+    if (status === 'RETURNED') {
+      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
+      await this.userService.updateWallet(bill.userId, bill.totalPrice * 5, 'plus');
+    }
 
     return new SuccessResponse({
-      message: 'Hủy đơn hàng thành công!',
+      message: 'Cập nhật trạng thái đơn hàng thành công!',
       metadata: { data: result },
     });
   }
@@ -431,19 +509,29 @@ export class BillController {
   @CheckRole(RoleName.SELLER)
   @Put('/seller/:id')
   @ApiQuery({ name: 'status', type: String, required: true })
-  async updateStatus(@Param('id') id: string, @Query('status') status: string): Promise<SuccessResponse | NotFoundException> {
+  async updateStatusSeller(@Param('id') id: string, @Query('status') status: string): Promise<SuccessResponse | NotFoundException> {
     const bill = await this.billService.getById(id);
     if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
 
+    const store = await this.storeService.getById(bill.storeId);
+
     const result = await this.billService.update(id, status);
-    if (!result) return new NotFoundException('Không tìm thấy đơn hàng này!');
+    if (!result) return new NotFoundException('Cập nhật trạng thái đơn hàng thất bại!');
 
     if (status === 'CANCELLED') await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
-
-    if (status === 'RETURNED') {
-      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
-      await this.userService.updateWallet(bill.userId, bill.totalPrice * 5, 'plus');
-    }
+    // Gửi thông báo cho người dùng
+    const createNotiDataToUser: CreateNotificationDto = {
+      userIdFrom: store.userId,
+      userIdTo: bill.userId,
+      content: new ContentNotiByStatus(bill._id.toString())[status.toUpperCase()],
+      type: 'Cập nhật đơn hàng',
+      sub: {
+        fullName: store.name,
+        avatar: store.avatar,
+        productId: bill._id.toString(),
+      },
+    };
+    await this.notificationService.create(createNotiDataToUser);
 
     return new SuccessResponse({
       message: 'Cập nhật trạng thái đơn hàng thành công!',
