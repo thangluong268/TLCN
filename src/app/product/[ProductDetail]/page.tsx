@@ -15,14 +15,7 @@ import Toast from "@/utils/Toast";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
-import {
-  FaHeart,
-  FaPlus,
-  FaShareAlt,
-  FaShopify,
-  FaShoppingCart,
-  FaTelegramPlane,
-} from "react-icons/fa";
+import { FaHeart, FaShareAlt, FaShopify, FaShoppingCart } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {
   FacebookShareButton,
@@ -31,13 +24,12 @@ import {
   FacebookMessengerIcon,
 } from "next-share";
 import { APIGetFeedbackStar } from "@/services/Feedback";
-import {
-  APIGetMyStore,
-  APIGetStoreById,
-  APIGetStoreReputation,
-} from "@/services/Store";
+
 import Store from "./Store";
 import Feedback from "./Feedback";
+import Modal from "@/components/Modal";
+import Login from "@/app/login/page";
+import Form from "@/app/login/Form";
 
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
@@ -46,7 +38,7 @@ function ProductDetail() {
   const [page, setPage] = React.useState(1);
   const [quantityDelivered, setQuantityDelivered] = React.useState(0);
   const [totalFeedback, setTotalFeedback] = React.useState(0);
-
+  const [showLogin, setShowLogin] = React.useState(false);
   const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const [evaluation, setEvaluation] = React.useState({
@@ -212,6 +204,7 @@ function ProductDetail() {
                           "Bạn cần đăng nhập để yêu thích sản phẩm này",
                           2000
                         );
+                        setShowLogin(true);
                       } else {
                         Heart();
                       }
@@ -259,6 +252,7 @@ function ProductDetail() {
                       if (!user) {
                         e.preventDefault();
                         Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                        setShowLogin(true);
                       } else {
                         AddToCart();
                       }
@@ -278,6 +272,7 @@ function ProductDetail() {
                         if (!user) {
                           e.preventDefault();
                           Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                          setShowLogin(true);
                         } else {
                           AddToCart(true);
                         }
@@ -469,6 +464,15 @@ function ProductDetail() {
           </div>
         </>
       )}
+      <Modal
+        isShow={showLogin}
+        setIsShow={(e) => setShowLogin(false)}
+        confirm={() => console.log("sss")}
+        title={"Đăng nhập để tiếp tục"}
+        fastLogin={true}
+      >
+        <Form fastLogin={true} />
+      </Modal>
     </div>
   );
 }

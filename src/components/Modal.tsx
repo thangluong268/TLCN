@@ -6,10 +6,11 @@ interface ModalProps {
   confirm: () => void;
   title: string;
   children: any;
+  fastLogin?: boolean;
 }
 
 export default function Modal(props: ModalProps) {
-  const { isShow, setIsShow, confirm, title, children } = props;
+  const { isShow, setIsShow, confirm, title, children, fastLogin } = props;
   return (
     <>
       {isShow ? (
@@ -33,22 +34,24 @@ export default function Modal(props: ModalProps) {
                 {/*body*/}
                 <div className="relative p-6 flex-auto">{children}</div>
                 {/*footer*/}
-                <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
-                  <button
-                    className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => setIsShow(false)}
-                  >
-                    Đóng
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white active:bg-blue-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => confirm()}
-                  >
-                    Xác nhận
-                  </button>
-                </div>
+                {!fastLogin && (
+                  <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                    <button
+                      className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                      type="button"
+                      onClick={() => setIsShow(false)}
+                    >
+                      Đóng
+                    </button>
+                    <button
+                      className="bg-blue-500 text-white active:bg-blue-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                      type="button"
+                      onClick={() => confirm()}
+                    >
+                      Xác nhận
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

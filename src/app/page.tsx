@@ -19,6 +19,7 @@ export default function Home() {
     const fetchData = async () => {
       const lst = await APIGetListProductLasted().then((res) => res);
       // const lst1 = await APIGetListProducMostInStore().then((res) => res);
+      // console.log(lst1);
       setListProduct(lst.metadata.data);
       // setListProductMost(lst1.metadata.data);
     };

@@ -9,6 +9,8 @@ import {
 import Toast from "@/utils/Toast";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
+import Review from "./review";
+import FormatMoney from "@/utils/FormatMoney";
 interface Invoice {
   status: string;
   title: string;
@@ -20,6 +22,15 @@ interface TableInvoice {
   storeName: string;
   price: number;
   recievedDate: string;
+  paymentMethod: string;
+  createdAt: Date;
+  receiverInfo: {
+    name: string;
+    phone: string;
+    address: string;
+  };
+  listProductsFullInfo: any;
+  deliveryFee: number;
 }
 
 function Info() {
@@ -30,6 +41,8 @@ function Info() {
   const [data, setData] = React.useState<TableInvoice[]>([] as TableInvoice[]);
   const [isShow, setIsShow] = React.useState(false);
   const [changed, setChanged] = React.useState(false);
+  const [isReview, setIsReview] = React.useState(false);
+  const [currentBill, setCurrentBill] = React.useState<any>({});
   const [typeMes, setTypeMes] = React.useState<string>("");
 
   const [currentId, setCurrentId] = React.useState("");
@@ -125,9 +138,14 @@ function Info() {
         const createdAtDate = new Date(lstProduct.createdAt);
         createdAtDate.setDate(createdAtDate.getDate() + 3);
         arrBill.recievedDate = formatToDDMMYYYY(createdAtDate);
+        arrBill.createdAt = lstProduct.createdAt;
         arrBill.storeName = lstProduct.storeInfo?.name;
         arrBill.price = lstProduct.totalPrice;
+        arrBill.paymentMethod = lstProduct.paymentMethod;
         arrBill.productName = [] as string[];
+        arrBill.receiverInfo = lstProduct.receiverInfo;
+        arrBill.listProductsFullInfo = lstProduct.listProductsFullInfo;
+        arrBill.deliveryFee = lstProduct.deliveryFee;
         lstProduct.listProductsFullInfo?.map((item: any, index: number) => {
           if (item.product) {
             arrBill.productName?.push(
@@ -197,7 +215,11 @@ function Info() {
               </td>
               <td
                 scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"
+                className="cursor-pointer px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"
+                onClick={(e) => {
+                  setIsReview(true);
+                  setCurrentBill(item);
+                }}
               >
                 <div className="flex flex-col">
                   {item.productName?.map((item, index) => (
@@ -206,7 +228,9 @@ function Info() {
                 </div>
               </td>
               <td className="px-6 py-4 text-center">{item.storeName}</td>
-              <td className="px-6 py-4 text-center">{item.price}</td>
+              <td className="px-6 py-4 text-center">
+                {FormatMoney(item.price)}
+              </td>
 
               <td className="px-6 py-4 text-center">{item.recievedDate}</td>
               {status == "NEW" && (
@@ -236,7 +260,6 @@ function Info() {
             </tr>
           ))}
         </SortTable>
-
         <Modal
           isShow={isShow}
           setIsShow={(data: any) => setIsShow(data)}
@@ -249,6 +272,10 @@ function Info() {
             {type[typeMes]?.mes}
           </div>
         </Modal>
+
+        {isReview && (
+          <Review setChanged={(data) => setIsReview(data)} bill={currentBill} />
+        )}
       </div>
     </div>
   );

@@ -104,3 +104,13 @@ export const APIGetListBillUser = async (
   );
   return res.data;
 };
+
+// /api/bill/user/657c6b868c3a7c4556f285ec
+export const APIGetBillUser = async (id: string): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user/${id}`,
+    { headers }
+  );
+  return res.data;
+};
