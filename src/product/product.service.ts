@@ -266,7 +266,7 @@ export class ProductService {
           $sort: { count: -1 },
         },
         {
-          $limit: limit,
+          $limit: Number(limit),
         },
       ]);
 
@@ -277,4 +277,15 @@ export class ProductService {
       throw err;
     }
   }
+
+  async countTotal(): Promise<number> {
+    try {
+      const total = await this.productModel.countDocuments();
+      return total;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

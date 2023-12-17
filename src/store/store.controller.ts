@@ -135,7 +135,7 @@ export class StoreController {
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @Get('stores-most-products')
   async getListStoreHaveMostProducts(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
-    const stores = await this.productService.getListStoreHaveMostProducts(Number(limit));
+    const stores = await this.productService.getListStoreHaveMostProducts(limit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = await Promise.all(
@@ -146,7 +146,7 @@ export class StoreController {
         store = store.toObject();
         delete store.status;
         delete store.__v;
-        delete store['createdA'];
+        delete store['createdAt'];
         delete store['updatedAt'];
         return { store, totalProducts: item.count };
       }),

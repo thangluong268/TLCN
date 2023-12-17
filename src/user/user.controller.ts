@@ -28,27 +28,29 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
-  @CheckRole(RoleName.USER, RoleName.ADMIN)
-  @Get('user/:id')
-  async findOne(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
-    const user = await this.userService.getById(id);
-    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
+  @CheckRole(RoleName.ADMIN)
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @Get('admin/users-most-bills')
+  async getListUserHaveMostBills(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
+    const bills = await this.billService.getListUserHaveMostBills(limit);
 
-    const billsOfUser = await this.billService.getAllByUserId(id);
-
-    const totalBills = billsOfUser.length;
-    const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0);
-    const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length;
-
-    const data = {
-      ...user.toObject(),
-      totalBills,
-      totalPricePaid,
-      totalReceived,
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bills.map(async (item: any) => {
+        let user = await this.userService.getById(item._id);
+        if (!user) throw new NotFoundException('Không tìm thấy người dùng này!');
+        user = user.toObject();
+        delete user.status;
+        delete user.__v;
+        delete user['createdAt'];
+        delete user['updatedAt'];
+        return { user, totalBills: item.count };
+      }),
+    );
 
     return new SuccessResponse({
-      message: 'Lấy thông tin người dùng thành công!',
+      message: 'Lấy thông tin danh sách người dùng mua hàng nhiều nhất thành công!',
       metadata: { data },
     });
   }
@@ -163,4 +165,32 @@ export class UserController {
       metadata: { data: updatedUser },
     });
   }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadUserAbility())
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
+  @Get('user/:id')
+  async findOne(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const user = await this.userService.getById(id);
+    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
+
+    const billsOfUser = await this.billService.getAllByUserId(id);
+
+    const totalBills = billsOfUser.length;
+    const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0);
+    const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length;
+
+    const data = {
+      ...user.toObject(),
+      totalBills,
+      totalPricePaid,
+      totalReceived,
+    };
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin người dùng thành công!',
+      metadata: { data },
+    });
+  }
+
 }

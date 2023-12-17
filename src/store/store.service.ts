@@ -71,4 +71,14 @@ export class StoreService {
       throw err;
     }
   }
+
+  async countTotal(): Promise<number> {
+    try {
+      return await this.storeModel.countDocuments();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

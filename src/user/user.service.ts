@@ -41,9 +41,9 @@ export class UserService {
     }
   }
 
-  async getById(userId: string): Promise<User> {
+  async getById(id: string): Promise<User> {
     try {
-      const user = await this.userModel.findById(userId);
+      const user = await this.userModel.findById(id);
 
       user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
 
@@ -184,4 +184,14 @@ export class UserService {
       throw err;
     }
   }
+
+  async countTotal(): Promise<number> {
+    try {
+      return await this.userModel.countDocuments();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

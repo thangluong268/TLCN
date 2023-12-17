@@ -79,8 +79,7 @@ export class BillController {
   @CheckRole(RoleName.SELLER)
   @ApiQuery({ name: 'year', type: Number, required: false, example: '2023' })
   @Get('seller/count-total-by-status')
-  async countTotalByStatusSeller(@Query('year') year: number, @GetCurrentUserId() userId: string)
-  : Promise<SuccessResponse | NotFoundException> {
+  async countTotalByStatusSeller(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -108,7 +107,6 @@ export class BillController {
   @CheckRole(RoleName.USER)
   @Get('user/count-total-by-status')
   async countTotalByStatusUser(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -138,8 +136,7 @@ export class BillController {
   @CheckRole(RoleName.SELLER)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('seller/calculate-revenue-by-year')
-  async calculateRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string)
-  : Promise<SuccessResponse | NotFoundException> {
+  async calculateRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -170,6 +167,23 @@ export class BillController {
 
     return new SuccessResponse({
       message: 'Lấy kết quả từ thiện của từng tháng theo năm thành công!',
+      metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.ADMIN)
+  @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
+  @Get('admin/calculate-total-revenue-by-year')
+  async calculateTotalRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const user = await this.userService.getById(userId);
+    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
+
+    const data = await this.billService.calculateTotalRevenueByYear(year);
+
+    return new SuccessResponse({
+      message: 'Lấy tổng doanh thu của từng tháng theo năm thành công!',
       metadata: { data },
     });
   }
@@ -316,10 +330,32 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.ADMIN)
+  @Get('admin/count-total-data')
+  async countTotalData(): Promise<SuccessResponse | NotFoundException> {
+    const totalProduct: number = await this.productService.countTotal();
+    const totalStore: number = await this.storeService.countTotal();
+    const totalUser: number = await this.userService.countTotal();
+    const totalRevenue: number = await this.billService.calculateRevenueAllTime();
+
+    const data = {
+      totalProduct,
+      totalStore,
+      totalUser,
+      totalRevenue,
+    };
+
+    return new SuccessResponse({
+      message: `Lấy data thành công!`,
+      metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
   @CheckRole(RoleName.USER)
   @Get('user/:id')
   async getMyBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-
     const bill: any = await this.billService.getMyBill(id, userId);
 
     if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
