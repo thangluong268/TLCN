@@ -15,11 +15,17 @@ import {
   APIGetCountBillAdmin,
   APIGetCountBillByStatus,
   APIGetRevenueByYear,
+  APIGetRevenueByYearAdmin,
+  APIGetUserMostBill,
 } from "@/services/Bill";
 import FormatMoney from "@/utils/FormatMoney";
 import { FaBoxOpen, FaKaaba, FaStore, FaUser } from "react-icons/fa";
 import { MdAttachMoney } from "react-icons/md";
 import FormatDecimal from "@/utils/FormatDecimal";
+import SortTable from "@/components/SortTable";
+import { APIGetStoreMostProduct } from "@/services/Store";
+import { set } from "firebase/database";
+import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 
 Chart.register(
   CategoryScale,
@@ -50,35 +56,42 @@ interface ChartData {
   revenueTotalInYear: number;
 }
 
-interface ChartCharityData {
-  labels: string[];
-  datasets: {
-    data: number[];
-    backgroundColor: string;
-    borderColor: string;
-  }[];
-  maxGive: {
-    month: string;
-    numOfGive: number;
+interface StoreHasMostProduct {
+  store: {
+    _id: string;
+    avatar: string;
+    name: string;
+    address: string;
+    phoneNumber: string[];
+    description: string;
+    warningCount: number;
+    createdAt: string;
+    userId: string;
   };
-  minGive: {
-    month: string;
-    numOfGive: number;
-  };
-  charityTotalAllTime: number;
-  charityTotalInYear: number;
+  totalProducts: number;
 }
 
-interface ChartBillData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string[];
-    borderColor: string[];
-    hoverOffset: number;
-    borderWidth: number;
-  }[];
+interface UserHasMostBill {
+  user: {
+    _id: string;
+    fullName: string;
+    email: string;
+    password: string;
+    address: {
+      receiverName: string;
+      receiverPhone: string;
+      address: string;
+      default: boolean;
+    }[];
+    friends: string[];
+    followStores: string[];
+    wallet: number;
+    warningCount: number;
+    avatar: string;
+    gender: string;
+    createdAt: string;
+  };
+  totalBills: number;
 }
 
 interface HomeProps {
@@ -108,40 +121,15 @@ function Home(props: HomeProps) {
     revenueTotalAllTime: 0,
     revenueTotalInYear: 0,
   });
-  const [dataCharityState, setDataCharityState] =
-    React.useState<ChartCharityData>({
-      labels: [],
-      datasets: [
-        {
-          data: [],
-          backgroundColor: "blue",
-          borderColor: "#bfbfbf",
-        },
-      ],
-      maxGive: {
-        month: "",
-        numOfGive: 0,
-      },
-      minGive: {
-        month: "",
-        numOfGive: 0,
-      },
-      charityTotalAllTime: 0,
-      charityTotalInYear: 0,
-    });
-  const [dataBillState, setDataBillState] = React.useState<ChartBillData>({
-    labels: [],
-    datasets: [
-      {
-        label: "",
-        data: [],
-        backgroundColor: [],
-        borderColor: [],
-        hoverOffset: 0,
-        borderWidth: 0,
-      },
-    ],
-  });
+  const [storeHasMostProduct, setStoreHasMostProduct] = React.useState<
+    StoreHasMostProduct[]
+  >([]);
+  const [userHasMostBill, setUserHasMostBill] = React.useState<
+    UserHasMostBill[]
+  >([]);
+  const [yearFilter, setYearFilter] = React.useState(
+    new Date().getFullYear() + ""
+  );
 
   const optionsSell: any = {
     plugins: {
@@ -183,198 +171,53 @@ function Home(props: HomeProps) {
     type: "line",
   };
 
-  const optionsCharity: any = {
-    plugins: {
-      title: {
-        display: true,
-        text: "Biểu đồ từ thiện năm",
-        color: "#007aff",
-        font: {
-          size: 24,
-        },
-      },
-      legend: {
-        display: false,
-      },
-    },
-    responsive: true,
-    scales: {
-      x: {
-        type: "category",
-        labels: [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-          "Tháng 7",
-          "Tháng 8",
-          "Tháng 9",
-          "Tháng 10",
-          "Tháng 11",
-          "Tháng 12",
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const data = await APIGetRevenueByYearAdmin(yearFilter).then(
+        (res) => res
+      );
+      // Set data for dataSellState
+      console.log(data);
+      const labels = Object.keys(data.metadata.data.data);
+      const value = Object.values(data.metadata.data.data);
+
+      const outputData = {
+        labels: labels,
+        datasets: [
+          {
+            data: value,
+            backgroundColor: "blue",
+            borderColor: "#bfbfbf",
+          },
         ],
-      },
-      y: {
-        beginAtZero: true, // Example configuration for the y-axis
-      },
-    },
-    type: "line",
-  };
+        maxRevenue: data.metadata.data.maxRevenue || 0,
+        minRevenue: data.metadata.data.minRevenue || 0,
+        revenueTotalAllTime: data.metadata.data.revenueTotalAllTime || 0,
+        revenueTotalInYear: data.metadata.data.revenueTotalInYear || 0,
+      };
+      setDataSellState(outputData as ChartData);
+    };
+    fetchData();
+  }, [yearFilter]);
 
-  //Tạo options cho pie chart (biểu đồ tròn), kích thước nhỏ
-  const optionsBill: any = {
-    plugins: {
-      title: {
-        display: true,
-        text: "Biểu đồ đơn hàng năm",
-        color: "#007aff",
-        font: {
-          size: 24,
-        },
-      },
-      legend: {
-        display: true,
-        position: "right",
-      },
-    },
-    layout: {
-      padding: {
-        bottom: 20,
-      },
-    },
-  };
+  React.useEffect(() => {
+    const fetchData = async () => {
+      await APIGetStoreMostProduct(10).then((res) =>
+        setStoreHasMostProduct(res.metadata.data)
+      );
+    };
+    fetchData();
+  }, []);
 
-  const [dataState, setDataState] = React.useState<any>({
-    NEW: 0,
-    CONFIRMED: 0,
-    DELIVERING: 0,
-  });
+  React.useEffect(() => {
+    const fetchData = async () => {
+      await APIGetUserMostBill(10).then((res) =>
+        setUserHasMostBill(res.metadata.data)
+      );
+    };
+    fetchData();
+  }, []);
 
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const data = await APIGetCountBillByStatus().then((res) => res);
-  //     setDataState({
-  //       NEW: data.metadata.data.NEW,
-  //       CONFIRMED: data.metadata.data.CONFIRMED,
-  //       DELIVERING: data.metadata.data.DELIVERING,
-  //     });
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // APIGetRevenueByYear
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const data = await APIGetRevenueByYear(
-  //       new Date().getFullYear() + ""
-  //     ).then((res) => res);
-  //     // Set data for dataSellState
-  //     console.log(data);
-  //     const labels = Object.keys(data.metadata.data.data);
-  //     const value = Object.values(data.metadata.data.data);
-
-  //     const outputData = {
-  //       labels: labels,
-  //       datasets: [
-  //         {
-  //           data: value,
-  //           backgroundColor: "blue",
-  //           borderColor: "#bfbfbf",
-  //         },
-  //       ],
-  //       maxRevenue: data.metadata.data.maxRevenue || 0,
-  //       minRevenue: data.metadata.data.minRevenue || 0,
-  //       revenueTotalAllTime: data.metadata.data.revenueTotalAllTime,
-  //       revenueTotalInYear: data.metadata.data.revenueTotalInYear,
-  //     };
-  //     setDataSellState(outputData as ChartData);
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // APIGetCharityByYear
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const data = await APIGetCharityByYear(
-  //       new Date().getFullYear() + ""
-  //     ).then((res) => res);
-  //     // Set data for dataSellState
-  //     const labels = Object.keys(data.metadata.data.data);
-  //     const value = Object.values(data.metadata.data.data);
-
-  //     const outputData = {
-  //       labels: labels,
-  //       datasets: [
-  //         {
-  //           data: value,
-  //           backgroundColor: "blue",
-  //           borderColor: "#bfbfbf",
-  //         },
-  //       ],
-  //       maxGive: data.metadata.data.maxGive,
-  //       minGive: data.metadata.data.minGive,
-  //       charityTotalAllTime: data.metadata.data.charityTotalAllTime,
-  //       charityTotalInYear: data.metadata.data.charityTotalInYear,
-  //     };
-  //     setDataCharityState(outputData as ChartCharityData);
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // APIGetCountBillByYear
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const data = await APIGetCountBillByStatus(
-  //       new Date().getFullYear() + ""
-  //     ).then((res) => res);
-  //     const labels = Object.keys(data.metadata.data);
-  //     const value = Object.values(data.metadata.data);
-  //     // Đổi tên cho label forEach
-  //     labels.forEach((item, index) => {
-  //       if (item === "CONFIRMED") {
-  //         labels[index] = "ĐANG CHUẨN BỊ";
-  //       } else if (item === "DELIVERING") {
-  //         labels[index] = "ĐNAG GIAO";
-  //       } else if (item === "NEW") {
-  //         labels[index] = "ĐƠN MỚI";
-  //       } else if (item === "CANCELLED") {
-  //         labels[index] = "ĐÃ HUỶ";
-  //       } else if (item === "RETURNED") {
-  //         labels[index] = "ĐÃ HOÀN";
-  //       } else if (item === "DELIVERED") {
-  //         labels[index] = "ĐÃ GIAO";
-  //       }
-  //     });
-
-  //     const outputData = {
-  //       labels: labels,
-  //       datasets: [
-  //         {
-  //           label: "",
-  //           data: value,
-  //           backgroundColor: [
-  //             "rgba(255, 99, 132, 0.2)",
-  //             "rgba(54, 162, 235, 0.2)",
-  //             "#FFCE56",
-  //             "#36A2EB",
-  //           ],
-  //           borderColor: [
-  //             "rgba(255, 99, 132, 1)",
-  //             "rgba(54, 162, 235, 1)",
-  //             "#FFCE56",
-  //             "#36A2EB",
-  //           ],
-  //           hoverOffset: 30,
-  //           borderWidth: 1,
-  //         },
-  //       ],
-  //     };
-  //     setDataBillState(outputData as ChartBillData);
-  //   };
-  //   fetchData();
-  // }, []);
   const [dataTotal, setDataTotal] = React.useState<any>({
     totalProduct: 0,
     totalRevenue: 0,
@@ -393,7 +236,60 @@ function Home(props: HomeProps) {
     };
     fetchData();
   }, []);
-
+  const arrTitleStore = [
+    {
+      title: "",
+      sort: false,
+      name: "index",
+    },
+    {
+      title: "Tên cửa hàng",
+      sort: false,
+      name: "name",
+    },
+    {
+      title: "Địa chỉ",
+      sort: false,
+      name: "address",
+    },
+    {
+      title: "Ngày tham gia",
+      sort: false,
+      name: "date",
+    },
+    {
+      title: "Tổng số sản phẩm",
+      sort: false,
+      name: "totalProducts",
+    },
+  ];
+  const arrTitleUser = [
+    {
+      title: "",
+      sort: false,
+      name: "index",
+    },
+    {
+      title: "Tên người dùng",
+      sort: false,
+      name: "name",
+    },
+    {
+      title: "Email",
+      sort: false,
+      name: "email",
+    },
+    {
+      title: "Ngày tham gia",
+      sort: false,
+      name: "date",
+    },
+    {
+      title: "Tổng số đơn đã mua",
+      sort: false,
+      name: "totalBills",
+    },
+  ];
   return (
     <div>
       <div className="grid grid-cols-4 gap-4 mb-5">
@@ -438,6 +334,27 @@ function Home(props: HomeProps) {
 
       <div className="bg-white rounded-md p-4 mb-5">
         {/* For sell */}
+        <div className="flex items-center">
+          <div className=" text-lg font-bold">Chọn năm muốn xem thống kê:</div>
+          <input
+            type="number"
+            defaultValue={yearFilter}
+            id="yearFilter"
+            className="border-2 border-gray-300 rounded-md p-2 ml-2"
+          />
+          <button
+            className="border-2 border-gray-300 rounded-md p-2 ml-2"
+            onClick={() => {
+              const year = (
+                document.getElementById("yearFilter") as HTMLInputElement
+              ).value;
+              setYearFilter(year);
+            }}
+          >
+            Xem
+          </button>
+        </div>
+
         <Line data={dataSellState} options={optionsSell} />
         <div className="grid gap-2 grid-cols-2 mb-10 rounded-md border-2 p-2 border-red-400">
           <div className="font-bold text-red-500 text-center col-span-1">
@@ -448,42 +365,78 @@ function Home(props: HomeProps) {
             {FormatMoney(dataSellState.revenueTotalInYear)}
           </div>
           <div className="font-bold text-red-500 text-center col-span-1">
-            Doanh thu cao nhất: {FormatMoney(dataSellState.maxRevenue.revenue)}
+            Doanh thu cao nhất:{" "}
+            {FormatMoney(dataSellState.maxRevenue.revenue || 0)}
           </div>
           <div className="font-bold text-red-500 text-center col-span-1">
-            Doanh thu thấp nhất: {FormatMoney(dataSellState.minRevenue.revenue)}
+            Doanh thu thấp nhất:{" "}
+            {FormatMoney(dataSellState.minRevenue.revenue || 0)}
           </div>
         </div>
       </div>
-
       <div className="bg-white rounded-md p-4 mb-5">
-        {/* For charity */}
-        <Line data={dataCharityState} options={optionsCharity} />
-        <div className="grid gap-2 grid-cols-2 mb-10 rounded-md border-2 p-2 border-red-400">
-          <div className="font-bold text-red-500 text-center col-span-1">
-            Tổng sản phẩm đã tặng: {dataCharityState.charityTotalAllTime}
-          </div>
-          <div className="font-bold text-red-500 text-center col-span-1">
-            Tổng sản phẩm đã tặng của năm: {dataCharityState.charityTotalInYear}
-          </div>
-          <div className="font-bold text-red-500 text-center col-span-1">
-            Số lượng sản phẩm tặng nhiều nhất:{" "}
-            {dataCharityState.maxGive?.numOfGive} (
-            {dataCharityState.maxGive?.month})
-          </div>
-          <div className="font-bold text-red-500 text-center col-span-1">
-            Số lượng sản phẩm tặng ít nhất:{" "}
-            {dataCharityState.minGive?.numOfGive} (
-            {dataCharityState.minGive?.month})
-          </div>
+        {/* For sell */}
+        <div className="text-center text-[#007aff] text-[24px] font-bold mb-3">
+          Top các của hàng có nhiều sản phẩm trên hệ thống
         </div>
+        <SortTable title={arrTitleStore} noPaging={true}>
+          {storeHasMostProduct.map((item, index) => (
+            <tr
+              className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+              key={index}
+            >
+              <td className="px-6 py-4 text-center">
+                <img
+                  src={item.store.avatar}
+                  width={50}
+                  height={50}
+                  className="rounded-full mx-auto"
+                  alt=""
+                />
+              </td>
+              <td className="px-6 py-4 text-center">{item.store.name}</td>
+              <td className="px-6 py-4 text-center">{item.store.address}</td>
+              <td className="px-6 py-4 text-center">
+                {formatToDDMMYYYY(item.store.createdAt)}
+              </td>
+              <td className="px-6 py-4 text-center">
+                {FormatDecimal(item.totalProducts)}
+              </td>
+            </tr>
+          ))}
+        </SortTable>
       </div>
-
-      {/* For bill */}
       <div className="bg-white rounded-md p-4 mb-5">
-        <div className="max-w-[50%] mx-auto flex justify-center ">
-          <Pie data={dataBillState} options={optionsBill} />
+        {/* For sell */}
+        <div className="text-center text-[#007aff] text-[24px] font-bold mb-3">
+          Top các cửa hàng có nhiều sản phẩm trên hệ thống
         </div>
+        <SortTable title={arrTitleUser} noPaging={true}>
+          {userHasMostBill.map((item, index) => (
+            <tr
+              className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+              key={index}
+            >
+              <td className="px-6 py-4 text-center">
+                <img
+                  src={item.user.avatar}
+                  width={50}
+                  height={50}
+                  className="rounded-full mx-auto"
+                  alt=""
+                />
+              </td>
+              <td className="px-6 py-4 text-center">{item.user.fullName}</td>
+              <td className="px-6 py-4 text-center">{item.user.email}</td>
+              <td className="px-6 py-4 text-center">
+                {formatToDDMMYYYY(item.user.createdAt)}
+              </td>
+              <td className="px-6 py-4 text-center">
+                {FormatDecimal(item.totalBills)}
+              </td>
+            </tr>
+          ))}
+        </SortTable>
       </div>
     </div>
   );

@@ -13,27 +13,26 @@ interface Store {
   address: string;
   phoneNumber: string[];
   avatar: string;
-  description: string;
   createdAt: string;
   warningCount: string;
 }
 
 function Info() {
   const [data, setData] = React.useState<Store>({} as Store);
+  const [description, setDescription] = React.useState<string>("" as string);
   React.useEffect(() => {
     const fetchData = async () => {
       const res = await APIGetMyStore();
-      console.log(res);
       setData({
         id: res.metadata.data._id,
         name: res.metadata.data.name,
         address: res.metadata.data.address,
         phoneNumber: res.metadata.data.phoneNumber,
         avatar: res.metadata.data.avatar,
-        description: res.metadata.data.description,
         createdAt: ConvertDate(res.metadata.data.createdAt),
         warningCount: res.metadata.data.warningCount,
       });
+      setDescription(res.metadata.data.description);
       const avatar = document.getElementById("avatar-preview");
       if (avatar) {
         avatar.setAttribute("src", res.metadata.data.avatar);
@@ -42,6 +41,7 @@ function Info() {
     };
     fetchData();
   }, []);
+
   const UpdateInfo = async () => {
     document.getElementById("loading-page")?.classList.remove("hidden");
     var avatarUrl = "";
@@ -58,7 +58,7 @@ function Info() {
       name: data.name,
       phone: data.phoneNumber,
       address: data.address,
-      description: data.description,
+      description: description,
     }).then((res) => {
       if (res.status == 200 || res.status == 201) {
         document.getElementById("loading-page")?.classList.add("hidden");
@@ -69,7 +69,7 @@ function Info() {
     });
   };
   const handleDescriptionChange = (value: string) => {
-    setData({ ...data, description: value });
+    setDescription(value);
   };
   return (
     <div className="flex flex-col w-full bg-white rounded-md py-2 px-4 mb-5">
@@ -196,12 +196,12 @@ function Info() {
             />
           </div>
         </div>
-        <div className="flex flex-col w-full items-center pb-10 col-span-2 w-full">
+        <div className="flex flex-col items-center pb-10 col-span-2 w-full">
           <p className=" font-semibold">Mô tả cửa hàng</p>
           <ReactQuill
             className="w-full "
             theme="snow"
-            value={data.description}
+            value={description}
             onChange={handleDescriptionChange}
           />
         </div>

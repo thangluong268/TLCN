@@ -63,3 +63,13 @@ export const APIGetStoreById = async (id: string) => {
   );
   return res.data;
 };
+
+// api/store/admin/stores-most-products?limit=10
+export const APIGetStoreMostProduct = async (limit: number) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/admin/stores-most-products?limit=${limit}`,
+    { headers }
+  );
+  return res.data;
+};

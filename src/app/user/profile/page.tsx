@@ -13,8 +13,13 @@ import {
   FaTransgender,
   FaUserClock,
 } from "react-icons/fa6";
+interface ProfileProps {
+  idProps?: string;
+  setIsShow?: (data: boolean) => void;
+}
 
-function Profile() {
+function Profile(props: ProfileProps): JSX.Element {
+  const { idProps, setIsShow } = props;
   const [userInfo, setUserInfo] = React.useState({
     id: "",
     avatar: "",
@@ -38,7 +43,7 @@ function Profile() {
       ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
       : null;
     const fetchData = async () => {
-      const data = await APIGetUserById(user._id);
+      const data = await APIGetUserById(idProps || user._id);
       console.log(data.metadata.data);
       setOrtherInfo({
         totalBills: data.metadata.data.totalBills,
@@ -65,7 +70,7 @@ function Profile() {
       }
     };
     fetchData();
-  }, []);
+  }, [idProps]);
 
   const UpdateInfo = async () => {
     document.getElementById("loading-page")?.classList.remove("hidden");
@@ -102,8 +107,34 @@ function Profile() {
     });
   };
   return (
-    <div className="min-h-screen px-[150px] my-4">
+    <div className={`min-h-screen ${!idProps ? "px-[150px]" : ""} my-4`}>
       <div className="flex flex-col bg-white rounded-md py-2 px-4 mb-5">
+        {idProps && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="flex-shrink-0 flex justify-center items-center h-8 w-8 rounded-lg text-white bg-gray-400 hover:bg-gray-300 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all text-sm dark:focus:ring-gray-700 dark:focus:ring-offset-gray-800"
+              onClick={() => setIsShow!(false)}
+            >
+              <span className="sr-only">Close</span>
+              <svg
+                className="flex-shrink-0 w-4 h-4 text-center"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
         <div className="mx-auto mt-5">
           <div
             className="w-[200px] h-[200px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer"
@@ -145,7 +176,6 @@ function Profile() {
             }}
           />
         </div>
-
         <div className="font-bold text-3xl text-center mt-4">
           {userInfo.fullName.toUpperCase()}
         </div>
@@ -168,6 +198,7 @@ function Profile() {
             <div className="flex flex-col text-lg">
               <p className=" font-semibold">Họ và tên</p>
               <input
+                disabled={idProps ? true : false}
                 type="text"
                 value={userInfo.fullName}
                 className="w-full border border-[#d9d9d9] rounded-md px-2 py-1"
@@ -184,6 +215,7 @@ function Profile() {
             <div className="flex flex-col text-lg">
               <p className=" font-semibold">Giới tính</p>
               <select
+                disabled={idProps ? true : false}
                 className="w-full border border-[#d9d9d9] rounded-md px-2 py-1"
                 value={userInfo.gender}
                 onChange={(e) => {
@@ -204,6 +236,7 @@ function Profile() {
             <div className="flex flex-col text-lg">
               <p className=" font-semibold">Email</p>
               <input
+                disabled={idProps ? true : false}
                 type="text"
                 value={userInfo.email}
                 className="w-full border border-[#d9d9d9] rounded-md px-2 py-1"
@@ -220,6 +253,7 @@ function Profile() {
             <div className="flex flex-col text-lg">
               <p className=" font-semibold">Số điện thoại</p>
               <input
+                disabled={idProps ? true : false}
                 type="text"
                 value={userInfo.phone}
                 className="w-full border border-[#d9d9d9] rounded-md px-2 py-1"
@@ -230,14 +264,16 @@ function Profile() {
             </div>
           </div>
         </div>
-        <div className="flex justify-center my-5">
-          <button
-            className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-500"
-            onClick={(e) => UpdateInfo()}
-          >
-            Cập nhật thông tin
-          </button>
-        </div>
+        {!idProps && (
+          <div className="flex justify-center my-5">
+            <button
+              className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-500"
+              onClick={(e) => UpdateInfo()}
+            >
+              Cập nhật thông tin
+            </button>
+          </div>
+        )}
         <div className="text-2xl font-bold text-blue-600 mt-10">
           Thông tin khác
         </div>

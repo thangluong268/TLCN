@@ -1,7 +1,7 @@
-export default function formatToDDMMYYYY(date: Date): string {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Lưu ý rằng tháng bắt đầu từ 0
-  const year = date.getFullYear();
-
+export default function formatToDDMMYYYY(date: Date | string): string {
+  const dateObj = new Date(date);
+  const day = dateObj.getDate();
+  const month = dateObj.getMonth() + 1;
+  const year = dateObj.getFullYear();
   return `${day}/${month}/${year}`;
 }

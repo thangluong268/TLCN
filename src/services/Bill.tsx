@@ -124,3 +124,25 @@ export const APIGetCountBillAdmin = async (): Promise<any> => {
   );
   return res.data;
 };
+
+// api/bill/admin/calculate-total-revenue-by-year?year=2023
+export const APIGetRevenueByYearAdmin = async (
+  year: string = ""
+): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/admin/calculate-total-revenue-by-year?year=${year}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/user/admin/users-most-bills?limit=4
+export const APIGetUserMostBill = async (limit: number): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/user/admin/users-most-bills?limit=${limit}`,
+    { headers }
+  );
+  return res.data;
+};

@@ -1,8 +1,13 @@
 import Paging from "@/components/Paging";
 import Star from "@/components/Star";
-import { APICreateFeedback, APIGetFeedbackUser } from "@/services/Feedback";
+import {
+  APICreateFeedback,
+  APIGetFeedbackUser,
+  APIUpdateFeedback,
+} from "@/services/Feedback";
 import { UserInterface } from "@/types/User";
 import ConvertDate from "@/utils/ConvertDate";
+import Toast from "@/utils/Toast";
 import { set } from "firebase/database";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -39,6 +44,7 @@ function Feedback(props: Props) {
     };
     fetchData();
   }, [page]);
+  console.log(feedbacks);
   const SendFeedback = async () => {
     await APICreateFeedback(params.ProductDetail + "", feedback).then(
       (res: any) => {
@@ -67,6 +73,27 @@ function Feedback(props: Props) {
       } else {
         starList![i].classList.remove("text-yellow-300");
       }
+    }
+  };
+
+  const Cosensus = async (fb: any, id: string) => {
+    const res = await APIUpdateFeedback(params.ProductDetail + "", id);
+    if (res.status !== 200 && res.status !== 201) {
+      Toast("warning", res.message, 3000);
+    } else {
+      var arr = feedbacks.map((item: any) => {
+        if (item._id == fb._id) {
+          if (item.consensus.includes(user?._id)) {
+            item.consensus = item.consensus.filter(
+              (item: any) => item != user?._id
+            );
+          } else {
+            item.consensus.push(user?._id);
+          }
+        }
+        return item;
+      });
+      setFeedbacks(arr as any);
     }
   };
   return (
@@ -110,18 +137,18 @@ function Feedback(props: Props) {
                   {item.consensus.length} người đồng thuận
                 </p>
                 <div className="flex items-center mt-3">
-                  <a
-                    href="#"
-                    className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                  <div
+                    className={`text-gray-900 ${
+                      item.consensus.includes(user?._id)
+                        ? "bg-blue-700 text-white"
+                        : "bg-white"
+                    } border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}
+                    onClick={(e) => Cosensus(item, user?._id!)}
                   >
-                    Đồng thuận
-                  </a>
-                  <a
-                    href="#"
-                    className="ps-4 text-sm font-medium text-blue-600 hover:underline dark:text-blue-500 border-gray-200 ms-4 border-s md:mb-0 dark:border-gray-600"
-                  >
-                    Báo cáo
-                  </a>
+                    {item.consensus.includes(user?._id)
+                      ? "Đã đồng thuận"
+                      : "Đồng thuận"}
+                  </div>
                 </div>
               </aside>
             )}

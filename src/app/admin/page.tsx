@@ -35,7 +35,7 @@ function MyStore() {
           Đăng xuất
         </div>
       </div>
-      <div className=" col-span-8 overflow-scroll scrollbar-hide max-h-screen">
+      <div className=" col-span-8 ">
         {dataAdmin.value === "home" ? (
           <dataAdmin.element
             setActive={(data: string) => {

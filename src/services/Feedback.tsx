@@ -40,3 +40,14 @@ export const APICreateFeedback = async (productId: string, body: any) => {
   );
   return res.data;
 };
+
+//api/feedback-consensus?productId=131231&userId=123123 => PUT
+export const APIUpdateFeedback = async (productId: string, userId: string) => {
+  const headers = GetHeaders();
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/feedback-consensus?productId=${productId}&userId=${userId}`,
+    {},
+    { headers }
+  );
+  return res.data;
+};
