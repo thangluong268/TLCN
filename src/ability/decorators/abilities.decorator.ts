@@ -13,6 +13,7 @@ import { Userotp } from '../..//userotp/schema/userotp.schema';
 import { UserToken } from '../..//usertoken/schema/usertoken.schema';
 import { Role } from '../../role/schema/role.schema';
 import { Action, Subjects } from '../ability.factory';
+import { Report } from '../../report/schema/report.schema';
 
 export interface RequiredRule {
   action: Action;
@@ -251,3 +252,15 @@ export class ReadCategoryAbility implements RequiredRule {
   action = Action.Read;
   subject = Category;
 }
+
+// Report
+export class CreateReportAbility implements RequiredRule {
+  action = Action.Create;
+  subject = Report;
+}
+
+export class ReadReportAbility implements RequiredRule {
+  action = Action.Read;
+  subject = Report;
+}
+

@@ -112,4 +112,18 @@ export class RoleService {
       throw err;
     }
   }
+
+  async getAllManagerStoreIds(): Promise<string[]> {
+    try {
+      const roles: Role[] = await this.roleModel.find({ name: RoleName.MANAGER_PRODUCT });
+      if (!roles) {
+        return [];
+      }
+      const userIds = roles.map(role => role.listUser).flat();
+      return userIds;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
 }

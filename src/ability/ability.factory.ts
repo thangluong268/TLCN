@@ -1,5 +1,6 @@
 import { AbilityBuilder, ExtractSubjectType, InferSubjects, MongoAbility, createMongoAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
+import { Report } from '../report/schema/report.schema';
 import { Bill } from '../bill/schema/bill.schema';
 import { Cart } from '../cart/schema/cart.schema';
 import { Category } from '../category/schema/category.schema';
@@ -38,6 +39,7 @@ export type Subjects =
       | typeof Notification
       | typeof Promotion
       | typeof Category
+      | typeof Report
     >
   | 'all';
 
@@ -66,6 +68,7 @@ export class AbilityFactory {
         can(Action.Read, Evaluation);
         can(Action.Manage, Notification);
         can(Action.Manage, Promotion);
+        can(Action.Create, Report);
         cannot(Action.Read, Role).because('Không cho đọc role!');
         cannot(Action.Create, Product).because('Không cho tạo sản phẩm!');
         break;
@@ -83,6 +86,7 @@ export class AbilityFactory {
         break;
       case RoleName.MANAGER_PRODUCT:
         can(Action.Manage, Product);
+        can(Action.Manage, Report);
         break;
       case RoleName.MANAGER_STORE:
         can(Action.Manage, Store);

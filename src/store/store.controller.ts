@@ -82,11 +82,7 @@ export class StoreController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
-  async getAllStores(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('search') search: string,
-  ): Promise<SuccessResponse> {
+  async getAllStores(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
     const data = await this.storeService.getAll(page, limit, search);
 
     return new SuccessResponse({

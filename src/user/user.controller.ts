@@ -41,12 +41,11 @@ export class UserController {
     const data: any = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bills.map(async (item: any) => {
-        let user = await this.userService.getById(item._id);
+        let user = await this.userService.getById(item._id);    
         if (!user) throw new NotFoundException('Không tìm thấy người dùng này!');
         user = user.toObject();
         delete user.status;
         delete user.__v;
-        delete user['createdAt'];
         delete user['updatedAt'];
         return { user, totalBills: item.count };
       }),
