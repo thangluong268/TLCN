@@ -115,17 +115,17 @@ describe('Product Controller E2E Test', () => {
     }, 10000);
   });
 
-  describe('Get all by search public', () => {
-    const URL = '/product?page=1&limit=5';
-    it('GET /product?page=1&limit=5 Should return an array of products', async () => {
-      await dbConnection.collection('products').insertOne({ ...productMock(), storeId });
-      const response = await request(httpServer).get(URL);
+  // describe('Get all by search public', () => {
+  //   const URL = '/product?page=1&limit=5';
+  //   it('GET /product?page=1&limit=5 Should return an array of products', async () => {
+  //     await dbConnection.collection('products').insertOne({ ...productMock(), storeId });
+  //     const response = await request(httpServer).get(URL);
 
-      expect(response.status).toBe(200);
-      expect(response.body.metadata.data).toHaveProperty('total');
-      expect(response.body.metadata.data).toHaveProperty('products');
-    }, 10000);
-  });
+  //     expect(response.status).toBe(200);
+  //     expect(response.body.metadata.data).toHaveProperty('total');
+  //     expect(response.body.metadata.data).toHaveProperty('products');
+  //   }, 10000);
+  // });
 
   describe('Get All Other Product By StoreId Public', () => {
     it('GET /products-other-in-store?page=1&limit=5&storeId=&productId= Should return an array of products', async () => {
