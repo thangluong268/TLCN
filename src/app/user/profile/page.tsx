@@ -4,14 +4,12 @@ import { APIGetUserById, APIUpdateUser } from "@/services/User";
 import ConvertDate from "@/utils/ConvertDate";
 import FormatMoney from "@/utils/FormatMoney";
 import Toast from "@/utils/Toast";
-import { set } from "firebase/database";
 import React from "react";
 import {
   FaAddressCard,
   FaPhone,
   FaRegCircleUser,
   FaTransgender,
-  FaUserClock,
 } from "react-icons/fa6";
 interface ProfileProps {
   idProps?: string;
@@ -19,7 +17,7 @@ interface ProfileProps {
 }
 
 function Profile(props: ProfileProps) {
-  const { idProps, setIsShow } = props;
+  const { idProps = "", setIsShow } = props;
   const [userInfo, setUserInfo] = React.useState({
     id: "",
     avatar: "",
