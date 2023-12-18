@@ -75,6 +75,26 @@ export class StoreController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('store/admin')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllStores(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+  ): Promise<SuccessResponse> {
+    const data = await this.storeService.getAll(page, limit, search);
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách cửa hàng thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @ApiQuery({ name: 'storeId', type: String, required: true })
   @Get('store-reputation')
@@ -146,7 +166,6 @@ export class StoreController {
         store = store.toObject();
         delete store.status;
         delete store.__v;
-        delete store['createdAt'];
         delete store['updatedAt'];
         return { store, totalProducts: item.count };
       }),
@@ -163,8 +182,6 @@ export class StoreController {
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getById(id);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
-
-    delete store.__v;
 
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
@@ -202,7 +219,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.MANAGER)
+  @CheckRole(RoleName.MANAGER_STORE)
   @Put('store/manager/warningcount/:id')
   async updateWarningCount(@Param('id') id: string, @Param('action') action: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.updateWarningCount(id, action);

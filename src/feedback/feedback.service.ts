@@ -41,6 +41,17 @@ export class FeedbackService {
     }
   }
 
+  async countTotal(productId: string): Promise<number> {
+    try {
+      return await this.feedbackModel.countDocuments({ productId });
+    } catch (err) {
+      if (err instanceof MongooseError) {
+        throw new InternalServerErrorExceptionCustom();
+      }
+      throw err;
+    }
+  }
+
   async getAllByProductId(productId: string): Promise<Feedback[]> {
     try {
       const feedbacks = await this.feedbackModel.find({ productId }).sort({ createdAt: -1 });

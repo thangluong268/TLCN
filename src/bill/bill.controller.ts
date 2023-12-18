@@ -385,6 +385,21 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('admin/revenue-store')
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  async revenueStore(@Query('storeId') storeId: string): Promise<SuccessResponse | NotFoundException> {
+    const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(storeId);
+    const totalDelivered: number = await this.billService.countTotalByStatusSeller(storeId, 'DELIVERED', null);
+
+    return new SuccessResponse({
+      message: `Lấy data thành công!`,
+      metadata: { totalRevenue, totalDelivered },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
   @CheckRole(RoleName.USER)
   @Get('user/:id')
   async getMyBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {

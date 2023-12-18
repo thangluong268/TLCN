@@ -121,7 +121,7 @@ export class UserController {
   //Add warningCount for user by id
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
-  @CheckRole(RoleName.MANAGER)
+  @CheckRole(RoleName.MANAGER_USER)
   @Put('manager/warningcount/:id')
   async updateWarningCount(@Param('id') id: string, @Param('action') action: string): Promise<SuccessResponse | BadRequestException> {
     const user = await this.userService.updateWarningCount(id, action);
@@ -135,8 +135,11 @@ export class UserController {
   // api/user/admin?page=1&limit=1&search=(Họ tên, email)
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
-  @CheckRole(RoleName.ADMIN)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_USER)
   @Get('admin')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
   async getAll(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
     const data = await this.userService.getAll(page, limit, search);
     return new SuccessResponse({

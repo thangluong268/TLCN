@@ -38,8 +38,8 @@ export class ProductService {
 
   async getAllBySearch(
     storeIdInput: string,
-    pageQuery: number,
-    limitQuery: number,
+    pageQuery: number = 1,
+    limitQuery: number = 5,
     searchQuery: string,
     sortTypeQuery: string = 'desc',
     sortValueQuery: string = 'productName',
@@ -47,8 +47,6 @@ export class ProductService {
     status: any,
   ): Promise<{ total: number; products: Product[] }> {
     const storeId = storeIdInput ? { storeId: storeIdInput } : {};
-    const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT);
-    const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT);
     const search = searchQuery
       ? {
           $or: [
@@ -61,13 +59,13 @@ export class ProductService {
           ],
         }
       : {};
-    const skip = limit * (page - 1);
+    const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
       const total = await this.productModel.countDocuments({ ...search, ...storeId, ...status });
       const products = await this.productModel
         .find({ ...search, ...storeId, ...status })
         .sort({ createdAt: -1 })
-        .limit(limit)
+        .limit(Number(limitQuery))
         .skip(skip);
 
       sortByConditions(products, sortTypeQuery, sortValueQuery);

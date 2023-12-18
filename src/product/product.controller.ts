@@ -148,16 +148,18 @@ export class ProductController {
     });
   }
 
-  @Public()
-  @Get('product')
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @Get('product/admin')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
   async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
-    const products = await this.productService.getAllBySearch(null, page, limit, search, null, null, { status: true });
+    const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, {});
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data: products },
+      metadata: { data },
     });
   }
 
@@ -204,7 +206,6 @@ export class ProductController {
   @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
-
     const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(limit);
 
     const data = await Promise.all(
@@ -231,7 +232,6 @@ export class ProductController {
           storeAvatar: store.avatar,
           listProducts: products.slice(0, 10),
         };
-
       }),
     );
 
@@ -306,7 +306,7 @@ export class ProductController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
-  @CheckRole(RoleName.MANAGER, RoleName.SELLER)
+  @CheckRole(RoleName.MANAGER_PRODUCT, RoleName.SELLER)
   @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const product = await this.productService.deleteProduct(id);

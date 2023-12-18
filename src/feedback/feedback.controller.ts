@@ -118,6 +118,20 @@ export class FeedbackController {
   }
 
   @Public()
+  @Get('feedback-count-total')
+  @ApiQuery({ name: 'productId', type: String, required: true })
+  async countTotal(
+    @Query('productId') productId: string,
+  ): Promise<SuccessResponse> {
+    const total = await this.feedbackService.countTotal(productId);
+
+    return new SuccessResponse({
+      message: 'Lấy tổng số lượng đánh giá thành công!',
+      metadata: { total },
+    });
+  }
+
+  @Public()
   @Get('feedback-star')
   @ApiQuery({ name: 'productId', type: String, required: true })
   async getAllByProductIdStar(@Query('productId') productId: string): Promise<SuccessResponse> {

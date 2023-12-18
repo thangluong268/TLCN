@@ -77,11 +77,14 @@ export class AbilityFactory {
         can(Action.Manage, Product);
         can(Action.Manage, Notification);
         break;
-      case RoleName.MANAGER:
+      case RoleName.MANAGER_USER:
         can(Action.Manage, UserToken);
-        can(Action.Manage, Notification);
-        can(Action.Read, Role);
         can(Action.Manage, User);
+        break;
+      case RoleName.MANAGER_PRODUCT:
+        can(Action.Manage, Product);
+        break;
+      case RoleName.MANAGER_STORE:
         can(Action.Manage, Store);
         break;
       default:

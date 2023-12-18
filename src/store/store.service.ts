@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import { CreateStoreDto } from './dto/create-store.dto';
-import { Store } from './schema/store.schema';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { Store } from './schema/store.schema';
 
 @Injectable()
 export class StoreService {
@@ -27,7 +27,7 @@ export class StoreService {
 
   async getById(id: string): Promise<Store> {
     try {
-      return await this.storeModel.findOne({_id: id.toString()});
+      return await this.storeModel.findOne({ _id: id.toString() });
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -81,4 +81,31 @@ export class StoreService {
     }
   }
 
+  async getAll(page: number = 1, limit: number = 5, search: string): Promise<{ total: number; stores: Store[] }> {
+
+    const skip = Number(limit) * (Number(page) - 1);
+
+    const query = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { address: { $regex: search, $options: 'i' } },
+            { phoneNumber: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    try {
+      const total = await this.storeModel.countDocuments(query);
+      const stores = await this.storeModel.find(query).sort({ createdAt: -1 }).limit(Number(limit)).skip(skip);
+
+      return { total, stores };
+    } catch (err) {
+      if (err instanceof MongooseError) {
+        throw new InternalServerErrorExceptionCustom();
+      }
+      throw err;
+    }
+  }
 }

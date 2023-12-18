@@ -133,19 +133,24 @@ export class UserService {
     }
   }
   // getAll
-  async getAll(page: number, limit: number, search: string): Promise<{ total: number; users: User[] }> {
+  async getAll(page: number = 1, limit: number = 5, search: string): Promise<{ total: number; users: User[] }> {
     try {
-      // Total user and search user by email or name
-      const total = await this.userModel.countDocuments({
-        $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }],
-      });
-      const users = await this.userModel
-        .find({ $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }] })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
+      const skip = (Number(page) - 1) * Number(limit);
+      const query = search
+        ? {
+            $or: [
+              { fullName: { $regex: search, $options: 'i' } },
+              { email: { $regex: search, $options: 'i' } },
+              { phone: { $regex: search, $options: 'i' } },
+            ],
+          }
+        : {};
 
-      users.map(user => {
+      const total = await this.userModel.countDocuments(query);
+
+      const users = await this.userModel.find(query).sort({ createdAt: -1 }).limit(Number(limit)).skip(skip);
+
+      users.forEach(user => {
         user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
         return user;
       });
@@ -193,5 +198,4 @@ export class UserService {
       throw err;
     }
   }
-
 }
