@@ -11,6 +11,7 @@ export class ReportDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+
 }
 
 export class CreateReportDto extends ReportDto {}

@@ -213,16 +213,4 @@ export class StoreController {
     });
   }
 
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.MANAGER_STORE)
-  @Put('store/manager/warningcount/:id')
-  async updateWarningCount(@Param('id') id: string, @Param('action') action: string): Promise<SuccessResponse | NotFoundException> {
-    const store = await this.storeService.updateWarningCount(id, action);
-    if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
-    return new SuccessResponse({
-      message: 'Cập nhật cảnh báo thành công!',
-      metadata: { data: store },
-    });
-  }
 }

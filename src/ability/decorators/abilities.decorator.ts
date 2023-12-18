@@ -264,3 +264,8 @@ export class ReadReportAbility implements RequiredRule {
   subject = Report;
 }
 
+export class UpdateReportAbility implements RequiredRule {
+  action = Action.Update;
+  subject = Report;
+}
+

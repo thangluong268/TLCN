@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
@@ -11,6 +12,7 @@ export class StoreService {
   constructor(
     @InjectModel(Store.name)
     private readonly storeModel: Model<Store>,
+    private mailService: MailerService,
   ) {}
 
   async create(userId: string, store: CreateStoreDto): Promise<Store | boolean> {
@@ -52,11 +54,34 @@ export class StoreService {
     }
   }
 
-  async updateWarningCount(storeId: string, action: string): Promise<Store> {
+  async updateWarningCount(id: string, warningCount: number, emailSeller: string): Promise<void> {
     try {
-      let point = 1;
-      if (action === 'minus') point = -1;
-      return await this.storeModel.findByIdAndUpdate(storeId, { $inc: { warningCount: point } });
+      if (warningCount + 1 === 5) {
+        await this.storeModel.findOneAndUpdate({ _id: id.toString() }, { warningCount: warningCount + 1, status: false });
+
+        await this.mailService.sendMail({
+          to: emailSeller,
+          from: process.env.MAIL_USER,
+          subject: 'STORE BANNED',
+          //Template is handlebar files
+          template: './store-banned',
+          context: {
+            otp: 'Your store has been banned. Please contact the administrator for more information.',
+          },
+        });
+      } else {
+        await this.storeModel.findOneAndUpdate({ _id: id.toString() }, { warningCount: warningCount + 1 });
+        await this.mailService.sendMail({
+          to: emailSeller,
+          from: process.env.MAIL_USER,
+          subject: 'STORE WARNING',
+          //Template is handlebar files
+          template: './store-warning',
+          context: {
+            otp: 'Your store has been warned. Because your product has been reported 5 times.',
+          },
+        });
+      }
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -82,7 +107,6 @@ export class StoreService {
   }
 
   async getAll(page: number = 1, limit: number = 5, search: string): Promise<{ total: number; stores: Store[] }> {
-
     const skip = Number(limit) * (Number(page) - 1);
 
     const query = search
