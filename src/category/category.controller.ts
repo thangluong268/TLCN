@@ -17,7 +17,7 @@ export class CategoryController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateCategoryAbility())
-  @CheckRole(RoleName.MANAGER)
+  @CheckRole(RoleName.MANAGER_PRODUCT)
   // @Public()
   @Post('manager')
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<SuccessResponse> {

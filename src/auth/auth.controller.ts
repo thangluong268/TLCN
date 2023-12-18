@@ -114,7 +114,7 @@ export class AuthController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ManageUserTokenAbility())
-  @CheckRole(RoleName.USER, RoleName.SELLER, RoleName.MANAGER, RoleName.ADMIN)
+  @CheckRole(RoleName.USER, RoleName.SELLER, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE, RoleName.MANAGER_USER, RoleName.ADMIN)
   @Delete('logout')
   async logout(@GetCurrentUserId() userId: string): Promise<SuccessResponse | ForbiddenException> {
     const result = await this.userTokenService.deleteUserToken(userId);
