@@ -92,7 +92,6 @@ function ManagerUser() {
     };
     fetchData();
   }, [page, search]);
-  console.log(search);
   return (
     <>
       {/* Search */}
@@ -185,7 +184,7 @@ function ManagerUser() {
         <div ref={ref}>
           <Profile
             idProps={currentId || ""}
-            setIsShow={(data: any) => setIsShow(data)}
+            setIsShow={(data: boolean) => setIsShow(data)}
           />
         </div>
       )}

@@ -17,7 +17,8 @@ interface ProfileProps {
 }
 
 function Profile(props: ProfileProps) {
-  const { idProps = "", setIsShow } = props;
+  const idProps = props?.idProps || "";
+  const setIsShow = props?.setIsShow || void 0;
   const [userInfo, setUserInfo] = React.useState({
     id: "",
     avatar: "",
