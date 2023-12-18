@@ -93,8 +93,9 @@ export class StoreController {
 
   @Public()
   @ApiQuery({ name: 'storeId', type: String, required: true })
+  @ApiQuery({ name: 'userId', type: String, required: false })
   @Get('store-reputation')
-  async getReputation(@Query('storeId') storeId: string): Promise<SuccessResponse | NotFoundException> {
+  async getReputation(@Query('storeId') storeId: string, @Query('userId') userId: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getById(storeId);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
@@ -139,9 +140,17 @@ export class StoreController {
 
     const totalFollow = await this.userService.countTotalFollowStoresByStoreId(storeId);
 
+    let isFollow = false;
+
+    if (userId) {
+      const user = await this.userService.getById(userId);
+      
+      isFollow = user.followStores.includes(storeId);
+    }
+
     return new SuccessResponse({
       message: 'Lấy thông tin độ uy tín cửa hàng thành công!',
-      metadata: { averageStar, totalFeedback, totalFollow },
+      metadata: { averageStar, totalFeedback, totalFollow, isFollow },
     });
   }
 
@@ -212,5 +221,4 @@ export class StoreController {
       metadata: { data: newStore },
     });
   }
-
 }
