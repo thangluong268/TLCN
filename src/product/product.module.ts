@@ -11,6 +11,7 @@ import { UserModule } from '../user/user.module';
 import { NotificationModule } from '../notification/notification.module';
 import { BillModule } from '../bill/bill.module';
 import { CategoryModule } from '../category/category.module';
+import { FeedbackModule } from '../feedback/feedback.module';
 
 @Module({
   imports: [
@@ -23,9 +24,10 @@ import { CategoryModule } from '../category/category.module';
     EvaluationModule,
     forwardRef(() => UserModule),
     forwardRef(() => StoreModule),
+    FeedbackModule,
   ],
   controllers: [ProductController],
   providers: [ProductService],
-  exports: [ProductService]
+  exports: [ProductService],
 })
-export class ProductModule { }
+export class ProductModule {}

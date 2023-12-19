@@ -27,6 +27,8 @@ import { ExcludeIds, FilterDate, FilterProduct, ProductDto } from './dto/product
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
+import { Feedback } from '../feedback/schema/feedback.schema';
+import { FeedbackService } from '../feedback/feedback.service';
 
 @Controller()
 @ApiTags('Product')
@@ -40,6 +42,7 @@ export class ProductController {
     private readonly notificationService: NotificationService,
     private readonly billService: BillService,
     private readonly categoryService: CategoryService,
+    private readonly feedbackService: FeedbackService,
   ) {}
 
   @UseGuards(AbilitiesGuard)
@@ -301,6 +304,96 @@ export class ProductController {
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm thành công!',
       metadata: { data: product, quantityDelivered },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @Get('product/admin/:id')
+  async getByIdAdmin(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const product = await this.productService.getById(id);
+    if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
+
+    const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
+
+    const quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
+
+    const evaluation = await this.evaluationService.getByProductId(id);
+    if (!evaluation) return new NotFoundException('Không tìm thấy đánh giá của sản phẩm này!');
+
+    const total: number = evaluation.emojis.length;
+
+    const emoji = {
+      Haha: 0,
+      Love: 0,
+      Wow: 0,
+      Sad: 0,
+      Angry: 0,
+      like: 0,
+    };
+
+    evaluation.emojis.forEach(e => {
+      switch (e.name) {
+        case 'Haha':
+          emoji.Haha++;
+          break;
+        case 'Love':
+          emoji.Love++;
+          break;
+        case 'Wow':
+          emoji.Wow++;
+          break;
+        case 'Sad':
+          emoji.Sad++;
+          break;
+        case 'Angry':
+          emoji.Angry++;
+          break;
+        case 'like':
+          emoji.like++;
+          break;
+      }
+    });
+
+    const emojis = {
+      total,
+      haha: emoji.Haha,
+      love: emoji.Love,
+      wow: emoji.Wow,
+      sad: emoji.Sad,
+      angry: emoji.Angry,
+      like: emoji.like,
+    };
+
+    const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(id);
+
+    const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    const startPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    let averageStar = 0;
+
+    feedbacks.forEach(feedback => {
+      star[feedback.star]++;
+    });
+
+    Object.keys(star).forEach(key => {
+      startPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+    });
+
+    Object.keys(star).forEach(key => {
+      averageStar += star[key] * Number(key);
+    });
+
+    averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+    const totalFeedback = await this.feedbackService.countTotal(id);
+
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin sản phẩm bởi Admin thành công!',
+      metadata: { data: product, quantityDelivered, emojis, startPercent, averageStar, totalFeedback },
     });
   }
 
