@@ -29,4 +29,5 @@ jobs:
     - run: npm run build
     - run: npm run test:e2e auth.e2e-spec.ts
     - run: npm run test:e2e product.e2e-spec.ts
+    - run: npm run test:e2e cart.e2e-spec.ts
     - run: npm run test:e2e bill.e2e-spec.ts

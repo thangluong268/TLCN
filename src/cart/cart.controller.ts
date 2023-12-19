@@ -45,7 +45,7 @@ export class CartController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadCartAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get()
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -65,7 +65,7 @@ export class CartController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadCartAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('/get-all')
   async getAllByUserId(@GetCurrentUserId() userId: string): Promise<SuccessResponse> {
     const data = await this.cartService.getAllByUserId(userId);
@@ -77,7 +77,7 @@ export class CartController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateCartAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'productId', type: String, required: true })
   @Delete()
   async removeProductInCart(@Query('productId') productId: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -97,7 +97,7 @@ export class CartController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadCartAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('/get-new')
   async getNewCartByUserId(@GetCurrentUserId() userId: string): Promise<SuccessResponse> {
     const carts = await this.cartService.getAllByUserId(userId);
