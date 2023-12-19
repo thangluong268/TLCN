@@ -160,9 +160,29 @@ export class ProductController {
   @ApiQuery({ name: 'search', type: String, required: false })
   async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
     const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, {});
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+        const quantitySold: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
+        };
+      }),
+    );
+
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data },
+      metadata: { data: fullInfoProducts },
     });
   }
 
