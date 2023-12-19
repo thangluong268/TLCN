@@ -1,17 +1,17 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { ProductService } from './product.service';
-import { ProductController } from './product.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AbilityModule } from '../ability/ability.module';
-import { RoleModule } from '../role/role.module';
-import { ProductSchema } from './schema/product.schema';
-import { StoreModule } from '../store/store.module';
-import { EvaluationModule } from '../evaluation/evaluation.module';
-import { UserModule } from '../user/user.module';
-import { NotificationModule } from '../notification/notification.module';
 import { BillModule } from '../bill/bill.module';
 import { CategoryModule } from '../category/category.module';
+import { EvaluationModule } from '../evaluation/evaluation.module';
 import { FeedbackModule } from '../feedback/feedback.module';
+import { NotificationModule } from '../notification/notification.module';
+import { RoleModule } from '../role/role.module';
+import { StoreModule } from '../store/store.module';
+import { UserModule } from '../user/user.module';
+import { ProductController } from './product.controller';
+import { ProductService } from './product.service';
+import { ProductSchema } from './schema/product.schema';
 
 @Module({
   imports: [

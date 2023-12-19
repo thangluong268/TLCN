@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ReportService } from './report.service';
-import { ReportController } from './report.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AbilityModule } from '../ability/ability.module';
-import { RoleModule } from '../role/role.module';
 import { NotificationModule } from '../notification/notification.module';
-import { ReportSchema } from './schema/report.schema';
 import { ProductModule } from '../product/product.module';
+import { RoleModule } from '../role/role.module';
 import { StoreModule } from '../store/store.module';
 import { UserModule } from '../user/user.module';
+import { ReportController } from './report.controller';
+import { ReportService } from './report.service';
+import { ReportSchema } from './schema/report.schema';
 
 @Module({
   imports: [
@@ -22,5 +22,6 @@ import { UserModule } from '../user/user.module';
   ],
   controllers: [ReportController],
   providers: [ReportService],
+  exports: [ReportService],
 })
 export class ReportModule {}

@@ -17,6 +17,8 @@ import { CategoryService } from '../category/category.service';
 import { NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { EvaluationService } from '../evaluation/evaluation.service';
+import { FeedbackService } from '../feedback/feedback.service';
+import { Feedback } from '../feedback/schema/feedback.schema';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from '../notification/schema/notification.schema';
 import { RoleName } from '../role/schema/role.schema';
@@ -27,8 +29,6 @@ import { ExcludeIds, FilterDate, FilterProduct, ProductDto } from './dto/product
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
-import { Feedback } from '../feedback/schema/feedback.schema';
-import { FeedbackService } from '../feedback/feedback.service';
 
 @Controller()
 @ApiTags('Product')
@@ -203,9 +203,9 @@ export class ProductController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Patch('product/seller/:id')
-  async update(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
+  async updateSeller(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
     const newProduct = await this.productService.update(id, product);
     if (!newProduct) return new NotFoundException('Không tìm thấy sản phẩm này!');
     return new SuccessResponse({
@@ -409,7 +409,6 @@ export class ProductController {
     averageStar = Number((averageStar / feedbacks.length).toFixed(2));
 
     const totalFeedback = await this.feedbackService.countTotal(id);
-
 
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm bởi Admin thành công!',

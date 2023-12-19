@@ -37,27 +37,22 @@ export class ReportController {
   @CheckAbilities(new CreateReportAbility())
   @CheckRole(RoleName.USER)
   @Post('report/user')
-  async create(@Body() createReportDto: CreateReportDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException | BadRequestException> {
+  async create(
+    @Body() createReportDto: CreateReportDto,
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     const product = await this.productService.getById(createReportDto.productId);
     if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
 
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
-    const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.productId, userId);
-    if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
+    // const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.productId, userId);
+    // if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
 
     const newReport = await this.reportService.create(createReportDto, userId);
 
-    const numOfReport = await this.reportService.countByProductId(createReportDto.productId);
-
     const store = await this.storeService.getById(product.storeId);
-    const seller = await this.userService.getById(store.userId);
-
-    if (numOfReport === 5) {
-      await this.productService.update(createReportDto.productId, { status: false });
-      await this.storeService.updateWarningCount(store._id, store.warningCount, seller.email);
-    }
 
     // Gửi thông báo cho người bán
     const createNotiDataToSeller: CreateNotificationDto = {
@@ -166,6 +161,16 @@ export class ReportController {
     if (!report) return new NotFoundException('Không tìm thấy báo cáo này!');
 
     await this.reportService.updateStatus(id);
+
+    const numOfReport = await this.reportService.countByProductId(report.productId);
+
+    if (numOfReport === 5) {
+      const product = await this.productService.getById(report.productId);
+      const store = await this.storeService.getById(product.storeId);
+      const seller = await this.userService.getById(store.userId);
+      await this.productService.update(report.productId, { status: false });
+      await this.storeService.updateWarningCount(store._id, store.warningCount, seller.email);
+    }
 
     return new SuccessResponse({
       message: 'Giải quyết báo cáo thành công!',

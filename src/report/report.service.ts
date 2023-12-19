@@ -33,9 +33,9 @@ export class ReportService {
       : {};
     const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
-      const total = await this.reportModel.countDocuments({ ...search });
+      const total = await this.reportModel.countDocuments({ ...search, status: false });
       const reports = await this.reportModel
-        .find({ ...search })
+        .find({ ...search, status: false })
         .sort({ createdAt: -1 })
         .limit(Number(limitQuery))
         .skip(skip);
@@ -49,7 +49,7 @@ export class ReportService {
 
   async getById(id: string): Promise<Report> {
     try {
-      const report = await this.reportModel.findOne({ _id: id.toString() });
+      const report = await this.reportModel.findOne({ _id: id.toString(), status: false });
       return report;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -78,7 +78,7 @@ export class ReportService {
 
   async countByProductId(productId: string): Promise<number> {
     try {
-      const total = await this.reportModel.countDocuments({ productId: productId.toString() });
+      const total = await this.reportModel.countDocuments({ productId: productId.toString(), status: true });
       return total;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
