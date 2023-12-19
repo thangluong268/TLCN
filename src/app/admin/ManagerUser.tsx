@@ -1,31 +1,8 @@
-import Modal from "@/components/Modal";
 import SortTable from "@/components/SortTable";
-import { APIGetListBill, APIUpdateBill } from "@/services/Bill";
 import { APIGetListUser } from "@/services/User";
-import ConvertDate from "@/utils/ConvertDate";
-import FormatDecimal from "@/utils/FormatDecimal";
-import FormatMoney from "@/utils/FormatMoney";
-import Toast from "@/utils/Toast";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
 import Profile from "../user/profile/page";
-
-interface TypeObject {
-  [key: string]: {
-    mes: string;
-    func: () => void;
-  };
-}
-
-interface ArrBill {
-  id: string;
-  fullName: string;
-  phoneNumber: string;
-  address: string;
-  infoProduct: string[];
-  date: string;
-  totalPrice: number;
-}
 
 interface ListUser {
   total: number;
@@ -102,6 +79,7 @@ function ManagerUser() {
           const search = document.getElementById(
             "default-search"
           ) as HTMLInputElement;
+          setIsShow(false);
           setSearch(search.value);
         }}
         className="mb-5"
