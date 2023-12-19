@@ -182,7 +182,7 @@ export class ProductController {
 
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data: fullInfoProducts },
+      metadata: { total: data.total, data: fullInfoProducts },
     });
   }
 

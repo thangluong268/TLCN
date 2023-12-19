@@ -24,7 +24,7 @@ export class CartController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateCartAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Post()
   @ApiQuery({ name: 'productId', type: String, required: true })
   async processCart(@Query('productId') productId: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {

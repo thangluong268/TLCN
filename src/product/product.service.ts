@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, MongooseError, Types } from 'mongoose';
+import mongoose, { Model, MongooseError, Types } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import sortByConditions from '../utils/sortByContitions';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -50,13 +50,13 @@ export class ProductService {
     const search = searchQuery
       ? {
           $or: [
-            { _id: searchQuery.toString() },
+            { _id: mongoose.Types.ObjectId.isValid(searchQuery) === true ? searchQuery.toString() : new mongoose.Types.ObjectId() },
             { productName: { $regex: searchQuery, $options: 'i' } },
             { description: { $regex: searchQuery, $options: 'i' } },
             { keywords: { $regex: searchQuery, $options: 'i' } },
             { type: { $regex: searchQuery, $options: 'i' } },
             { storeName: { $regex: searchQuery, $options: 'i' } },
-            { categoryId: searchQuery.toString() },
+            { categoryId: mongoose.Types.ObjectId.isValid(searchQuery) === true ? searchQuery.toString() : new mongoose.Types.ObjectId() },
           ],
         }
       : {};

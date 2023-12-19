@@ -44,10 +44,10 @@ describe('Cart Controller E2E Test', () => {
   }, 10000);
 
   beforeEach(async () => {
-    await dbConnection.collection('products').deleteMany({});
+    // await dbConnection.collection('carts').deleteMany({});
   }, 10000);
 
-  it('Product controller should be defined', () => {
+  it('Cart controller should be defined', () => {
     expect(controller).toBeDefined();
   }, 10000);
 
@@ -70,8 +70,10 @@ describe('Cart Controller E2E Test', () => {
       const newStore = await dbConnection.collection('stores').insertOne(createStoreData);
       await dbConnection.collection('roles').updateOne({ name: RoleName.SELLER }, { $push: { listUser: newUser2.insertedId.toString() } });
 
+      const newProduct = await dbConnection.collection('products').insertOne({ ...productMock(), storeId: newStore.insertedId.toString() });
+
       const response = await request(httpServer).post(URL_LOGIN).send({
-        email: 'luongthangg268@gmail.com',
+        email: 'luongthang730@gmail.com',
         password: 'Thang@11',
       });
 
