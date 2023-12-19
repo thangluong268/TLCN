@@ -8,6 +8,7 @@ import { RoleModule } from '../role/role.module';
 import { UserModule } from '../user/user.module';
 import { FeedbackModule } from '../feedback/feedback.module';
 import { ProductModule } from '../product/product.module';
+import { BillModule } from '../bill/bill.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProductModule } from '../product/product.module';
     forwardRef(() => ProductModule),
     FeedbackModule,
     forwardRef(() => UserModule),
+    forwardRef(() => BillModule),
   ],
   controllers: [StoreController],
   providers: [StoreService],

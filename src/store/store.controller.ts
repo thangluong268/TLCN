@@ -22,6 +22,7 @@ import { UserService } from '../user/user.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreService } from './store.service';
+import { BillService } from '../bill/bill.service';
 
 @Controller()
 @ApiTags('Store')
@@ -33,6 +34,7 @@ export class StoreController {
     private readonly roleService: RoleService,
     private readonly feedbackService: FeedbackService,
     private readonly productService: ProductService,
+    private readonly billService: BillService,
   ) {}
 
   @UseGuards(AbilitiesGuard)
@@ -144,7 +146,7 @@ export class StoreController {
 
     if (userId) {
       const user = await this.userService.getById(userId);
-      
+
       isFollow = user.followStores.includes(storeId);
     }
 
@@ -179,6 +181,64 @@ export class StoreController {
     return new SuccessResponse({
       message: 'Lấy thông tin danh sách cửa hàng có nhiều sản phẩm nhất thành công!',
       metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('store/admin/:id')
+  async getByIdAdmin(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getById(id);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
+
+    const products = await this.productService.getProductsByStoreId(id);
+
+    let totalFeedback = 0;
+
+    let totalProductsHasFeedback = 0;
+    let totalAverageStar = 0;
+
+    let averageStar = 0;
+
+    await Promise.all(
+      products.map(async product => {
+        const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id);
+
+        if (feedbacks.length === 0) return;
+
+        totalFeedback += feedbacks.length;
+
+        const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        feedbacks.forEach(feedback => {
+          star[feedback.star]++;
+        });
+
+        let averageStar = 0;
+
+        Object.keys(star).forEach(key => {
+          averageStar += star[key] * Number(key);
+        });
+
+        averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+        totalAverageStar += averageStar;
+
+        totalProductsHasFeedback++;
+      }),
+    );
+
+    if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2));
+
+    const totalFollow = await this.userService.countTotalFollowStoresByStoreId(id);
+
+    const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(id);
+    const totalDelivered: number = await this.billService.countTotalByStatusSeller(id, 'DELIVERED', null);
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin cửa hàng thành công!',
+      metadata: { store, averageStar, totalFeedback, totalFollow, totalRevenue, totalDelivered },
     });
   }
 
