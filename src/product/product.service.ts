@@ -50,12 +50,13 @@ export class ProductService {
     const search = searchQuery
       ? {
           $or: [
+            { _id: searchQuery.toString() },
             { productName: { $regex: searchQuery, $options: 'i' } },
             { description: { $regex: searchQuery, $options: 'i' } },
             { keywords: { $regex: searchQuery, $options: 'i' } },
             { type: { $regex: searchQuery, $options: 'i' } },
             { storeName: { $regex: searchQuery, $options: 'i' } },
-            { categoryId: { $regex: searchQuery, $options: 'i' } },
+            { categoryId: searchQuery.toString() },
           ],
         }
       : {};
