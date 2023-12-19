@@ -47,8 +47,8 @@ export class ReportController {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
-    // const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.productId, userId);
-    // if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
+    const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.productId, userId);
+    if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
 
     const newReport = await this.reportService.create(createReportDto, userId);
 
