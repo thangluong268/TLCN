@@ -16,9 +16,9 @@ interface ProfileProps {
   setIsShow?: (data: boolean) => void;
 }
 
-function Profile(props: ProfileProps): JSX.Element {
-  const idProps = props?.idProps || "";
-  const setIsShow = props?.setIsShow || null;
+function Profile(props: ProfileProps) {
+  const { idProps } = props || { idProps: "" };
+  const { setIsShow } = props || { setIsShow: () => {} };
   const [userInfo, setUserInfo] = React.useState({
     id: "",
     avatar: "",
