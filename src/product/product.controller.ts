@@ -203,7 +203,7 @@ export class ProductController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())
-  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
   @Patch('product/seller/:id')
   async updateSeller(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
     const newProduct = await this.productService.update(id, product);
@@ -390,7 +390,7 @@ export class ProductController {
 
     const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    const startPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const starPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
     let averageStar = 0;
 
@@ -399,7 +399,7 @@ export class ProductController {
     });
 
     Object.keys(star).forEach(key => {
-      startPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+      starPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
     });
 
     Object.keys(star).forEach(key => {
@@ -412,7 +412,7 @@ export class ProductController {
 
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm bởi Admin thành công!',
-      metadata: { data: product, quantityDelivered, emojis, startPercent, averageStar, totalFeedback },
+      metadata: { data: product, quantityDelivered, emojis, starPercent, averageStar, totalFeedback },
     });
   }
 
