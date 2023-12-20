@@ -158,7 +158,7 @@ export class ProductController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
-  async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
+  async getAllBySearchAdmin(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
     const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, {});
 
     const fullInfoProducts = await Promise.all(
@@ -176,6 +176,33 @@ export class ProductController {
           quantitySold,
           quantityGive,
           revenue,
+        };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { total: data.total, data: fullInfoProducts },
+    });
+  }
+
+  @Public()
+  @Get('product')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
+    const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, { status: true });
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
         };
       }),
     );
