@@ -4,7 +4,6 @@ import { CheckAbilities, ReadNotificationAbility, UpdateNotificationAbility } fr
 import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
-import { Public } from '../auth/decorators/public.decorator';
 import { NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { RoleName } from '../role/schema/role.schema';
@@ -22,7 +21,9 @@ export class NotificationController {
     private readonly userService: UserService,
   ) {}
 
-  @Public()
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadNotificationAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.USER)
   @Post()
   async create(@Body() notification: CreateNotificationDto): Promise<SuccessResponse> {
     const newNotification = await this.notificationService.create(notification);
@@ -34,7 +35,7 @@ export class NotificationController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadNotificationAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @CheckRole(RoleName.SELLER, RoleName.USER, RoleName.ADMIN)
   @Get()
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -48,7 +49,7 @@ export class NotificationController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateNotificationAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @CheckRole(RoleName.SELLER, RoleName.USER, RoleName.ADMIN)
   @Patch('/:id')
   async update(@Param('id') id: string, @Body() updateNoti: UpdateNotificationDto): Promise<SuccessResponse | NotFoundException> {
     const result = await this.notificationService.update(id, updateNoti);
