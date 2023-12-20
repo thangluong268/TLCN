@@ -17,6 +17,7 @@ export class ReportService {
       const newReport = await this.reportModel.create(createReportData);
       newReport.status = false;
       newReport.userId = userId;
+      newReport.type = newReport.type.toUpperCase();
       await newReport.save();
       return newReport;
     } catch (err) {
@@ -25,7 +26,7 @@ export class ReportService {
     }
   }
 
-  async getAllBySearch(pageQuery: number = 1, limitQuery: number = 5, searchQuery: string): Promise<{ total: number; reports: Report[] }> {
+  async getAllBySearch(pageQuery: number = 1, limitQuery: number = 5, searchQuery: string, type: string): Promise<{ total: number; reports: Report[] }> {
     const search = searchQuery
       ? {
           $or: [{ content: { $regex: searchQuery, $options: 'i' } }],
@@ -33,9 +34,9 @@ export class ReportService {
       : {};
     const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
-      const total = await this.reportModel.countDocuments({ ...search, status: false });
+      const total = await this.reportModel.countDocuments({ ...search, status: false, type: type.toUpperCase() });
       const reports = await this.reportModel
-        .find({ ...search, status: false })
+        .find({ ...search, status: false, type: type.toUpperCase() })
         .sort({ createdAt: -1 })
         .limit(Number(limitQuery))
         .skip(skip);
@@ -49,7 +50,7 @@ export class ReportService {
 
   async getById(id: string): Promise<Report> {
     try {
-      const report = await this.reportModel.findOne({ _id: id.toString(), status: false });
+      const report = await this.reportModel.findOne({ _id: id.toString(), status: false }, { __v: 0, status: 0 });
       return report;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -57,9 +58,9 @@ export class ReportService {
     }
   }
 
-  async getByProductIdAndUserId(productId: string, userId: string): Promise<Report> {
+  async getByProductIdAndUserId(subjectId: string, userId: string): Promise<Report> {
     try {
-      const report = await this.reportModel.findOne({ productId: productId.toString(), userId: userId.toString() });
+      const report = await this.reportModel.findOne({ subjectId: subjectId.toString(), userId: userId.toString() });
       return report;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -76,10 +77,19 @@ export class ReportService {
     }
   }
 
-  async countByProductId(productId: string): Promise<number> {
+  async countByProductId(subjectId: string): Promise<number> {
     try {
-      const total = await this.reportModel.countDocuments({ productId: productId.toString(), status: true });
+      const total = await this.reportModel.countDocuments({ subjectId: subjectId.toString(), status: true });
       return total;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.reportModel.deleteOne({ _id: id.toString() });
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

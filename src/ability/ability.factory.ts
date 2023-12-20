@@ -87,6 +87,7 @@ export class AbilityFactory {
       case RoleName.MANAGER_PRODUCT:
         can(Action.Manage, Product);
         can(Action.Manage, Report);
+        can(Action.Manage, Category);
         break;
       case RoleName.MANAGER_STORE:
         can(Action.Manage, Store);

@@ -5,12 +5,17 @@ export class ReportDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  productId: string;
+  subjectId: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  type: string;
 
 }
 

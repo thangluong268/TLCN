@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CheckAbilities, CreateReportAbility, ReadReportAbility, UpdateReportAbility } from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
@@ -6,9 +6,7 @@ import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { BadRequestException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
-import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
 import { NotificationService } from '../notification/notification.service';
-import { Notification } from '../notification/schema/notification.schema';
 import { ProductService } from '../product/product.service';
 import { Product } from '../product/schema/product.schema';
 import { RoleService } from '../role/role.service';
@@ -41,54 +39,10 @@ export class ReportController {
     @Body() createReportDto: CreateReportDto,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
-    const product = await this.productService.getById(createReportDto.productId);
-    if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
-
-    const user = await this.userService.getById(userId);
-    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
-
-    const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.productId, userId);
+    const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.subjectId, userId);
     if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
 
     const newReport = await this.reportService.create(createReportDto, userId);
-
-    const store = await this.storeService.getById(product.storeId);
-
-    // Gửi thông báo cho người bán
-    const createNotiDataToSeller: CreateNotificationDto = {
-      userIdFrom: userId,
-      userIdTo: store.userId,
-      content: `đã báo cáo sản phẩm của bạn. Mã sản phẩm: #${createReportDto.productId}.`,
-      type: 'Báo cáo',
-      sub: {
-        fullName: user.fullName,
-        avatar: user.avatar,
-        productId: createReportDto.productId,
-      },
-    };
-    await this.notificationService.create(createNotiDataToSeller);
-
-    // Gửi thông báo cho quản lý cửa hàng
-    const managerStoreIds: string[] = await this.roleService.getAllManagerStoreIds();
-
-    const notificationPromises: Promise<Notification>[] = [];
-
-    for (const managerStoreId of managerStoreIds) {
-      const notificationPromise = this.notificationService.create({
-        userIdFrom: userId,
-        userIdTo: managerStoreId,
-        content: `đã báo cáo sản phẩm. Mã sản phẩm: #${createReportDto.productId}.`,
-        type: 'Báo cáo',
-        sub: {
-          fullName: user.fullName,
-          avatar: user.avatar,
-          productId: createReportDto.productId,
-        },
-      });
-
-      notificationPromises.push(notificationPromise);
-    }
-    await Promise.all(notificationPromises);
 
     return new SuccessResponse({
       message: 'Tạo báo cáo thành công!',
@@ -103,12 +57,46 @@ export class ReportController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
-  async getAllBySearch(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
-    const data = await this.reportService.getAllBySearch(page, limit, search);
+  @ApiQuery({ name: 'type', type: String, required: true })
+  async getAllBySearch(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+    @Query('type') type: string,
+  ): Promise<SuccessResponse> {
+    const reports = await this.reportService.getAllBySearch(page, limit, search, type);
+
+    const data = await Promise.all(
+      reports.reports.map(async report => {
+        if (type.toUpperCase() === 'PRODUCT') {
+          const product: Product = await this.productService.getById(report.subjectId);
+          const user: User = await this.userService.getById(report.userId);
+          return {
+            _id: report._id,
+            userName: user.fullName,
+            productName: product.productName,
+            content: report.content,
+            createdAt: report['createdAt'],
+          };
+        }
+        if (type.toUpperCase() === 'STORE') {
+          const store: Store = await this.storeService.getById(report.subjectId);
+          const user: User = await this.userService.getById(report.userId);
+          return {
+            _id: report._id,
+            userName: user.fullName,
+            storeName: store.name,
+            content: report.content,
+            status: report.status,
+            createdAt: report['createdAt'],
+          };
+        }
+      }),
+    );
 
     return new SuccessResponse({
       message: 'Lấy danh sách báo cáo thành công!',
-      metadata: { data },
+      metadata: { total: reports.total, data },
     });
   }
 
@@ -122,18 +110,17 @@ export class ReportController {
 
     const userReport: User = await this.userService.getById(report.userId);
 
-    const product: Product = await this.productService.getById(report.productId);
-
-    const store: Store = await this.storeService.getById(product.storeId);
+    const subject: Product | Store =
+      report.type.toUpperCase() === 'PRODUCT'
+        ? await this.productService.getById(report.subjectId)
+        : await this.storeService.getById(report.subjectId);
 
     const data = {
       report: {
         _id: report._id,
         content: report.content,
-        status: report.status,
         createdAt: report['createdAt'],
       },
-
       userReport: {
         _id: userReport._id,
         fullName: userReport.fullName,
@@ -141,9 +128,7 @@ export class ReportController {
         avatar: userReport.avatar,
         gender: userReport.gender,
       },
-
-      product,
-      store,
+      subject,
     };
 
     return new SuccessResponse({
@@ -162,18 +147,34 @@ export class ReportController {
 
     await this.reportService.updateStatus(id);
 
-    const numOfReport = await this.reportService.countByProductId(report.productId);
+    const numOfReport = await this.reportService.countByProductId(report.subjectId);
 
     if (numOfReport === 5) {
-      const product = await this.productService.getById(report.productId);
+      const product = await this.productService.getById(report.subjectId);
       const store = await this.storeService.getById(product.storeId);
       const seller = await this.userService.getById(store.userId);
-      await this.productService.update(report.productId, { status: false });
+      await this.productService.update(report.subjectId, { status: false });
       await this.storeService.updateWarningCount(store._id, store.warningCount, seller.email);
     }
 
     return new SuccessResponse({
       message: 'Giải quyết báo cáo thành công!',
+      metadata: { data: {} },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new UpdateReportAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @Delete('report/admin/:id')
+  async delete(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const report = await this.reportService.getById(id);
+    if (!report) return new NotFoundException('Không tìm thấy báo cáo này!');
+
+    await this.reportService.delete(id);
+
+    return new SuccessResponse({
+      message: 'Xóa báo cáo thành công!',
       metadata: { data: {} },
     });
   }

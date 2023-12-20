@@ -18,7 +18,6 @@ export class CategoryController {
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateCategoryAbility())
   @CheckRole(RoleName.MANAGER_PRODUCT)
-  // @Public()
   @Post('manager')
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<SuccessResponse> {
     const data = await this.categoryService.create(createCategoryDto);
@@ -29,7 +28,7 @@ export class CategoryController {
   }
 
   @Public()
-  @Get('')
+  @Get()
   @ApiQuery({ name: 'id', required: false })
   @ApiQuery({ name: 'status', required: false })
   async findAllByCategoryName(@Query('id') id: string, @Query('status') status: string): Promise<SuccessResponse> {

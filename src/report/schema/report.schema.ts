@@ -6,13 +6,16 @@ import { Document } from 'mongoose';
 })
 export class Report extends Document {
   @Prop()
-  productId: string;
+  subjectId: string;
 
   @Prop()
   userId: string;
 
   @Prop()
   content: string;
+
+  @Prop()
+  type: string;
 
   @Prop()
   status: boolean = false;

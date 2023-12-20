@@ -41,7 +41,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Post('user')
   async create(@Body() createBillDto: CreateBillDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
@@ -108,7 +108,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: false, example: '2023' })
   @Get('seller/count-total-by-status')
   async countTotalByStatusSeller(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -136,7 +136,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/count-total-by-status')
   async countTotalByStatusUser(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
@@ -165,7 +165,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('seller/calculate-revenue-by-year')
   async calculateRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -185,7 +185,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('seller/count-charity-by-year')
   async countCharityByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -205,7 +205,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.ADMIN)
+  @CheckRole(RoleName.ADMIN, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('admin/calculate-total-revenue-by-year')
   async calculateTotalRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -222,7 +222,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -292,7 +292,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Get('seller')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -400,7 +400,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/:id')
   async getMyBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const bill: any = await this.billService.getMyBill(id, userId);
@@ -456,7 +456,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'status', type: String, required: true })
   @Put('/user/:id')
   async updateStatusUser(
@@ -520,7 +520,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Put('/seller/:id')
   @ApiQuery({ name: 'status', type: String, required: true })
   async updateStatusSeller(@Param('id') id: string, @Query('status') status: string): Promise<SuccessResponse | NotFoundException> {
