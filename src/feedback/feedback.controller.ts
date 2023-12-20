@@ -33,7 +33,7 @@ export class FeedbackController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateFeedBackAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'productId', type: String, required: true })
   @Post('feedback/user')
   async create(
@@ -120,9 +120,7 @@ export class FeedbackController {
   @Public()
   @Get('feedback-count-total')
   @ApiQuery({ name: 'productId', type: String, required: true })
-  async countTotal(
-    @Query('productId') productId: string,
-  ): Promise<SuccessResponse> {
+  async countTotal(@Query('productId') productId: string): Promise<SuccessResponse> {
     const total = await this.feedbackService.countTotal(productId);
 
     return new SuccessResponse({
@@ -170,7 +168,7 @@ export class FeedbackController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateFeedBackAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'userId', type: String, required: true })
   @ApiQuery({ name: 'productId', type: String, required: true })
   @Put('feedback-consensus')

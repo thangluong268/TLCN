@@ -32,3 +32,4 @@ jobs:
     - run: npm run test:e2e cart.e2e-spec.ts
     - run: npm run test:e2e bill.e2e-spec.ts
     - run: npm run test:e2e category.e2e-spec.ts
+    - run: npm run test:e2e feedback.e2e-spec.ts
