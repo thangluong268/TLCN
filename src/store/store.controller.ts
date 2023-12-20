@@ -256,7 +256,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteStoreAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Delete('store/seller')
   async delete(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     const result = await this.storeService.delete(userId);
@@ -271,7 +271,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Put('store/seller')
   async update(@Body() store: UpdateStoreDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const newStore = await this.storeService.update(userId, store);

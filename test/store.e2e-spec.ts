@@ -4,6 +4,7 @@ import { Connection } from 'mongoose';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { DatabaseService } from '../src/database/database.service';
+import { productMock } from '../src/product/mock-dto/product.mock';
 import { RoleName } from '../src/role/schema/role.schema';
 import { createStoreMock, createStoreMock2 } from '../src/store/mock-dto/store.mock';
 import { StoreController } from '../src/store/store.controller';
@@ -53,6 +54,7 @@ describe('Store Controller E2E Test', () => {
 
     it('POST /auth/login Should login successfully', async () => {
       await dbConnection.collection('stores').deleteMany({});
+      await dbConnection.collection('products').deleteMany({});
       await dbConnection.collection('users').deleteMany({});
 
       const newUser = await dbConnection.collection('users').insertOne(createUserMock());
@@ -62,6 +64,8 @@ describe('Store Controller E2E Test', () => {
       createStoreData.userId = newUser.insertedId.toString();
       const newStore = await dbConnection.collection('stores').insertOne(createStoreData);
       await dbConnection.collection('roles').updateOne({ name: RoleName.SELLER }, { $push: { listUser: newUser.insertedId.toString() } });
+
+      await dbConnection.collection('products').insertOne({ ...productMock(), storeId: newStore.insertedId.toString() });
 
       sellerId = newUser.insertedId.toString();
       storeId = newStore.insertedId.toString();
@@ -175,6 +179,49 @@ describe('Store Controller E2E Test', () => {
       expect(response.body.metadata).toHaveProperty('totalFeedback');
       expect(response.body.metadata).toHaveProperty('totalFollow');
       expect(response.body.metadata).toHaveProperty('isFollow');
+    }, 10000);
+  });
+
+  describe('Get List Store Have Most Products Successfully', () => {
+    it('GET store/admin/stores-most-products?limit=2 should return list store have most products successfully', async () => {
+      const URL = `/store/admin/stores-most-products?limit=2`;
+
+      const response = await request(httpServer).get(URL).set('Authorization', `Bearer ${accessTokenAdmin}`);
+
+      console.log(response.body);
+
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toEqual('Lấy thông tin danh sách cửa hàng có nhiều sản phẩm nhất thành công!');
+      expect(response.body.metadata).toHaveProperty('data');
+    }, 10000);
+  });
+
+  describe('Get Store By Id Admin Successfully', () => {
+    it('GET store/admin/:id should return detail information successfully', async () => {
+      const URL = `/store/admin/${storeId}`;
+
+      const response = await request(httpServer).get(URL).set('Authorization', `Bearer ${accessTokenAdmin}`);
+
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toEqual('Lấy thông tin cửa hàng thành công!');
+      expect(response.body.metadata).toHaveProperty('store');
+      expect(response.body.metadata).toHaveProperty('averageStar');
+      expect(response.body.metadata).toHaveProperty('totalFeedback');
+      expect(response.body.metadata).toHaveProperty('totalFollow');
+      expect(response.body.metadata).toHaveProperty('totalRevenue');
+      expect(response.body.metadata).toHaveProperty('totalDelivered');
+    }, 10000);
+  });
+
+  describe('Update Store By Seller Successfully', () => {
+    it('PUT /store/seller should update store information successfully', async () => {
+      const URL = `/store/seller`;
+
+      const response = await request(httpServer).put(URL).send(createStoreMock2()).set('Authorization', `Bearer ${accessTokenSeller}`);
+
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toEqual('Cập nhật thông tin cửa hàng thành công!');
+      expect(response.body.metadata).toHaveProperty('data');
     }, 10000);
   });
 });
