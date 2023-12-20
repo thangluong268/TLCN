@@ -45,10 +45,14 @@ export const APIUpdateMyStore = async (body: any) => {
 };
 
 // /api/store-reputation?storeId=654736b154e5a9481f44b86d
-export const APIGetStoreReputation = async (storeId: string) => {
+export const APIGetStoreReputation = async (
+  storeId: string,
+  userId: string
+) => {
   const headers = GetHeaders();
+  var userId = userId ? userId : "";
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/store-reputation?storeId=${storeId}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/store-reputation?storeId=${storeId}&userId=${userId}`,
     { headers }
   );
   return res.data;
@@ -96,6 +100,17 @@ export const APIGetStoreAdmin = async (id: any) => {
   const headers = GetHeaders();
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_API_URL}/store/admin/${id}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// pp/api/user/user-follow-store?storeId=sad
+export const APIFollowStore = async (storeId: any) => {
+  const headers = GetHeaders();
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/user/user-follow-store?storeId=${storeId}`,
+    {},
     { headers }
   );
   return res.data;

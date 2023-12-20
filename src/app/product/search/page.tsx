@@ -17,8 +17,8 @@ function Search() {
     const fetchData = async (searchParam: any) => {
       await APIGetListProductForUser(page || 1, 5, searchParam).then(
         (res: any) => {
-          setLstProduct(res.metadata.data.products);
-          setTotalPage(res.metadata.data.total);
+          setLstProduct(res.metadata.data);
+          setTotalPage(res.metadata.total);
         }
       );
     };

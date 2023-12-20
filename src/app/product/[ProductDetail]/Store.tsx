@@ -1,30 +1,50 @@
 import { APIGetListProductOtherInStore } from "@/services/Product";
-import { APIGetStoreById, APIGetStoreReputation } from "@/services/Store";
+import {
+  APIFollowStore,
+  APIGetStoreById,
+  APIGetStoreReputation,
+} from "@/services/Store";
+import Toast from "@/utils/Toast";
 import { useParams } from "next/navigation";
 import React from "react";
 import { FaPlus, FaTelegramPlane } from "react-icons/fa";
+interface Props {
+  product: any;
+  setShowLogin: (data: boolean) => void;
+  setShowReport: (data: boolean) => void;
+  setType: (data: string) => void;
+}
 
-function Store({ product }: any) {
+function Store(props: Props) {
+  const { product, setShowLogin, setShowReport, setType } = props;
   const params = useParams();
   const [productsOrderCurrent, setProductsOrderCurrent] = React.useState([]);
+  const [user, setUser] = React.useState<any>(null);
   const [storeInfo, setStoreInfo] = React.useState({
     avatar: "",
     averageStar: 0,
+    isFollow: false,
     totalFeedback: 0,
     totalFollow: 0,
     name: "",
   });
   React.useEffect(() => {
     // Promise all
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user") ?? "").providerData[0]
+      : null;
+    setUser(user);
     const fectData = async () => {
       product.storeId &&
         (await Promise.all([
-          APIGetStoreReputation(product.storeId),
+          APIGetStoreReputation(product.storeId, user?._id || ""),
           APIGetStoreById(product.storeId),
         ]).then((res: any) => {
+          console.log("resss", res[0]);
           setStoreInfo({
             avatar: res[1].metadata.data.avatar,
             name: res[1].metadata.data.name,
+            isFollow: res[0].metadata.isFollow,
             averageStar: res[0].metadata.averageStar,
             totalFeedback: res[0].metadata.totalFeedback,
             totalFollow: res[0].metadata.totalFollow,
@@ -44,6 +64,16 @@ function Store({ product }: any) {
     };
     fetchData();
   }, [product.storeId]);
+  const FollowStore = async (status: boolean) => {
+    setStoreInfo({
+      ...storeInfo,
+      isFollow: status,
+      totalFollow: status
+        ? storeInfo.totalFollow + 1
+        : storeInfo.totalFollow - 1,
+    });
+    await APIFollowStore(product.storeId);
+  };
   return (
     <div className="mb-3 bg-white rounded-md p-4 w-full col-span-4 flex flex-col border-solid ">
       <p className="text-lg font-bold mb-2">Thông tin người bán:</p>
@@ -77,6 +107,25 @@ function Store({ product }: any) {
               </div>
               <span className="mx-2">|</span>
               <span className="">Theo dõi: {storeInfo.totalFollow}</span>
+              <div
+                className="ml-3 text-center font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                onClick={(e) => {
+                  if (!user) {
+                    e.preventDefault();
+                    Toast(
+                      "error",
+                      "Bạn cần đăng nhập để báo cáo cửa hàng này",
+                      2000
+                    );
+                    setShowLogin(true);
+                  } else {
+                    setType("store");
+                    setShowReport(true);
+                  }
+                }}
+              >
+                (Báo cáo cửa hàng)
+              </div>
             </div>
           </div>
         </div>
@@ -90,10 +139,25 @@ function Store({ product }: any) {
           </button>
           <button
             type="button"
-            className="flex justify-center items-center w-full py-1.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+            className={`${
+              storeInfo.isFollow
+                ? "text-white bg-blue-700 hover:bg-blue-800"
+                : "bg-white"
+            } flex justify-center items-center w-full py-1.5 px-5 text-sm font-medium text-gray-900 focus:outline-none  rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 `}
+            onClick={(e) => {
+              if (user) {
+                if (!storeInfo.isFollow) {
+                  FollowStore(true);
+                } else {
+                  FollowStore(false);
+                }
+              } else {
+                setShowLogin(true);
+              }
+            }}
           >
-            <FaPlus className="mr-3" />
-            <span>Theo dõi</span>
+            {!storeInfo.isFollow && <FaPlus className="mr-3" />}
+            <span>{storeInfo.isFollow ? "Đã theo dõi" : "Theo dõi"}</span>
           </button>
         </div>
       </div>

@@ -1,14 +1,9 @@
 "use client";
-import Star from "@/components/Star";
 import { addItemtoCartPopup } from "@/redux/features/cart/cartpopup-slice";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { APIAddProductInCart } from "@/services/Cart";
 import { APIGetEvaluation, APIGetEvaluationUser } from "@/services/Evaluation";
-import {
-  APIGetListProductOtherInStore,
-  APIGetProduct,
-} from "@/services/Product";
-import { Product } from "@/types/Cart";
+import { APIGetProduct } from "@/services/Product";
 import { UserInterface } from "@/types/User";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
 import Toast from "@/utils/Toast";
@@ -28,18 +23,20 @@ import { APIGetFeedbackStar } from "@/services/Feedback";
 import Store from "./Store";
 import Feedback from "./Feedback";
 import Modal from "@/components/Modal";
-import Login from "@/app/login/page";
 import Form from "@/app/login/Form";
+import { APIReportUser } from "@/services/Report";
 
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const [user, setUser] = React.useState<UserInterface>();
-  const [page, setPage] = React.useState(1);
   const [quantityDelivered, setQuantityDelivered] = React.useState(0);
   const [totalFeedback, setTotalFeedback] = React.useState(0);
   const [showLogin, setShowLogin] = React.useState(false);
   const params = useParams();
+  const [showReport, setShowReport] = React.useState(false);
+  const [contentReport, setContentReport] = React.useState("");
+  const [type, setType] = React.useState("");
   const dispatch = useDispatch<AppDispatch>();
   const [evaluation, setEvaluation] = React.useState({
     total: 0,
@@ -47,7 +44,6 @@ function ProductDetail() {
     isPurchased: false,
   });
   const [star, setStar] = React.useState({} as any);
-  const [feedback, setFeedback] = React.useState([]);
 
   React.useEffect(() => {
     const user = localStorage.getItem("user")
@@ -154,6 +150,21 @@ function ProductDetail() {
     });
   };
 
+  const Report = async () => {
+    await APIReportUser({
+      subjectId: type == "product" ? params.ProductDetail : product.storeId,
+      content: contentReport,
+      type: type,
+    }).then((res) => {
+      setShowReport(false);
+      if (res.status == 200 || res.status == 201) {
+        Toast("success", "Báo cáo thành công", 2000);
+      } else {
+        Toast("error", "Bạn đã báo cáo sản phẩm này rồi!", 2000);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-[160px] my-4">
       {product._id && (
@@ -240,6 +251,25 @@ function ProductDetail() {
                         </FacebookMessengerShareButton>
                       </div>
                     </div>
+                  </div>
+                  <div
+                    className="text-center font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        Toast(
+                          "error",
+                          "Bạn cần đăng nhập để báo cáo sản phẩm này",
+                          2000
+                        );
+                        setShowLogin(true);
+                      } else {
+                        setType("product");
+                        setShowReport(true);
+                      }
+                    }}
+                  >
+                    Báo cáo sản phẩm
                   </div>
                 </div>
                 <hr className="my-2" />
@@ -329,7 +359,12 @@ function ProductDetail() {
               </div>
             </div>
           </div>
-          <Store product={product} />
+          <Store
+            product={product}
+            setType={(data: string) => setType(data)}
+            setShowLogin={(data: boolean) => setShowLogin(data)}
+            setShowReport={(data: boolean) => setShowReport(data)}
+          />
           <div className="mb-3 bg-white rounded-md p-4 w-full">
             <div className="text-lg font-bold mb-2">Đánh giá sản phẩm:</div>
             <div className="flex flex-col items-center justify-center w-full">
@@ -458,8 +493,9 @@ function ProductDetail() {
             <hr className="my-6 w-full" />
 
             <Feedback
-              isPurchase={!evaluation.isPurchased}
+              isPurchase={evaluation.isPurchased}
               setTotalFeedback={setTotalFeedback}
+              setShowLogin={(data: boolean) => setShowLogin(data)}
             />
           </div>
         </>
@@ -472,6 +508,18 @@ function ProductDetail() {
         fastLogin={true}
       >
         <Form fastLogin={true} />
+      </Modal>
+      <Modal
+        isShow={showReport}
+        setIsShow={(e) => setShowReport(false)}
+        confirm={() => Report()}
+        title={`Báo cáo ${type == "product" ? "sản phẩm" : "cửa hàng"}`}
+      >
+        <div> Nội dung báo cáo:</div>
+        <textarea
+          className="w-full h-32 border border-gray-300 rounded-md mt-2 p-2 outline-none"
+          onChange={(e) => setContentReport(e.target.value)}
+        ></textarea>
       </Modal>
     </div>
   );

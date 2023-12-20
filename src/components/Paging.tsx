@@ -8,7 +8,6 @@ interface SortTableProps {
 }
 function Paging(props: SortTableProps) {
   const { totalPage = 1, currentPage, setPage, perPage = 1 } = props;
-  console.log(totalPage);
   return (
     <nav aria-label="Page navigation example" className="mt-3">
       <ul className="flex items-center -space-x-px h-10 text-base justify-end">

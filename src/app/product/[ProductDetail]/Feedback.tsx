@@ -8,17 +8,17 @@ import {
 import { UserInterface } from "@/types/User";
 import ConvertDate from "@/utils/ConvertDate";
 import Toast from "@/utils/Toast";
-import { set } from "firebase/database";
 import { useParams } from "next/navigation";
 import React from "react";
 import { FaRegPaperPlane } from "react-icons/fa";
 interface Props {
   isPurchase: boolean;
   setTotalFeedback: (arg: number) => void;
+  setShowLogin: (arg: boolean) => void;
 }
 
 function Feedback(props: Props) {
-  const { isPurchase, setTotalFeedback } = props;
+  const { isPurchase, setTotalFeedback, setShowLogin } = props;
   const [page, setPage] = React.useState(1);
   const [total, setTotal] = React.useState(0);
   const [feedbacks, setFeedbacks] = React.useState([]);
@@ -44,7 +44,6 @@ function Feedback(props: Props) {
     };
     fetchData();
   }, [page]);
-  console.log(feedbacks);
   const SendFeedback = async () => {
     await APICreateFeedback(params.ProductDetail + "", feedback).then(
       (res: any) => {
@@ -140,10 +139,16 @@ function Feedback(props: Props) {
                   <div
                     className={`text-gray-900 ${
                       item.consensus.includes(user?._id)
-                        ? "bg-blue-700 text-white"
-                        : "bg-white"
-                    } border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}
-                    onClick={(e) => Cosensus(item, user?._id!)}
+                        ? "bg-blue-700 text-white hover:bg-blue-600"
+                        : "bg-white hover:bg-gray-100"
+                    } cursor-pointer border border-gray-300 focus:outline-none  focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}
+                    onClick={(e) => {
+                      if (user) {
+                        Cosensus(item, item.userId);
+                      } else {
+                        setShowLogin(true);
+                      }
+                    }}
                   >
                     {item.consensus.includes(user?._id)
                       ? "Đã đồng thuận"
