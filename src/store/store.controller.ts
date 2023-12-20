@@ -39,7 +39,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateStoreAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Post('store/user')
   async create(
     @Body() store: CreateStoreDto,
@@ -65,7 +65,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadStoreAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Get('store/seller')
   async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getByUserId(userId);

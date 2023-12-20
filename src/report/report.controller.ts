@@ -33,7 +33,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateReportAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
   @Post('report/user')
   async create(
     @Body() createReportDto: CreateReportDto,
