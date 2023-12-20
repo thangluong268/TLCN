@@ -1,4 +1,6 @@
 import Home from "@/app/admin/Home";
+import ManagerProduct from "@/app/admin/ManagerProduct";
+import ManagerStore from "@/app/admin/ManagerStore";
 import ManagerUser from "@/app/admin/ManagerUser";
 
 export const CATEGORYADMIN = [
@@ -9,17 +11,17 @@ export const CATEGORYADMIN = [
   },
   {
     title: "Quản lý người dùng",
-    value: "create",
+    value: "user",
     element: ManagerUser,
   },
-  // {
-  //   title: "Quản lý cửa hàng",
-  //   value: "new",
-  //   element: New,
-  // },
-  // {
-  //   title: "Quản lý sản phẩm",
-  //   value: "preparing",
-  //   element: Preparing,
-  // },
+  {
+    title: "Quản lý sản phẩm",
+    value: "product",
+    element: ManagerProduct,
+  },
+  {
+    title: "Quản lý cửa hàng",
+    value: "store",
+    element: ManagerStore,
+  },
 ];

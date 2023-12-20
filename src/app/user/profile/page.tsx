@@ -17,8 +17,7 @@ interface ProfileProps {
 }
 
 function Profile(props: ProfileProps) {
-  const { idProps } = props || { idProps: "" };
-  const { setIsShow } = props || { setIsShow: () => {} };
+  const { idProps = "", setIsShow = () => {} } = props;
   const [userInfo, setUserInfo] = React.useState({
     id: "",
     avatar: "",
@@ -54,7 +53,7 @@ function Profile(props: ProfileProps) {
         warningCount: data.metadata.data.warningCount,
       });
       setUserInfo({
-        id: data.metadata.data._id,
+        id: data.metadata.data._id || "",
         avatar: data.metadata.data.avatar,
         fullName: data.metadata.data.fullName,
         gender: data.metadata.data.gender || "Khác",
@@ -138,6 +137,7 @@ function Profile(props: ProfileProps) {
           <div
             className="w-[200px] h-[200px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer"
             onClick={(e) => {
+              if (idProps) return;
               const input = document.getElementById("upload-avatar");
               if (input) {
                 input.click();

@@ -73,3 +73,30 @@ export const APIGetStoreMostProduct = async (limit: number) => {
   );
   return res.data;
 };
+
+//api/store/admin?page=1&limit=1
+export const APIGetListStore = async (
+  page?: any,
+  limit?: any,
+  search?: any
+) => {
+  const headers = GetHeaders();
+  var search = search ? search : "";
+  var page = page ? page : 1;
+  var limit = limit ? limit : 10;
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/admin?page=${page}&limit=${limit}&search=${search}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/store/admin/:id
+export const APIGetStoreAdmin = async (id: any) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/admin/${id}`,
+    { headers }
+  );
+  return res.data;
+};

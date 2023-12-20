@@ -73,7 +73,7 @@ function Create() {
   return (
     <div className="bg-white rounded-md p-4 mb-5">
       <div className="flex justify-between items-center">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <UploadFile
             index={index}
             key={index}
