@@ -41,7 +41,7 @@ export class UserController {
     const data: any = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bills.map(async (item: any) => {
-        let user = await this.userService.getById(item._id);    
+        let user = await this.userService.getById(item._id);
         if (!user) throw new NotFoundException('Không tìm thấy người dùng này!');
         user = user.toObject();
         delete user.status;
@@ -59,14 +59,16 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
   @ApiQuery({ name: 'storeId', type: String, required: true })
   @Put('user-follow-store')
   async followStore(
     @Query('storeId') storeId: string,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
-    const store: Store = await this.storeService.getById(storeId);
+    let store: Store = await this.storeService.getById(storeId);
+
+    store = store['_doc'] ? store['_doc'] : store;
 
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
@@ -82,14 +84,16 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
   @ApiQuery({ name: 'userIdReceive', type: String, required: true })
   @Put('user-add-friend')
   async addFriend(
     @Query('userIdReceive') userIdReceive: string,
     @GetCurrentUserId() userIdSend: string,
   ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
-    const user: User = await this.userService.getById(userIdReceive);
+    let user: User = await this.userService.getById(userIdReceive);
+
+    user = user['_doc'] ? user['_doc'] : user;
 
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -98,7 +102,7 @@ export class UserController {
     await this.userService.addFriend(userIdSend, userIdReceive);
 
     return new SuccessResponse({
-      message: 'Follow cửa hàng thành công!',
+      message: 'Kết bạn thành công!',
       metadata: { data: {} },
     });
   }
@@ -148,6 +152,7 @@ export class UserController {
   }
 
   // Update user
+
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
   @CheckRole(RoleName.USER, RoleName.ADMIN)

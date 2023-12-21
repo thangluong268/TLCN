@@ -45,7 +45,7 @@ describe('Store Controller E2E Test', () => {
 
   beforeEach(async () => {}, 10000);
 
-  it('Notification controller should be defined', () => {
+  it('Store controller should be defined', () => {
     expect(controller).toBeDefined();
   }, 10000);
 

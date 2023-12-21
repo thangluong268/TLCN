@@ -75,15 +75,17 @@ export class UserService {
     }
   }
 
-  async followStore(userId: string, storeId: string): Promise<void> {
+  async followStore(id: string, storeId: string): Promise<void> {
     try {
-      const user: User = await this.userModel.findById(userId);
+      let user: User = await this.userModel.findById(id);
+
+      user = user['_doc'] ? user['_doc'] : user;
 
       const index = user.followStores.findIndex(id => id.toString() === storeId.toString());
 
       index == -1 ? user.followStores.push(storeId) : user.followStores.splice(index, 1);
 
-      await user.save();
+      await this.userModel.findByIdAndUpdate(id, { followStores: user.followStores });
       return;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -91,15 +93,18 @@ export class UserService {
     }
   }
 
-  async addFriend(userIdSend: string, userIdReceive: string): Promise<void> {
+  async addFriend(id: string, userIdReceive: string): Promise<void> {
     try {
-      const user: User = await this.userModel.findById(userIdSend);
+      let user: User = await this.userModel.findById(id);
+
+      user = user['_doc'] ? user['_doc'] : user;
 
       const index = user.friends.findIndex(id => id.toString() === userIdReceive.toString());
 
       index == -1 ? user.friends.push(userIdReceive) : user.friends.splice(index, 1);
 
-      await user.save();
+      await this.userModel.findByIdAndUpdate(id, { friends: user.friends });
+
       return;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
