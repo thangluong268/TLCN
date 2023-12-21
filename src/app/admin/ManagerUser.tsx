@@ -163,7 +163,7 @@ function ManagerUser() {
       {currentId && isShow && (
         <Profile
           idProps={currentId || ""}
-          setIsShow={((data: boolean) => setIsShow(data)) || (() => {})}
+          setIsShow={(data: boolean) => setIsShow(data)}
         />
       )}
     </>

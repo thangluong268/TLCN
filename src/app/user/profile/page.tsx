@@ -13,13 +13,13 @@ import {
 } from "react-icons/fa6";
 interface ProfileProps {
   idProps?: string;
-  setIsShow?: (data: boolean) => void;
+  setIsShow: (data: boolean) => void;
 }
 
 function Profile(props: ProfileProps) {
   const { idProps = "", setIsShow = () => {} } = props;
   const [userInfo, setUserInfo] = React.useState({
-    id: "",
+    id: idProps || "",
     avatar: "",
     fullName: "",
     gender: "",
