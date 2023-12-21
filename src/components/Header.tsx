@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import FormatMoney from "@/utils/FormatMoney";
 import { UserAuth } from "@/app/authContext";
+import { redirect } from "next/navigation";
 
 function Header() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -42,6 +43,10 @@ function Header() {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user") ?? "")
       : null;
+
+    if (user.role == "Admin") {
+      return redirect("/admin");
+    }
     setUser(user?.providerData[0]);
     setRole(user?.role);
     const fetchAllCart = async () => {
