@@ -1,3 +1,4 @@
+"use client";
 import Profile from "@/components/Profile";
 import SortTable from "@/components/SortTable";
 import { APIGetListUser } from "@/services/User";
@@ -61,6 +62,7 @@ function ManagerUser() {
   const [currentId, setCurrentId] = React.useState<string>("");
   const [listUser, setListUser] = React.useState<ListUser>({} as ListUser);
   const [isShow, setIsShow] = React.useState<boolean>(false);
+  console.log(localStorage.getItem("user"));
   React.useEffect(() => {
     const fetchData = async () => {
       await APIGetListUser(page || 1, 10, search).then((res) =>

@@ -1,7 +1,7 @@
 import SortTable from "@/components/SortTable";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
-import Profile from "../user/profile/page";
+import Profile from "../user/profile/ProfilePage";
 import { APIGetListStore, APIGetStoreAdmin } from "@/services/Store";
 import Info from "../store/seller/[MyStore]/Info";
 import { set } from "firebase/database";

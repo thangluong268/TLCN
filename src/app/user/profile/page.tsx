@@ -1,7 +1,6 @@
+import Profile from "@/components/Profile";
 import React from "react";
 
-function Profile() {
+export function ProfilePage() {
   return <Profile />;
 }
-
-export default Profile;

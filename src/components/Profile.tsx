@@ -12,8 +12,8 @@ import {
   FaTransgender,
 } from "react-icons/fa6";
 interface ProfileProps {
-  idProps: string;
-  setIsShow: (data: boolean) => any;
+  idProps?: string;
+  setIsShow?: (data: boolean) => any;
 }
 
 function Profile(props: ProfileProps) {
