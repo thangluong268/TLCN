@@ -40,7 +40,7 @@ export class ReportController {
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     const hasReport = await this.reportService.getByProductIdAndUserId(createReportDto.subjectId, userId);
-    if (hasReport) return new BadRequestException('Bạn đã báo cáo sản phẩm này rồi!');
+    if (hasReport) return new BadRequestException('Bạn đã báo cáo nội dung này rồi!');
 
     const newReport = await this.reportService.create(createReportDto, userId);
 
