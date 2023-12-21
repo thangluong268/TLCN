@@ -21,7 +21,7 @@ export class AbilitiesGuard implements CanActivate {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async canActivate(context: ExecutionContext): Promise<any> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const checkRoles = this.reflector.get<string[]>(CHECK_ROLE, context.getHandler()) || [];
     const rules = this.reflector.get<RequiredRule[]>(CHECK_ABILITY, context.getHandler()) || [];
     const request = context.switchToHttp().getRequest();
@@ -39,10 +39,10 @@ export class AbilitiesGuard implements CanActivate {
     });
 
     if (currentRole.length === 0 && arrRoles.some(role => role !== RoleName.ADMIN)) {
-      return new ForbiddenException('Bạn không có quyền truy cập!');
+      throw new ForbiddenException('Bạn không có quyền truy cập!');
     }
 
-    currentRole.forEach(role => {
+    const result = currentRole.map(role => {
       const ability = this.caslAbilityFactory.defineAbility(role);
       try {
         rules.forEach(rule => {
@@ -52,9 +52,11 @@ export class AbilitiesGuard implements CanActivate {
         return true;
       } catch (error) {
         if (error instanceof ForbiddenError) {
-          return new ForbiddenException('Bạn không có quyền truy cập!');
+          throw new ForbiddenException('Bạn không có quyền truy cập!');
         }
       }
     });
+
+    return result.some(res => res === false) ? false : true;
   }
 }
