@@ -16,7 +16,7 @@ import { BillModule } from '../bill/bill.module';
     AbilityModule,
     RoleModule,
     forwardRef(() => ProductModule),
-    FeedbackModule,
+    forwardRef(() => FeedbackModule),
     forwardRef(() => UserModule),
     forwardRef(() => BillModule),
   ],

@@ -42,7 +42,7 @@ export class AbilitiesGuard implements CanActivate {
       throw new ForbiddenException('Bạn không có quyền truy cập!');
     }
 
-    const result = currentRole.map(role => {
+    const canActive = currentRole.map(role => {
       const ability = this.caslAbilityFactory.defineAbility(role);
       try {
         rules.forEach(rule => {
@@ -52,11 +52,15 @@ export class AbilitiesGuard implements CanActivate {
         return true;
       } catch (error) {
         if (error instanceof ForbiddenError) {
-          throw new ForbiddenException('Bạn không có quyền truy cập!');
+          throw new ForbiddenException(error.message);
         }
       }
     });
 
-    return result.some(res => res === false) ? false : true;
+    const result = canActive.some(res => res === false);
+    if (result) {
+      throw new ForbiddenException('Bạn không có quyền truy cập!');
+    }
+    return true;
   }
 }

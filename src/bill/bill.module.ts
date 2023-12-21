@@ -22,7 +22,7 @@ import { NotificationModule } from '../notification/notification.module';
     ProductModule,
     StoreModule,
     forwardRef(() => UserModule),
-    NotificationModule,
+    forwardRef(() => NotificationModule),
   ],
   controllers: [BillController],
   providers: [BillService],

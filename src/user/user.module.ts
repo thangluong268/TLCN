@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AbilityModule } from '../ability/ability.module';
 import { BillModule } from '../bill/bill.module';
@@ -12,7 +12,14 @@ import { StoreModule } from '../store/store.module';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), AbilityModule, RoleModule, BillModule, StoreModule, NotificationModule],
+  imports: [
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    AbilityModule,
+    RoleModule,
+    BillModule,
+    StoreModule,
+    forwardRef(() => NotificationModule),
+  ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

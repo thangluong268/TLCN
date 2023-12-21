@@ -18,7 +18,7 @@ import { NotificationModule } from '../notification/notification.module';
     forwardRef(() => UserModule),
     forwardRef(() => StoreModule),
     forwardRef(() => ProductModule),
-    NotificationModule,
+    forwardRef(() => NotificationModule),
   ],
   controllers: [FeedbackController],
   providers: [FeedbackService],

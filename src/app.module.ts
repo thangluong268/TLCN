@@ -1,6 +1,6 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AbilityModule } from './ability/ability.module';
@@ -25,7 +25,6 @@ import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 import { UserotpModule } from './userotp/userotp.module';
 import { UsertokenModule } from './usertoken/usertoken.module';
-// import { CanActiveMiddleware } from './middleware';
 
 @Module({
   imports: [
@@ -85,8 +84,3 @@ import { UsertokenModule } from './usertoken/usertoken.module';
   providers: [],
 })
 export class AppModule {}
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(CanActiveMiddleware).forRoutes('*');
-//   }
-// }
