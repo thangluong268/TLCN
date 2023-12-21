@@ -76,6 +76,7 @@ export class ReportController {
             userName: user.fullName,
             productName: product.productName,
             content: report.content,
+            status: report.status,
             createdAt: report['createdAt'],
           };
         }

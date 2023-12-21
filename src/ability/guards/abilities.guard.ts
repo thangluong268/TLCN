@@ -1,11 +1,12 @@
 import { ForbiddenError } from '@casl/ability';
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RoleService } from '../../role/role.service';
 import { AbilityFactory } from '../ability.factory';
 import { CHECK_ABILITY, RequiredRule } from '../decorators/abilities.decorator';
 import { CHECK_ROLE } from '../decorators/role.decorator';
 import { RoleName } from '../../role/schema/role.schema';
+import { ForbiddenException } from 'src/core/error.response';
 
 @Injectable()
 export class AbilitiesGuard implements CanActivate {
@@ -37,7 +38,7 @@ export class AbilitiesGuard implements CanActivate {
     });
 
     if (currentRole.length === 0 && arrRoles.some(role => role !== RoleName.ADMIN)) {
-      throw new ForbiddenException('Người dùng không có quyền truy cập!');
+      return new ForbiddenException('Người dùng không có quyền truy cập!');
     }
 
     const result = currentRole.map(role => {
