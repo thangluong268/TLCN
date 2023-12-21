@@ -1,8 +1,8 @@
+import Profile from "@/components/Profile";
 import SortTable from "@/components/SortTable";
 import { APIGetListUser } from "@/services/User";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
-import Profile from "../user/profile/page";
 
 interface ListUser {
   total: number;
