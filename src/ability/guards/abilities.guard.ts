@@ -38,7 +38,7 @@ export class AbilitiesGuard implements CanActivate {
     });
 
     if (currentRole.length === 0 && arrRoles.some(role => role !== RoleName.ADMIN)) {
-      return new ForbiddenException('Người dùng không có quyền truy cập!');
+      throw new ForbiddenException('Người dùng không có quyền truy cập!');
     }
 
     const result = currentRole.map(role => {

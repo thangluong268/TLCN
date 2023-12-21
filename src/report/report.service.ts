@@ -26,7 +26,7 @@ export class ReportService {
     }
   }
 
-  async getAllBySearch(pageQuery: number = 1, limitQuery: number = 5, searchQuery: string, type: string): Promise<{ total: number; reports: Report[] }> {
+  async getAllBySearch(pageQuery: number = 1, limitQuery: number = 5, searchQuery: string, type: string, status: boolean): Promise<{ total: number; reports: Report[] }> {    
     const search = searchQuery
       ? {
           $or: [{ content: { $regex: searchQuery, $options: 'i' } }],
@@ -34,7 +34,7 @@ export class ReportService {
       : {};
     const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
-      const total = await this.reportModel.countDocuments({ ...search, status: false, type: type.toUpperCase() });
+      const total = await this.reportModel.countDocuments({ ...search, type: type.toUpperCase(), status });
       const reports = await this.reportModel
         .find({ ...search, status: false, type: type.toUpperCase() })
         .sort({ createdAt: -1 })

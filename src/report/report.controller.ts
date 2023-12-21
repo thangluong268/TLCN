@@ -58,13 +58,15 @@ export class ReportController {
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
   @ApiQuery({ name: 'type', type: String, required: true })
+  @ApiQuery({ name: 'status', type: Boolean, required: true, example: false })
   async getAllBySearch(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('search') search: string,
     @Query('type') type: string,
+    @Query('status') status: boolean,
   ): Promise<SuccessResponse> {
-    const reports = await this.reportService.getAllBySearch(page, limit, search, type);
+    const reports = await this.reportService.getAllBySearch(page, limit, search, type, status);
 
     const data = await Promise.all(
       reports.reports.map(async report => {
@@ -76,7 +78,6 @@ export class ReportController {
             userName: user.fullName,
             productName: product.productName,
             content: report.content,
-            status: report.status,
             createdAt: report['createdAt'],
           };
         }
@@ -88,7 +89,6 @@ export class ReportController {
             userName: user.fullName,
             storeName: store.name,
             content: report.content,
-            status: report.status,
             createdAt: report['createdAt'],
           };
         }
