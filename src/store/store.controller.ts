@@ -11,6 +11,7 @@ import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { BillService } from '../bill/bill.service';
 import { BadRequestException, ConflictException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { FeedbackService } from '../feedback/feedback.service';
@@ -22,7 +23,6 @@ import { UserService } from '../user/user.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreService } from './store.service';
-import { BillService } from '../bill/bill.service';
 
 @Controller()
 @ApiTags('Store')
@@ -168,9 +168,9 @@ export class StoreController {
     const data: any = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stores.map(async (item: any) => {
-        let store = await this.storeService.getById(item._id);
+        const store = await this.storeService.getById(item._id);
         if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
-        store = store.toObject();
+        // store = store.toObject();
         delete store.status;
         delete store.__v;
         delete store['updatedAt'];
