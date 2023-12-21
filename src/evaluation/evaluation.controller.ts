@@ -32,7 +32,7 @@ export class EvaluationController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateEvaluationAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'productId', type: String, required: true })
   @Put('user')
   async create(
@@ -52,8 +52,6 @@ export class EvaluationController {
     const hadEvaluation = await this.evaluationService.checkEvaluationByUserIdAndProductId(userId, productId);
 
     const result = await this.evaluationService.update(userId, productId, evaluationDto.name);
-
-    console.log(result);
 
     if (!result) return new NotFoundException('Không tìm thấy sản phẩm này!');
 
@@ -77,6 +75,7 @@ export class EvaluationController {
       metadata: { data: result },
     });
   }
+
 
   @Public()
   @ApiQuery({ name: 'productId', type: String, required: true })

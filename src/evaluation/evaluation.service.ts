@@ -28,6 +28,7 @@ export class EvaluationService {
     async update(userId: string, productId: string, name: string): Promise<boolean> {
 
         const evaluation = await this.evaluationModel.findOne({ productId })
+        console.log(evaluation)
         if (!evaluation) {
             return false
         }

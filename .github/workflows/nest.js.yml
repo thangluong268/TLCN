@@ -36,3 +36,4 @@ jobs:
     - run: npm run test:e2e notification.e2e-spec.ts
     - run: npm run test:e2e store.e2e-spec.ts
     - run: npm run test:e2e user.e2e-spec.ts
+    - run: npm run test:e2e evaluation.e2e-spec.ts
