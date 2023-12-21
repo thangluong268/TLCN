@@ -36,7 +36,7 @@ export class ReportService {
     try {
       const total = await this.reportModel.countDocuments({ ...search, type: type.toUpperCase(), status });
       const reports = await this.reportModel
-        .find({ ...search, status: false, type: type.toUpperCase() })
+        .find({ ...search, type: type.toUpperCase(), status })
         .sort({ createdAt: -1 })
         .limit(Number(limitQuery))
         .skip(skip);

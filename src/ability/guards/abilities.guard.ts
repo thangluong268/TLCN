@@ -1,12 +1,12 @@
 import { ForbiddenError } from '@casl/ability';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ForbiddenException } from '../../core/error.response';
 import { RoleService } from '../../role/role.service';
+import { RoleName } from '../../role/schema/role.schema';
 import { AbilityFactory } from '../ability.factory';
 import { CHECK_ABILITY, RequiredRule } from '../decorators/abilities.decorator';
 import { CHECK_ROLE } from '../decorators/role.decorator';
-import { RoleName } from '../../role/schema/role.schema';
-import { ForbiddenException } from 'src/core/error.response';
 
 @Injectable()
 export class AbilitiesGuard implements CanActivate {
@@ -20,7 +20,8 @@ export class AbilitiesGuard implements CanActivate {
     this.param = param;
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async canActivate(context: ExecutionContext): Promise<any> {
     const checkRoles = this.reflector.get<string[]>(CHECK_ROLE, context.getHandler()) || [];
     const rules = this.reflector.get<RequiredRule[]>(CHECK_ABILITY, context.getHandler()) || [];
     const request = context.switchToHttp().getRequest();
@@ -38,10 +39,10 @@ export class AbilitiesGuard implements CanActivate {
     });
 
     if (currentRole.length === 0 && arrRoles.some(role => role !== RoleName.ADMIN)) {
-      throw new ForbiddenException('Người dùng không có quyền truy cập!');
+      return new ForbiddenException('Bạn không có quyền truy cập!');
     }
 
-    const result = currentRole.map(role => {
+    currentRole.forEach(role => {
       const ability = this.caslAbilityFactory.defineAbility(role);
       try {
         rules.forEach(rule => {
@@ -51,11 +52,9 @@ export class AbilitiesGuard implements CanActivate {
         return true;
       } catch (error) {
         if (error instanceof ForbiddenError) {
-          throw new ForbiddenException(error.message);
+          return new ForbiddenException('Bạn không có quyền truy cập!');
         }
       }
     });
-
-    return result.some(item => item === false) ? false : true;
   }
 }
