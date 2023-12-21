@@ -1,6 +1,4 @@
 import SortTable from "@/components/SortTable";
-import { APIGetListUser } from "@/services/User";
-import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
 import { APIGetListProductAdmin, APIGetProductAdmin } from "@/services/Product";
 import FormatMoney from "@/utils/FormatMoney";
