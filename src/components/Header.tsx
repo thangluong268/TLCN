@@ -44,45 +44,50 @@ function Header() {
       ? JSON.parse(localStorage.getItem("user") ?? "")
       : null;
 
-    if (user.role == "Admin") {
-      return redirect("/admin");
-    }
-    setUser(user?.providerData[0]);
-    setRole(user?.role);
-    const fetchAllCart = async () => {
-      const res = await APIGetAllCart();
-      var total = 0;
-      if (res.status == 200 || res.status == 201) {
-        const carts: Cart = {
-          isCheckAll: false,
-          store: res.metadata.data.map((item: any) => {
-            return {
-              id: item.storeId,
-              name: item.storeName,
-              isChecked: false,
-              avatar: item.storeAvatar,
-              product: item.listProducts.map((product: any) => {
-                total += 1;
-                return {
-                  id: product.productId,
-                  name: product.productName,
-                  avatar: product.avatar[0],
-                  type: product.type,
-                  price: product.price,
-                  quantity: product.quantity,
-                  quantityInStock: product.quantityInStock,
-                  isChecked: false,
-                };
-              }),
-            };
-          }),
-        };
-        dispatch(setCartPopUp(carts));
-      }
-    };
+    // Nếu role là admin và đang ở trang khác có pathname khác /admin thì redirect về trang admin
+    if (
+      user?.role == "Admin" &&
+      !window.location.pathname.startsWith("/admin")
+    ) {
+      redirect("/admin");
+    } else {
+      setUser(user?.providerData[0]);
+      setRole(user?.role);
+      const fetchAllCart = async () => {
+        const res = await APIGetAllCart();
+        var total = 0;
+        if (res.status == 200 || res.status == 201) {
+          const carts: Cart = {
+            isCheckAll: false,
+            store: res.metadata.data.map((item: any) => {
+              return {
+                id: item.storeId,
+                name: item.storeName,
+                isChecked: false,
+                avatar: item.storeAvatar,
+                product: item.listProducts.map((product: any) => {
+                  total += 1;
+                  return {
+                    id: product.productId,
+                    name: product.productName,
+                    avatar: product.avatar[0],
+                    type: product.type,
+                    price: product.price,
+                    quantity: product.quantity,
+                    quantityInStock: product.quantityInStock,
+                    isChecked: false,
+                  };
+                }),
+              };
+            }),
+          };
+          dispatch(setCartPopUp(carts));
+        }
+      };
 
-    if (user && user.role != "Admin") {
-      fetchAllCart();
+      if (user && user.role != "Admin") {
+        fetchAllCart();
+      }
     }
   }, []);
 
