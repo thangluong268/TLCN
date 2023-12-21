@@ -162,7 +162,7 @@ function ManagerUser() {
       <div ref={ref}></div>
       {currentId && isShow && (
         <Profile
-          idProps={currentId || ""}
+          idProps={currentId}
           setIsShow={(data: boolean) => setIsShow(data)}
         />
       )}

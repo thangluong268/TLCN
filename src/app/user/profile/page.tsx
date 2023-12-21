@@ -12,12 +12,12 @@ import {
   FaTransgender,
 } from "react-icons/fa6";
 interface ProfileProps {
-  idProps?: string;
-  setIsShow: (data: boolean) => void;
+  idProps: string;
+  setIsShow: (data: boolean) => any;
 }
 
 function Profile(props: ProfileProps) {
-  const { idProps = "", setIsShow = () => {} } = props;
+  const { idProps, setIsShow } = props;
   const [userInfo, setUserInfo] = React.useState({
     id: idProps || "",
     avatar: "",
