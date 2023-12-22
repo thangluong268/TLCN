@@ -6,7 +6,8 @@ import { APIUploadImage } from "@/services/UploadImage";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
 import React from "react";
-import ReactQuill from "react-quill";
+const ReactQuill =
+  typeof window === "object" ? require("react-quill") : () => false;
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
@@ -131,140 +132,149 @@ function CreateStore() {
       window.location.href = "/shop/" + storeRes.metadata?.data._id;
     }
   };
-  // Check valid input
-  return (
-    <div className="min-h-screen flex px-[150px] my-4">
-      <div className="bg-white rounded-md p-4 mb-5 w-full">
-        <div className="text-center text-blue-500 font-bold text-2xl">
-          TẠO CỬA HÀNG CỦA BẠN
-        </div>
-        <div className="flex mt-5">
-          <div
-            className="w-[16%] h-[165px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer mr-3"
-            onClick={(e) => {
-              const input = document.getElementById("upload-avatar");
-              if (input) {
-                input.click();
-              }
-            }}
-          >
-            <div className="text-[50px] text-[#d9d9d9]" id="symbol-upload">
-              <span className="text-[#d9d9d9]">+</span>
-            </div>
-            <img
-              src=""
-              id="avatar-preview"
-              alt=""
-              className="rounded-full h-full fit-cover w-full"
-              hidden
-            />
-          </div>
-          {/* Ẩn */}
-          <input
-            id="upload-avatar"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setStore({ ...store, avatar: file as any });
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                  const avatar = document.getElementById("avatar-preview");
-                  const symbol = document.getElementById("symbol-upload");
-                  if (avatar) {
-                    avatar.setAttribute("src", reader.result as string);
-                    avatar.hidden = false;
-                  }
-                  if (symbol) {
-                    symbol.hidden = true;
-                  }
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-          />
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
-          <div className="grid grid-cols-2 w-full gap-x-2 mx-2">
-            {CREATESTORE.map((item, index) => (
-              <Input label={item.label} required={true} key={index}>
-                <input
-                  id={`formCreate-${item.name}`}
-                  type="text"
-                  className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
-                  placeholder={item.placeholder}
-                  name={item.name}
-                  disabled={item.name === "phoneNumber1" ? true : false}
-                  value={store[item.name as keyof typeof store]}
-                  onChange={(e) =>
-                    setStore({ ...store, [item.name]: e.target.value })
-                  }
-                  onBlur={(e) => {
-                    const result = CheckValidInput({
-                      [`${item.identify}`]: e.target.value,
-                    });
-                    if (result !== "") {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.add("border-red-500");
-                    } else {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.remove("border-red-500");
-                    }
-                    document.getElementById(`errMes-${item.name}`)!.innerHTML =
-                      result;
-                  }}
-                />
-                <span
-                  id={`errMes-${item.name}`}
-                  className="text-red-500 text-sm"
-                ></span>
-              </Input>
-            ))}
+  return (
+    mounted && (
+      <div className="min-h-screen flex px-[150px] my-4">
+        <div className="bg-white rounded-md p-4 mb-5 w-full">
+          <div className="text-center text-blue-500 font-bold text-2xl">
+            TẠO CỬA HÀNG CỦA BẠN
           </div>
-        </div>
-        <div className="mt-4">
-          <div className="font-bold text-lg">Mô tả cửa hàng của bạn</div>
-        </div>
-        <ReactQuill
-          theme="snow"
-          value={store.description}
-          onChange={handleDescriptionChange}
-        />
-        <div className="mt-4">
-          <div className="flex">
+          <div className="flex mt-5">
+            <div
+              className="w-[16%] h-[165px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer mr-3"
+              onClick={(e) => {
+                const input = document.getElementById("upload-avatar");
+                if (input) {
+                  input.click();
+                }
+              }}
+            >
+              <div className="text-[50px] text-[#d9d9d9]" id="symbol-upload">
+                <span className="text-[#d9d9d9]">+</span>
+              </div>
+              <img
+                src=""
+                id="avatar-preview"
+                alt=""
+                className="rounded-full h-full fit-cover w-full"
+                hidden
+              />
+            </div>
+            {/* Ẩn */}
             <input
-              type="checkbox"
-              name=""
-              id=""
-              className="w-5 h-5 mr-2"
-              onChange={(e) => setAcceptPolicy(!acceptPolicy)}
+              id="upload-avatar"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setStore({ ...store, avatar: file as any });
+                  const reader = new FileReader();
+                  reader.onloadend = function () {
+                    const avatar = document.getElementById("avatar-preview");
+                    const symbol = document.getElementById("symbol-upload");
+                    if (avatar) {
+                      avatar.setAttribute("src", reader.result as string);
+                      avatar.hidden = false;
+                    }
+                    if (symbol) {
+                      symbol.hidden = true;
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
             />
-            <div>Tôi đồng ý với chính sách bên dưới</div>
+
+            <div className="grid grid-cols-2 w-full gap-x-2 mx-2">
+              {CREATESTORE.map((item, index) => (
+                <Input label={item.label} required={true} key={index}>
+                  <input
+                    id={`formCreate-${item.name}`}
+                    type="text"
+                    className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
+                    placeholder={item.placeholder}
+                    name={item.name}
+                    disabled={item.name === "phoneNumber1" ? true : false}
+                    value={store[item.name as keyof typeof store]}
+                    onChange={(e) =>
+                      setStore({ ...store, [item.name]: e.target.value })
+                    }
+                    onBlur={(e) => {
+                      const result = CheckValidInput({
+                        [`${item.identify}`]: e.target.value,
+                      });
+                      if (result !== "") {
+                        document
+                          .getElementById(`formCreate-${item.name}`)
+                          ?.classList.add("border-red-500");
+                      } else {
+                        document
+                          .getElementById(`formCreate-${item.name}`)
+                          ?.classList.remove("border-red-500");
+                      }
+                      document.getElementById(
+                        `errMes-${item.name}`
+                      )!.innerHTML = result;
+                    }}
+                  />
+                  <span
+                    id={`errMes-${item.name}`}
+                    className="text-red-500 text-sm"
+                  ></span>
+                </Input>
+              ))}
+            </div>
           </div>
-          <p
-            className={`outline outline-offset-2 outline-2 ${
-              acceptPolicy ? "outline-green-600" : "outline-gray-600"
-            } rounded-sm p-2 mt-2`}
-          >
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam
-            corrupti voluptas placeat, laborum vero possimus quasi minus
-            reprehenderit provident esse quae harum quam optio modi nostrum
-            ipsum reiciendis cum explicabo.
-          </p>
-        </div>
-        <div className="flex justify-center mt-5">
-          <button
-            className="bg-blue-500 text-white rounded-md px-4 py-2"
-            onClick={(e) => CreateStore()}
-          >
-            Tạo cửa hàng
-          </button>
+          <div className="mt-4">
+            <div className="font-bold text-lg">Mô tả cửa hàng của bạn</div>
+            {typeof window === "object" && (
+              <ReactQuill
+                theme="snow"
+                value={store.description}
+                onChange={handleDescriptionChange}
+              />
+            )}
+          </div>
+          <div className="mt-4">
+            <div className="flex">
+              <input
+                type="checkbox"
+                name=""
+                id=""
+                className="w-5 h-5 mr-2"
+                onChange={(e) => setAcceptPolicy(!acceptPolicy)}
+              />
+              <div>Tôi đồng ý với chính sách bên dưới</div>
+            </div>
+            <p
+              className={`outline outline-offset-2 outline-2 ${
+                acceptPolicy ? "outline-green-600" : "outline-gray-600"
+              } rounded-sm p-2 mt-2`}
+            >
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam
+              corrupti voluptas placeat, laborum vero possimus quasi minus
+              reprehenderit provident esse quae harum quam optio modi nostrum
+              ipsum reiciendis cum explicabo.
+            </p>
+          </div>
+          <div className="flex justify-center mt-5">
+            <button
+              className="bg-blue-500 text-white rounded-md px-4 py-2"
+              onClick={(e) => CreateStore()}
+            >
+              Tạo cửa hàng
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    )
   );
 }
 
