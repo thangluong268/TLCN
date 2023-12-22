@@ -26,6 +26,7 @@ import { SeedDto, SeedProductDto } from './dto/seed.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { JwtRTAuthGuard } from './guards/jwt-rt-auth.guard';
 
+
 @Controller('auth')
 @ApiTags('Auth')
 @ApiBearerAuth('Authorization')
