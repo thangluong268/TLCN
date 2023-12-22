@@ -33,3 +33,17 @@ export const APIGetListUser = async (
   );
   return res.data;
 };
+
+// /api/user/admin/get-all
+export const APIGetAllUser = async () => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
+
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/user/admin/get-all`,
+    { headers }
+  );
+  document.getElementById("loading-page")?.classList.add("hidden");
+
+  return res.data;
+};

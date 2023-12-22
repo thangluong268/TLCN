@@ -1,7 +1,11 @@
 "use client";
 import Profile from "@/components/Profile";
 import SortTable from "@/components/SortTable";
-import { APIGetListUser } from "@/services/User";
+import { APIGetAllUser, APIGetListUser } from "@/services/User";
+import ConvertDate from "@/utils/ConvertDate";
+import { exportExcel } from "@/utils/ExportExcel";
+import FormatMoney from "@/utils/FormatMoney";
+import Toast from "@/utils/Toast";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
 
@@ -70,6 +74,30 @@ function ManagerUser() {
     };
     fetchData();
   }, [page, search]);
+  const ExportExcel = async () => {
+    Toast("success", "File sẽ được tải về sau 2 giây nữa...", 2000);
+    setTimeout(async () => {
+      const data = await APIGetAllUser();
+      const dataExcel = data.metadata.data?.map((item: any, index: any) => {
+        return {
+          STT: index + 1,
+          "Tên người dùng": item.fullName,
+          Email: item.email,
+          "Giới tính": item.gender || "Khác",
+          "Số điện thoại": item.phone,
+          "Số lượng cửa hàng đang theo dõi": item.followStores.length,
+          "Số lượng bạn bè": item.friends.length,
+          "Số lượng đơn hàng đã mua": item.totalBills,
+          "Số số tiền đã mua": FormatMoney(item.totalPricePaid),
+          "Số lượng quà đã nhận": item.totalReceived,
+          "Số lần bị cảnh báo": item.warningCount,
+          "Tổng xu hiện có": item.wallet,
+          "Ngày tham gia": ConvertDate(item.createdAt),
+        };
+      });
+      exportExcel(dataExcel, "Danh sách người dùng", "Danh sách người dùng");
+    }, 2000);
+  };
   return (
     <div className="min-h-screen my-5">
       {/* Search */}
@@ -118,7 +146,14 @@ function ManagerUser() {
           </button>
         </div>
       </form>
-
+      <div className="flex justify-end mb-5">
+        <button
+          className="px-4 py-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          onClick={() => ExportExcel()}
+        >
+          Xuất file excel
+        </button>
+      </div>
       <SortTable
         title={arrTitleUser}
         totalPage={listUser.total}

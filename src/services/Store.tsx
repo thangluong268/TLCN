@@ -119,3 +119,17 @@ export const APIFollowStore = async (storeId: any) => {
   );
   return res.data;
 };
+
+// api/store/admin-get-all
+export const APIGetAllStore = async () => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
+
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/store/admin-get-all`,
+    { headers }
+  );
+  document.getElementById("loading-page")?.classList.add("hidden");
+
+  return res.data;
+};

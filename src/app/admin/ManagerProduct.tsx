@@ -1,10 +1,17 @@
 "use client";
 import SortTable from "@/components/SortTable";
 import React from "react";
-import { APIGetListProductAdmin, APIGetProductAdmin } from "@/services/Product";
+import {
+  APIGetAllProductAdmin,
+  APIGetListProductAdmin,
+  APIGetProductAdmin,
+} from "@/services/Product";
 import FormatMoney from "@/utils/FormatMoney";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import Report from "@/components/Report";
+import { exportExcel } from "@/utils/ExportExcel";
+import Toast from "@/utils/Toast";
+import ConvertDate from "@/utils/ConvertDate";
 
 interface Product {
   _id: string;
@@ -109,6 +116,7 @@ function ManagerProduct() {
     };
     fetchData();
   }, [page, search]);
+
   const DetailProduct = async (product: Product) => {
     setCurrentProduct(product);
     setIsShowDetail(true);
@@ -122,6 +130,30 @@ function ManagerProduct() {
         totalReaction: data.emojis.total || 0,
       });
     });
+  };
+
+  const ExportExcel = async () => {
+    Toast("success", "File sẽ được tải về sau 2 giây nữa...", 2000);
+    setTimeout(async () => {
+      const data = await APIGetAllProductAdmin();
+      const dataExcel = data.metadata.data?.map((item: any, index: any) => {
+        return {
+          STT: index + 1,
+          "Tên sản phẩm": item.product.productName,
+          "Số lượng còn lại": item.product.quantity,
+          "Số lượng đã bán": item.product.quantitySold,
+          "Số lượng đã tặng": item.product.quantityGive,
+          Giá: FormatMoney(item.product.price),
+          "Danh mục": item.product.categoryName,
+          "Cửa hàng": item.product.storeName,
+          "Đánh giá trung bình (sao)": item.averageStar,
+          "Bình luận": item.totalFeedback,
+          "Số lượng cảm xúc": item.emojis.total,
+          "Ngày đăng bán": ConvertDate(item.product.createdAt),
+        };
+      });
+      exportExcel(dataExcel, "Danh sách sản phẩm", "Danh sách sản phẩm");
+    }, 2000);
   };
   return (
     <div className="min-h-screen my-5">
@@ -224,7 +256,15 @@ function ManagerProduct() {
               </button>
             </div>
           </form>
-
+          {/* Button export excel */}
+          <div className="flex justify-end mb-5">
+            <button
+              className="px-4 py-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              onClick={() => ExportExcel()}
+            >
+              Xuất file excel
+            </button>
+          </div>
           <SortTable
             title={arrTitleProduct}
             totalPage={listProduct.total}

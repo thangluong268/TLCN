@@ -1,10 +1,18 @@
 import SortTable from "@/components/SortTable";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
-import { APIGetListStore, APIGetStoreAdmin } from "@/services/Store";
+import {
+  APIGetAllStore,
+  APIGetListStore,
+  APIGetStoreAdmin,
+} from "@/services/Store";
 import Info from "../shop/seller/[MyStore]/Info";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Report from "@/components/Report";
+import Toast from "@/utils/Toast";
+import FormatMoney from "@/utils/FormatMoney";
+import { exportExcel } from "@/utils/ExportExcel";
+import ConvertDate from "@/utils/ConvertDate";
 
 interface DetailStore {
   averageStar: number;
@@ -79,7 +87,6 @@ function ManagerStore() {
     };
     fetchData();
   }, [page, search]);
-  console.log(listStore);
   const DetailStore = async (store: Store) => {
     setCurrentStore(store);
     setIsShowDetail(true);
@@ -95,6 +102,30 @@ function ManagerStore() {
         totalDelivered: data.totalDelivered || 0,
       });
     });
+  };
+
+  const ExportExcel = async () => {
+    Toast("success", "File sẽ được tải về sau 2 giây nữa...", 2000);
+    setTimeout(async () => {
+      const data = await APIGetAllStore();
+      const dataExcel = data.metadata.data?.map((item: any, index: any) => {
+        return {
+          STT: index + 1,
+          "Tên cửa hàng": item.store.name,
+          "Địa chỉ": item.store.address,
+          "Số điện thoại 1": item.store.phoneNumber[0] || "",
+          "Số điện thoại 2": item.store.phoneNumber[1] || "",
+          "Đánh giá trung bình (sao)": item.averageStar,
+          "Người theo dõi": item.totalFollow,
+          "Đơn bán": item.totalDelivered,
+          "Bình luận": item.totalFeedback,
+          "Doanh thu": FormatMoney(item.totalRevenue),
+          "Cảnh báo": item.store.warningCount,
+          "Ngày tham gia": ConvertDate(item.store.createdAt),
+        };
+      });
+      exportExcel(dataExcel, "Danh sách cửa hàng", "Danh sách cửa hàng");
+    }, 2000);
   };
   return (
     <div className="min-h-screen my-5">
@@ -194,7 +225,14 @@ function ManagerStore() {
               </button>
             </div>
           </form>
-
+          <div className="flex justify-end mb-5">
+            <button
+              className="px-4 py-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              onClick={() => ExportExcel()}
+            >
+              Xuất file excel
+            </button>
+          </div>
           <SortTable
             title={arrTitleUser}
             totalPage={listStore.total}
