@@ -62,8 +62,30 @@ export class UserController {
   @CheckRole(RoleName.MANAGER_USER, RoleName.ADMIN)
   @Get('admin/get-all')
   async getAllNoPaging(): Promise<SuccessResponse | NotFoundException> {
-    const data = await this.userService.getAllNoPaging();
-    if (!data) return new NotFoundException('Lấy danh sách người dùng thất bại!');
+    const users = await this.userService.getAllNoPaging();
+    if (!users) return new NotFoundException('Lấy danh sách người dùng thất bại!');
+
+    users.slice(0, 30);
+
+    const data = await Promise.all(
+      users.map(async (item: User) => {
+        const user = await this.userService.getById(item._id);
+        if (!user) return;
+
+        const billsOfUser = await this.billService.getAllByUserId(item._id);
+
+        const totalBills = billsOfUser.length;
+        const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0);
+        const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length;
+
+        return {
+          ...user.toObject(),
+          totalBills,
+          totalPricePaid,
+          totalReceived,
+        };
+      }),
+    );
 
     return new SuccessResponse({
       message: 'Lấy danh sách người dùng thành công!',

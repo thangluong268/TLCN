@@ -343,8 +343,97 @@ export class ProductController {
   @CheckRole(RoleName.MANAGER_PRODUCT, RoleName.ADMIN)
   @Get('product/admin-get-all')
   async getAll(): Promise<SuccessResponse | NotFoundException> {
-    const data = await this.productService.getAll();
-    if (!data) return new NotFoundException('Lấy danh sách sản phẩm thất bại!');
+    const products = await this.productService.getAll();
+    if (!products) return new NotFoundException('Lấy danh sách sản phẩm thất bại!');
+
+    products.slice(0, 30);
+
+    const data = await Promise.all(
+      products.map(async (item: Product) => {
+        const product = await this.productService.getById(item._id);
+        if (!product) return;
+
+        const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
+
+        const quantityDelivered: number = await this.billService.countProductDelivered(item._id, type, 'DELIVERED');
+
+        const evaluation = await this.evaluationService.getByProductId(item._id);
+        if (!evaluation) return;
+
+        const total: number = evaluation.emojis.length;
+
+        const emoji = {
+          Haha: 0,
+          Love: 0,
+          Wow: 0,
+          Sad: 0,
+          Angry: 0,
+          like: 0,
+        };
+
+        evaluation.emojis.forEach(e => {
+          switch (e.name) {
+            case 'Haha':
+              emoji.Haha++;
+              break;
+            case 'Love':
+              emoji.Love++;
+              break;
+            case 'Wow':
+              emoji.Wow++;
+              break;
+            case 'Sad':
+              emoji.Sad++;
+              break;
+            case 'Angry':
+              emoji.Angry++;
+              break;
+            case 'like':
+              emoji.like++;
+              break;
+          }
+        });
+
+        const emojis = {
+          total,
+          haha: emoji.Haha,
+          love: emoji.Love,
+          wow: emoji.Wow,
+          sad: emoji.Sad,
+          angry: emoji.Angry,
+          like: emoji.like,
+        };
+
+        const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(item._id);
+
+        const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        const starPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        let averageStar = 0;
+
+        if (feedbacks.length > 0) {
+          feedbacks.forEach(feedback => {
+            star[feedback.star]++;
+          });
+
+          Object.keys(star).forEach(key => {
+            starPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+          });
+
+          Object.keys(star).forEach(key => {
+            averageStar += star[key] * Number(key);
+          });
+
+          averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+        }
+
+        const totalFeedback = await this.feedbackService.countTotal(item._id);
+
+        return { product, quantityDelivered, emojis, starPercent, averageStar, totalFeedback };
+      }),
+    );
+
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
       metadata: { data },

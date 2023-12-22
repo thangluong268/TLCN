@@ -22,6 +22,7 @@ import { RoleName } from '../role/schema/role.schema';
 import { UserService } from '../user/user.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { Store } from './schema/store.schema';
 import { StoreService } from './store.service';
 
 @Controller()
@@ -247,8 +248,64 @@ export class StoreController {
   @CheckRole(RoleName.MANAGER_STORE, RoleName.ADMIN)
   @Get('store/admin-get-all')
   async getAll(): Promise<SuccessResponse | NotFoundException> {
-    const data = await this.storeService.getAllNoPaging();
-    if (!data) return new NotFoundException('Lấy danh sách cửa hàng thất bại!');
+    const stores = await this.storeService.getAllNoPaging();
+    if (!stores) return new NotFoundException('Lấy danh sách cửa hàng thất bại!');
+
+    stores.slice(0, 30);
+
+    const data = await Promise.all(
+      stores.map(async (item: Store) => {
+        const store = await this.storeService.getById(item._id);
+        if (!store) return;
+
+        const products = await this.productService.getProductsByStoreId(item._id);
+
+        let totalFeedback = 0;
+
+        let totalProductsHasFeedback = 0;
+        let totalAverageStar = 0;
+
+        let averageStar = 0;
+
+        await Promise.all(
+          products.map(async product => {
+            const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id);
+
+            if (feedbacks.length === 0) return;
+
+            totalFeedback += feedbacks.length;
+
+            const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+            feedbacks.forEach(feedback => {
+              star[feedback.star]++;
+            });
+
+            let averageStar = 0;
+
+            Object.keys(star).forEach(key => {
+              averageStar += star[key] * Number(key);
+            });
+
+            averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+            totalAverageStar += averageStar;
+
+            totalProductsHasFeedback++;
+          }),
+        );
+
+        if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2));
+
+        const totalFollow = await this.userService.countTotalFollowStoresByStoreId(item._id);
+
+        const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(item._id);
+        const totalDelivered: number = await this.billService.countTotalByStatusSeller(item._id, 'DELIVERED', null);
+
+        return { store, averageStar, totalFeedback, totalFollow, totalRevenue, totalDelivered };
+      }),
+    );
+
     return new SuccessResponse({
       message: 'Lấy danh sách cửa hàng thành công!',
       metadata: { data },
