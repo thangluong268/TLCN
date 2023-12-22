@@ -6,8 +6,7 @@ import { APIUploadImage } from "@/services/UploadImage";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
 import React from "react";
-const ReactQuill =
-  typeof window === "object" ? require("react-quill") : () => false;
+import ReactQuill from "react-quill";
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
@@ -38,7 +37,7 @@ function CreateStore() {
       if (store.status == 200 || store.status == 201) {
         Toast("error", "Bạn đã có cửa hàng", 2000);
         setTimeout(() => {
-          window.location.href = "/store/" + store.metadata.data._id;
+          window.location.href = "/shop/" + store.metadata.data._id;
         }, 2000);
       }
     };
@@ -129,7 +128,7 @@ function CreateStore() {
         Toast("error", storeRes.message, 2000);
       }
       console.log(storeRes);
-      window.location.href = "/store/" + storeRes.metadata?.data._id;
+      window.location.href = "/shop/" + storeRes.metadata?.data._id;
     }
   };
   // Check valid input
@@ -228,12 +227,12 @@ function CreateStore() {
         </div>
         <div className="mt-4">
           <div className="font-bold text-lg">Mô tả cửa hàng của bạn</div>
-          <ReactQuill
-            theme="snow"
-            value={store.description}
-            onChange={handleDescriptionChange}
-          />
         </div>
+        <ReactQuill
+          theme="snow"
+          value={store.description}
+          onChange={handleDescriptionChange}
+        />
         <div className="mt-4">
           <div className="flex">
             <input
