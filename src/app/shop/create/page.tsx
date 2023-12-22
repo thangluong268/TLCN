@@ -12,7 +12,11 @@ import ReactQuill from "react-quill";
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
+  const [document, setDocument] = React.useState<any>(null);
   React.useEffect(() => {
+    if (typeof document !== "undefined") {
+      setDocument(document);
+    }
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user")!)
       : null;
@@ -44,66 +48,63 @@ function CreateStore() {
   };
 
   const CheckValid = () => {
-    if (typeof document !== "undefined") {
-      var isValid = true;
-      if (store.address === "") {
-        isValid = false;
-        document
-          .getElementById(`formCreate-address`)
-          ?.classList.add("border-red-500");
-        document.getElementById(`errMes-address`)!.innerHTML =
-          "Không được để trống";
-      }
-      if (store.name === "") {
-        isValid = false;
-        document
-          .getElementById(`formCreate-name`)
-          ?.classList.add("border-red-500");
-        document.getElementById(`errMes-name`)!.innerHTML =
-          "Không được để trống";
-      }
-      if (store.phoneNumber2 === "") {
-        isValid = false;
-        document
-          .getElementById(`formCreate-phoneNumber2`)
-          ?.classList.add("border-red-500");
-        document.getElementById(`errMes-phoneNumber2`)!.innerHTML =
-          "Không được để trống";
-      }
-      if (!isValid) {
-        Toast("error", "Bạn chưa nhập đủ thông tin", 2000);
-        return false;
-      }
-      if (store.phoneNumber1 === store.phoneNumber2) {
-        Toast("error", "Số điện thoại không được trùng nhau", 2000);
-        return false;
-      }
-      if (store.avatar === "") {
-        Toast("error", "Bạn chưa chọn ảnh", 2000);
-        return false;
-      }
+    var isValid = true;
+    if (store.address === "") {
+      isValid = false;
+      document
+        .getElementById(`formCreate-address`)
+        ?.classList.add("border-red-500");
+      document.getElementById(`errMes-address`)!.innerHTML =
+        "Không được để trống";
+    }
+    if (store.name === "") {
+      isValid = false;
+      document
+        .getElementById(`formCreate-name`)
+        ?.classList.add("border-red-500");
+      document.getElementById(`errMes-name`)!.innerHTML = "Không được để trống";
+    }
+    if (store.phoneNumber2 === "") {
+      isValid = false;
+      document
+        .getElementById(`formCreate-phoneNumber2`)
+        ?.classList.add("border-red-500");
+      document.getElementById(`errMes-phoneNumber2`)!.innerHTML =
+        "Không được để trống";
+    }
+    if (!isValid) {
+      Toast("error", "Bạn chưa nhập đủ thông tin", 2000);
+      return false;
+    }
+    if (store.phoneNumber1 === store.phoneNumber2) {
+      Toast("error", "Số điện thoại không được trùng nhau", 2000);
+      return false;
+    }
+    if (store.avatar === "") {
+      Toast("error", "Bạn chưa chọn ảnh", 2000);
+      return false;
+    }
 
-      if (store.description === "") {
-        Toast("error", "Bạn chưa mô tả cửa hàng", 2000);
-        return false;
-      }
+    if (store.description === "") {
+      Toast("error", "Bạn chưa mô tả cửa hàng", 2000);
+      return false;
+    }
 
-      if (!acceptPolicy) {
-        Toast("error", "Bạn chưa đồng ý với chính sách", 2000);
-        return false;
-      }
+    if (!acceptPolicy) {
+      Toast("error", "Bạn chưa đồng ý với chính sách", 2000);
+      return false;
+    }
 
-      var check = false;
-      const elementInValid = document.querySelectorAll("[id^='errMes-']");
-      elementInValid.forEach((item) => {
-        if (item.innerHTML !== "") {
-          Toast("error", "Thông tin chưa chính xác", 2000);
-          check = true;
-        }
-      });
-      if (check) {
-        return false;
+    var check = false;
+    const elementInValid = document.querySelectorAll("[id^='errMes-']");
+    elementInValid.forEach((item: any) => {
+      if (item.innerHTML !== "") {
+        Toast("error", "Thông tin chưa chính xác", 2000);
+        check = true;
       }
+    });
+    if (check) {
+      return false;
     }
     return true;
   };
@@ -142,11 +143,9 @@ function CreateStore() {
           <div
             className="w-[16%] h-[165px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer mr-3"
             onClick={(e) => {
-              if (typeof document !== "undefined") {
-                const input = document.getElementById("upload-avatar");
-                if (input) {
-                  input.click();
-                }
+              const input = document.getElementById("upload-avatar");
+              if (input) {
+                input.click();
               }
             }}
           >
@@ -168,24 +167,22 @@ function CreateStore() {
             accept="image/*"
             className="hidden"
             onChange={async (e) => {
-              if (typeof document !== "undefined") {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setStore({ ...store, avatar: file as any });
-                  const reader = new FileReader();
-                  reader.onloadend = function () {
-                    const avatar = document.getElementById("avatar-preview");
-                    const symbol = document.getElementById("symbol-upload");
-                    if (avatar) {
-                      avatar.setAttribute("src", reader.result as string);
-                      avatar.hidden = false;
-                    }
-                    if (symbol) {
-                      symbol.hidden = true;
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                }
+              const file = e.target.files?.[0];
+              if (file) {
+                setStore({ ...store, avatar: file as any });
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                  const avatar = document.getElementById("avatar-preview");
+                  const symbol = document.getElementById("symbol-upload");
+                  if (avatar) {
+                    avatar.setAttribute("src", reader.result as string);
+                    avatar.hidden = false;
+                  }
+                  if (symbol) {
+                    symbol.hidden = true;
+                  }
+                };
+                reader.readAsDataURL(file);
               }
             }}
           />
@@ -207,20 +204,17 @@ function CreateStore() {
                     const result = CheckValidInput({
                       [`${item.identify}`]: e.target.value,
                     });
-                    if (typeof document !== "undefined") {
-                      if (result !== "") {
-                        document
-                          .getElementById(`formCreate-${item.name}`)
-                          ?.classList.add("border-red-500");
-                      } else {
-                        document
-                          .getElementById(`formCreate-${item.name}`)
-                          ?.classList.remove("border-red-500");
-                      }
-                      document.getElementById(
-                        `errMes-${item.name}`
-                      )!.innerHTML = result;
+                    if (result !== "") {
+                      document
+                        .getElementById(`formCreate-${item.name}`)
+                        ?.classList.add("border-red-500");
+                    } else {
+                      document
+                        .getElementById(`formCreate-${item.name}`)
+                        ?.classList.remove("border-red-500");
                     }
+                    document.getElementById(`errMes-${item.name}`)!.innerHTML =
+                      result;
                   }}
                 />
                 <span
