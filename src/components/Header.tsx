@@ -68,8 +68,7 @@ function Header() {
       if (
         (user?.role == "User" || user?.role == "User - Seller") &&
         (window.location.pathname.startsWith("/admin") ||
-          window.location.pathname.startsWith("/manager") ||
-          window.location.pathname.startsWith("/store"))
+          window.location.pathname.startsWith("/manager"))
       ) {
         redirect("/");
       } else {

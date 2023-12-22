@@ -75,7 +75,6 @@ function Form(props: FormProps) {
         Toast("error", "Tài khoản hoặc mật khẩu không đúng", 5000);
         return;
       }
-      console.log(res.metadata.data);
       localStorage.setItem("user", JSON.stringify(res.metadata.data));
       axios.defaults.headers.common[
         "Authorization"
