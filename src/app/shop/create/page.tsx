@@ -202,17 +202,20 @@ function CreateStore() {
                     const result = CheckValidInput({
                       [`${item.identify}`]: e.target.value,
                     });
-                    if (result !== "") {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.add("border-red-500");
-                    } else {
-                      document
-                        .getElementById(`formCreate-${item.name}`)
-                        ?.classList.remove("border-red-500");
+                    if (typeof document !== "undefined") {
+                      if (result !== "") {
+                        document
+                          .getElementById(`formCreate-${item.name}`)
+                          ?.classList.add("border-red-500");
+                      } else {
+                        document
+                          .getElementById(`formCreate-${item.name}`)
+                          ?.classList.remove("border-red-500");
+                      }
+                      document.getElementById(
+                        `errMes-${item.name}`
+                      )!.innerHTML = result;
                     }
-                    document.getElementById(`errMes-${item.name}`)!.innerHTML =
-                      result;
                   }}
                 />
                 <span
