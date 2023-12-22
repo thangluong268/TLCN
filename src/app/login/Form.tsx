@@ -2,7 +2,11 @@ import React from "react";
 import FrameFormInit from "@/components/FrameFormInit";
 import Input from "@/components/Input";
 import CheckValidInput from "@/utils/CheckValidInput";
-import { FaFacebook, FaLongArrowAltLeft } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaLongArrowAltLeft,
+  FaWindowRestore,
+} from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { LOGIN } from "@/constants/Login";
 import Link from "next/link";
@@ -78,14 +82,16 @@ function Form(props: FormProps) {
       ] = `Bearer ${res.metadata.data.stsTokenManager.accessToken}`;
       Toast("success", "Đăng nhập thành công", 2000);
       setTimeout(() => {
-        if (res.metadata.data.role.toUpperCase() == "ADMIN") {
+        if (res.metadata.data.role == "Admin") {
           window.location.href = "/admin";
+        } else if (res.metadata.data.role == "Manager_Product") {
+          window.location.href = "/manager/product";
+        } else if (res.metadata.data.role == "Manager_Store") {
+          window.location.href = "/manager/store";
+        } else if (res.metadata.data.role == "Manager_User") {
+          window.location.href = "/manager/user";
         } else {
-          if (window.location.pathname === "/login") {
-            window.location.href = "/";
-          } else {
-            window.location.reload();
-          }
+          window.location.href = "/";
         }
       }, 2000);
     }

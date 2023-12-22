@@ -94,12 +94,7 @@ interface UserHasMostBill {
   totalBills: number;
 }
 
-interface HomeProps {
-  setActive?: any;
-}
-
-function Home(props: HomeProps) {
-  const { setActive } = props;
+function Home() {
   // useStates for dataSell, dataCharity, dataBill
   const [dataSellState, setDataSellState] = React.useState<ChartData>({
     labels: [],

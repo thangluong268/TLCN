@@ -5,9 +5,10 @@ import { APICreate, APIGetMyStore } from "@/services/Store";
 import { APIUploadImage } from "@/services/UploadImage";
 import CheckValidInput from "@/utils/CheckValidInput";
 import Toast from "@/utils/Toast";
+import { redirect } from "next/navigation";
 import React from "react";
-const ReactQuill =
-  typeof window === "object" ? require("react-quill") : () => false;
+import ReactQuill from "react-quill";
+
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
@@ -16,6 +17,17 @@ function CreateStore() {
       ? JSON.parse(localStorage.getItem("user")!)
       : null;
     setUser(user);
+    const fetchData = async () => {
+      const store = await APIGetMyStore();
+      console.log(store);
+      if (store.status == 200 || store.status == 201) {
+        Toast("error", "Bạn đã có cửa hàng", 2000);
+        setTimeout(() => {
+          return redirect("/shop/" + store.metadata.data._id);
+        }, 2000);
+      }
+    };
+    fetchData();
   }, []);
   const [store, setStore] = React.useState({
     address:
@@ -31,19 +43,6 @@ function CreateStore() {
   const handleDescriptionChange = (value: string) => {
     setStore({ ...store, description: value });
   };
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const store = await APIGetMyStore();
-      if (store.status == 200 || store.status == 201) {
-        Toast("error", "Bạn đã có cửa hàng", 2000);
-        setTimeout(() => {
-          window.location.href = "/store/" + store.metadata.data._id;
-        }, 2000);
-      }
-    };
-    fetchData();
-  }, []);
 
   const CheckValid = () => {
     var isValid = true;
@@ -128,8 +127,7 @@ function CreateStore() {
       } else {
         Toast("error", storeRes.message, 2000);
       }
-      console.log(storeRes);
-      window.location.href = "/store/" + storeRes.metadata?.data._id;
+      window.location.href = "/shop/" + storeRes.metadata?.data._id;
     }
   };
   // Check valid input
@@ -196,7 +194,6 @@ function CreateStore() {
                   className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
                   placeholder={item.placeholder}
                   name={item.name}
-                  disabled={item.name === "phoneNumber1" ? true : false}
                   value={store[item.name as keyof typeof store]}
                   onChange={(e) =>
                     setStore({ ...store, [item.name]: e.target.value })
@@ -228,12 +225,12 @@ function CreateStore() {
         </div>
         <div className="mt-4">
           <div className="font-bold text-lg">Mô tả cửa hàng của bạn</div>
-          <ReactQuill
-            theme="snow"
-            value={store.description}
-            onChange={handleDescriptionChange}
-          />
         </div>
+        <ReactQuill
+          theme="snow"
+          value={store.description}
+          onChange={handleDescriptionChange}
+        />
         <div className="mt-4">
           <div className="flex">
             <input
@@ -245,16 +242,61 @@ function CreateStore() {
             />
             <div>Tôi đồng ý với chính sách bên dưới</div>
           </div>
-          <p
+          <div
             className={`outline outline-offset-2 outline-2 ${
               acceptPolicy ? "outline-green-600" : "outline-gray-600"
             } rounded-sm p-2 mt-2`}
           >
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam
-            corrupti voluptas placeat, laborum vero possimus quasi minus
-            reprehenderit provident esse quae harum quam optio modi nostrum
-            ipsum reiciendis cum explicabo.
-          </p>
+            Để thúc đẩy sự phát triển của cộng đồng kinh doanh trực tuyến trên
+            nền tảng thương mại điện tử DTExchange, chúng tôi đã xây dựng một
+            chính sách Tạo Cửa Hàng linh hoạt và thân thiện với người bán. Chúng
+            tôi cam kết mang đến cho doanh nghiệp và cá nhân một trải nghiệm
+            buôn bán trực tuyến thuận lợi và an toàn.
+            <br />
+            <br />
+            <span className="font-bold">1. Dễ dàng và Nhanh Chóng:</span>
+            <br />
+            Chúng tôi đặt trọng tâm vào quy trình đăng ký cửa hàng để đảm bảo
+            tính dễ dàng và nhanh chóng. Người bán chỉ cần điền một số thông tin
+            cơ bản và một loạt các bước đơn giản để bắt đầu kinh doanh trực
+            tuyến trên DTExchange.
+            <br />
+            <span className="font-bold">2. Chăm Sóc Khách Hàng:</span>
+            <br />
+            Để tạo môi trường mua bán an toàn và tin cậy, chúng tôi cung cấp hỗ
+            trợ khách hàng đầy đủ. Chính sách này bao gồm cơ hội gửi câu hỏi,
+            yêu cầu hỗ trợ kỹ thuật, và các kênh liên lạc chính thức để giúp
+            người bán giải quyết mọi vấn đề một cách hiệu quả.
+            <br />
+            <span className="font-bold">3. An Toàn Giao Dịch: </span>
+            <br />
+            Chúng tôi áp dụng các biện pháp bảo mật mạnh mẽ để đảm bảo an toàn
+            cho cả người mua và người bán trong quá trình giao dịch. Hệ thống
+            thanh toán được mã hóa để ngăn chặn rủi ro gian lận và bảo vệ thông
+            tin cá nhân của người dùng.
+            <br />
+            <span className="font-bold">
+              4. Quảng Bá và Tiếp Cận Khách Hàng:{" "}
+            </span>
+            <br />
+            Chúng tôi hỗ trợ người bán tối đa hóa tiềm năng kinh doanh của họ
+            thông qua các chiến lược quảng bá mục tiêu. Các chương trình quảng
+            cáo, ưu đãi và khuyến mãi sẽ giúp cửa hàng của bạn thu hút đối tượng
+            khách hàng mong muốn.
+            <br />
+            <span className="font-bold">4. Chính Sách Hợp Tác Dài Hạn: </span>
+            <br />
+            Để xây dựng mối quan hệ đối tác bền vững, chúng tôi thúc đẩy chính
+            sách hợp tác dài hạn với những người bán tích cực và chất lượng.
+            Những đối tác này có thể được đánh giá cao và nhận được ưu đãi đặc
+            biệt từ DTExchange.
+            <br />
+            <br />
+            Chính sách Tạo Cửa Hàng trên DTExchange không chỉ là một bước quan
+            trọng để đảm bảo sự đa dạng và chất lượng của thị trường, mà còn là
+            cam kết của chúng tôi đối với sự thành công và phát triển của cộng
+            đồng kinh doanh trực tuyến.
+          </div>
         </div>
         <div className="flex justify-center mt-5">
           <button

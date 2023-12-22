@@ -8,8 +8,10 @@ import {
 import ConvertDate from "@/utils/ConvertDate";
 import Modal from "./Modal";
 import Toast from "@/utils/Toast";
+import { stat } from "fs";
 interface Props {
   type: string;
+  status: boolean;
 }
 
 interface Report {
@@ -27,7 +29,7 @@ interface TypeObject {
 }
 
 function Report(props: Props) {
-  const { type } = props;
+  const { type, status } = props;
   const [page, setPage] = React.useState<any>(1);
   const [total, setTotal] = React.useState<any>(0);
   const [listReport, setListReport] = React.useState<Report[]>([]);
@@ -37,20 +39,23 @@ function Report(props: Props) {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      await APIReportAdmin(page || 1, 10, type).then((res) => {
-        setTotal(res.metadata.total);
-        setListReport(
-          res.metadata.data.map((item: any) => {
-            return {
-              ...item,
-              name: item.productName || item.storeName,
-            };
-          })
-        );
+      console.log("status", status);
+      await APIReportAdmin(page || 1, 10, type, status).then((res) => {
+        if (res.status == 200 || res.status == 201) {
+          setTotal(res.metadata.total);
+          setListReport(
+            res.metadata.data.map((item: any) => {
+              return {
+                ...item,
+                name: item.productName || item.storeName,
+              };
+            })
+          );
+        }
       });
     };
     fetchData();
-  }, []);
+  }, [status]);
   const arrTitle = [
     {
       title: "STT",
@@ -148,16 +153,18 @@ function Report(props: Props) {
               {ConvertDate(item.createdAt)}
             </td>
             <td>
-              <div
-                className="px-6 text-center font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer m-1"
-                onClick={(e) => {
-                  setTypeMes("ok");
-                  setIsShow(true);
-                  setCurrentId(item._id);
-                }}
-              >
-                Đồng ý
-              </div>
+              {!status && (
+                <div
+                  className="px-6 text-center font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer m-1"
+                  onClick={(e) => {
+                    setTypeMes("ok");
+                    setIsShow(true);
+                    setCurrentId(item._id);
+                  }}
+                >
+                  Đồng ý
+                </div>
+              )}
               <div
                 className="px-6 text-center font-medium text-red-600 dark:text-red-500 hover:underline cursor-pointer m-1"
                 onClick={(e) => {
@@ -166,7 +173,7 @@ function Report(props: Props) {
                   setCurrentId(item._id);
                 }}
               >
-                Từ chối
+                {status ? "Xoá" : "Từ chối"}{" "}
               </div>
             </td>
           </tr>

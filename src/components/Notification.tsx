@@ -1,6 +1,7 @@
 "use client";
 import { APIUpdateNotification } from "@/services/Notification";
 import { NotificationInterface } from "@/types/Notification";
+import { IoNotificationsSharp } from "react-icons/io5";
 import DifferenceTime from "@/utils/DifferenceTime";
 import Link from "next/link";
 import React from "react";
@@ -45,6 +46,9 @@ function Notification(props: NotificationProps) {
     "Kết bạn": <FaUserPlus className="w-[14px] h-[14px] fill-[#6499FF]" />,
     "Thêm sản phẩm": (
       <FaCommentMedical className="w-[14px] h-[14px] fill-[#6499FF]" />
+    ),
+    Orther: (
+      <IoNotificationsSharp className="w-[14px] h-[14px] fill-[#6499FF]" />
     ),
   };
 
@@ -128,7 +132,7 @@ function Notification(props: NotificationProps) {
           <div
             className={`flex justify-center items-center w-[20px] h-[20px] bg-white rounded-full mt-[-16px] ml-[40px]`}
           >
-            {iconType[type]}
+            {iconType[type] ? iconType[type] : iconType.Orther}
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+"use client";
 import SortTable from "@/components/SortTable";
 import React from "react";
 import { APIGetListProductAdmin, APIGetProductAdmin } from "@/services/Product";
@@ -87,7 +88,8 @@ function ManagerProduct() {
   ];
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [page, setPage] = React.useState<number>(1);
-  const [reportState, setReportState] = React.useState(false);
+  // "", current, approve
+  const [reportState, setReportState] = React.useState("");
   const [search, setSearch] = React.useState<string>("");
   const [isShowDetail, setIsShowDetail] = React.useState<boolean>(false);
   const [detailProduct, setDetailProduct] = React.useState<DetailProduct>(
@@ -122,25 +124,60 @@ function ManagerProduct() {
     });
   };
   return (
-    <>
+    <div className="min-h-screen my-5">
       <div
         className={`${
-          !reportState && "justify-end"
-        } flex items-center cursor-pointer mt-5 mb-3 z-10`}
-        onClick={(e) => setReportState(!reportState)}
+          !reportState && "flex-row-reverse"
+        } justify-between flex items-center mt-5 mb-3 z-10`}
       >
-        {reportState ? (
+        {reportState == "" && (
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={(e) => {
+              setReportState("current");
+            }}
+          >
+            Xem các báo cáo <FaArrowRight className="ml-2" />
+          </div>
+        )}
+        {reportState == "current" && (
           <>
-            <FaArrowLeft className="mr-2" /> Trở về trang tổng quan
+            <div
+              className="flex items-center cursor-pointer "
+              onClick={(e) => {
+                setReportState("");
+              }}
+            >
+              <FaArrowLeft className="mr-2" /> Trở về trang tổng quan
+            </div>
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={(e) => {
+                setReportState("approve");
+              }}
+            >
+              Xem các báo cáo đã chấp thuận <FaArrowRight className="ml-2" />
+            </div>
           </>
-        ) : (
+        )}
+        {reportState == "approve" && (
           <>
-            Xem các báo cáo về sản phẩm <FaArrowRight className="ml-2" />
+            <div
+              className="flex items-center cursor-pointer "
+              onClick={(e) => {
+                setReportState("current");
+              }}
+            >
+              <FaArrowLeft className="mr-2" /> Xem các báo cáo
+            </div>
           </>
         )}
       </div>
       {reportState ? (
-        <Report type="product" />
+        <Report
+          type="product"
+          status={reportState == "current" ? false : true}
+        />
       ) : (
         <>
           <form
@@ -313,7 +350,7 @@ function ManagerProduct() {
           )}
         </>
       )}
-    </>
+    </div>
   );
 }
 

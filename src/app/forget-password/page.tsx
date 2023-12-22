@@ -215,6 +215,22 @@ function ForgetPassword() {
             )}
 
             <div className="w-full mt-4">
+              <Link href="/login" className=" font-bold cursor-pointer mb-3">
+                <div className="flex items-center justify-center">
+                  <div className="mr-2">
+                    <FaLongArrowAltLeft></FaLongArrowAltLeft>
+                  </div>
+                  Trở về trang đăng nhập
+                </div>
+              </Link>
+              <Link href="/" className=" font-bold cursor-pointer mb-3">
+                <div className="flex items-center justify-center">
+                  <div className="mr-2">
+                    <FaLongArrowAltLeft></FaLongArrowAltLeft>
+                  </div>
+                  Trở về trang chủ
+                </div>
+              </Link>
               <button
                 className="py-3 bg-gray-600 text-white rounded-[10px] mt-2 w-full px-4 font-bold text-lg"
                 onClick={(e) => Confirm()}

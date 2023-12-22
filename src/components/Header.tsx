@@ -17,7 +17,6 @@ import { UserInterface } from "@/types/User";
 import Notification from "./Notification";
 import { APIGetAllCart } from "@/services/Cart";
 import { Cart, Order } from "@/types/Cart";
-import Toast from "@/utils/Toast";
 import { APIGetMyStore } from "@/services/Store";
 import { setCartPopUp } from "@/redux/features/cart/cartpopup-slice";
 import { useDispatch } from "react-redux";
@@ -50,43 +49,67 @@ function Header() {
       !window.location.pathname.startsWith("/admin")
     ) {
       redirect("/admin");
+    } else if (
+      user?.role == "Manager_Product" &&
+      !window.location.pathname.startsWith("/manager/product")
+    ) {
+      redirect("/manager/product");
+    } else if (
+      user?.role == "Manager_Store" &&
+      !window.location.pathname.startsWith("/manager/store")
+    ) {
+      redirect("/manager/store");
+    } else if (
+      user?.role == "Manager_User" &&
+      !window.location.pathname.startsWith("/manager/user")
+    ) {
+      redirect("/manager/user");
     } else {
-      setUser(user?.providerData[0]);
-      setRole(user?.role);
-      const fetchAllCart = async () => {
-        const res = await APIGetAllCart();
-        var total = 0;
-        if (res.status == 200 || res.status == 201) {
-          const carts: Cart = {
-            isCheckAll: false,
-            store: res.metadata.data.map((item: any) => {
-              return {
-                id: item.storeId,
-                name: item.storeName,
-                isChecked: false,
-                avatar: item.storeAvatar,
-                product: item.listProducts.map((product: any) => {
-                  total += 1;
-                  return {
-                    id: product.productId,
-                    name: product.productName,
-                    avatar: product.avatar[0],
-                    type: product.type,
-                    price: product.price,
-                    quantity: product.quantity,
-                    quantityInStock: product.quantityInStock,
-                    isChecked: false,
-                  };
-                }),
-              };
-            }),
-          };
-          dispatch(setCartPopUp(carts));
-        }
-      };
+      if (
+        (user?.role == "User" || user?.role == "User - Seller") &&
+        (window.location.pathname.startsWith("/admin") ||
+          window.location.pathname.startsWith("/manager") ||
+          window.location.pathname.startsWith("/store"))
+      ) {
+        redirect("/");
+      } else {
+        setUser(user?.providerData[0]);
+        setRole(user?.role);
+        const fetchAllCart = async () => {
+          const res = await APIGetAllCart();
+          var total = 0;
+          if (res.status == 200 || res.status == 201) {
+            const carts: Cart = {
+              isCheckAll: false,
+              store: res.metadata.data.map((item: any) => {
+                return {
+                  id: item.storeId,
+                  name: item.storeName,
+                  isChecked: false,
+                  avatar: item.storeAvatar,
+                  product: item.listProducts.map((product: any) => {
+                    total += 1;
+                    return {
+                      id: product.productId,
+                      name: product.productName,
+                      avatar: product.avatar[0],
+                      type: product.type,
+                      price: product.price,
+                      quantity: product.quantity,
+                      quantityInStock: product.quantityInStock,
+                      isChecked: false,
+                    };
+                  }),
+                };
+              }),
+            };
+            dispatch(setCartPopUp(carts));
+          }
+        };
 
-      if (user && user.role != "Admin") {
-        fetchAllCart();
+        if (user && user.role == "User") {
+          fetchAllCart();
+        }
       }
     }
   }, []);
@@ -101,8 +124,6 @@ function Header() {
         limit: 10,
       });
       if (res.status == 200 || res.status == 201) {
-        console.log("NOTI", res.metadata.data);
-
         setDataNoti(res.metadata.data.notifications);
         setCountNewNoti(
           res.metadata.data.notifications.filter(
@@ -130,14 +151,14 @@ function Header() {
   const OpenStore = async () => {
     const store = await APIGetMyStore();
     if (store.status == 200 || store.status == 201) {
-      window.location.href = "/store/seller/" + store.metadata.data._id;
+      window.location.href = "/shop/seller/" + store.metadata.data._id;
     } else {
-      window.location.href = "/store/create";
+      window.location.href = "/shop/create";
     }
   };
   return (
     <>
-      {role != "Admin" && (
+      {(role == "User" || role == "User - Seller" || !role) && (
         <header className="h-[60px]">
           <div className="flex justify-between items-center w-full h-[60px] bg-[#D2E0FB] px-[10%] fixed top-0 left-0 right-0 z-10">
             <img
@@ -145,11 +166,7 @@ function Header() {
               src="/logo.png"
               alt="Loading..."
               onClick={() => {
-                if (role == "Admin") {
-                  window.location.href = "/admin";
-                } else {
-                  window.location.href = "/";
-                }
+                window.location.href = "/";
               }}
             />
 
@@ -175,7 +192,7 @@ function Header() {
 
             {user && (
               <>
-                <div className="flex items-center">
+                <div className="flex items-center cursor-pointer">
                   <div
                     onClick={() => OpenStore()}
                     className="flex flex-col items-center"
@@ -186,7 +203,7 @@ function Header() {
                   <div className="border-r border-gray-400 mx-10 h-6"></div>
 
                   <div className="group py-6 flex flex-col justify-center items-center mr-10">
-                    <FaCartPlus className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b] " />
+                    <FaCartPlus className="w-[24px] h-[24px]  hover:fill-[#59595b] " />
                     {dataCarts?.store?.length! > 0 && isShowCart && (
                       <>
                         <div className="group-hover:block group-hover:shadow-inner hidden">
@@ -206,7 +223,7 @@ function Header() {
                                   >
                                     <div>
                                       <Link
-                                        href={`/store/user/${store.id}`}
+                                        href={`/shop/user/${store.id}`}
                                         className="flex items-center hover:bg-[#c1d2f6] p-2 rounded-lg"
                                       >
                                         <span className="text-[14px] font-bold p-2">

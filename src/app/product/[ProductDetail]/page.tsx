@@ -151,6 +151,10 @@ function ProductDetail() {
   };
 
   const Report = async () => {
+    if (contentReport == "") {
+      Toast("warning", "Vui lòng nhập nội dung báo cáo", 2000);
+      return;
+    }
     await APIReportUser({
       subjectId: type == "product" ? params.ProductDetail : product.storeId,
       content: contentReport,
@@ -160,7 +164,7 @@ function ProductDetail() {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Báo cáo thành công", 2000);
       } else {
-        Toast("error", "Bạn đã báo cáo sản phẩm này rồi!", 2000);
+        Toast("error", res.message, 2000);
       }
     });
   };
@@ -295,8 +299,7 @@ function ProductDetail() {
                     type="button"
                     className="w-full text-center py-3 font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                   >
-                    <Link
-                      href="/payment"
+                    <div
                       className="flex justify-center items-center "
                       onClick={(e) => {
                         if (!user) {
@@ -310,7 +313,7 @@ function ProductDetail() {
                     >
                       <FaShopify className="mr-3" />
                       <span>Mua ngay</span>
-                    </Link>
+                    </div>
                   </button>
                 </div>
               </div>

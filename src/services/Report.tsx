@@ -13,10 +13,15 @@ export const APIReportUser = async (body: any) => {
 };
 
 // /api/report/admin?page=1&limit=10&type=product
-export const APIReportAdmin = async (page: any, limit: any, type: any) => {
+export const APIReportAdmin = async (
+  page: any,
+  limit: any,
+  type: any,
+  status: any
+) => {
   const headers = GetHeaders();
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/report/admin?page=${page}&limit=${limit}&type=${type}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/report/admin?page=${page}&limit=${limit}&type=${type}&status=${status}`,
     { headers }
   );
   return res.data;

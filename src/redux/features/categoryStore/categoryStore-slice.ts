@@ -1,5 +1,5 @@
 
-import Home from "@/app/store/seller/[MyStore]/Home";
+import Home from "@/app/shop/seller/[MyStore]/Home";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 export const categoryStoreSlice = createSlice({
     name: "categoryStore",

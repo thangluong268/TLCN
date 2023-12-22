@@ -71,7 +71,7 @@ function ManagerUser() {
     fetchData();
   }, [page, search]);
   return (
-    <>
+    <div className="min-h-screen my-5">
       {/* Search */}
 
       <form
@@ -167,7 +167,7 @@ function ManagerUser() {
           setIsShow={(data: boolean) => setIsShow(data)}
         />
       )}
-    </>
+    </div>
   );
 }
 
