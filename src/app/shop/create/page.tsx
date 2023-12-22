@@ -19,7 +19,6 @@ function CreateStore() {
     setUser(user);
     const fetchData = async () => {
       const store = await APIGetMyStore();
-      console.log(store);
       if (store.status == 200 || store.status == 201) {
         Toast("error", "Bạn đã có cửa hàng", 2000);
         setTimeout(() => {
@@ -143,9 +142,11 @@ function CreateStore() {
           <div
             className="w-[16%] h-[165px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer mr-3"
             onClick={(e) => {
-              const input = document.getElementById("upload-avatar");
-              if (input) {
-                input.click();
+              if (typeof document !== "undefined") {
+                const input = document.getElementById("upload-avatar");
+                if (input) {
+                  input.click();
+                }
               }
             }}
           >
@@ -167,22 +168,24 @@ function CreateStore() {
             accept="image/*"
             className="hidden"
             onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setStore({ ...store, avatar: file as any });
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                  const avatar = document.getElementById("avatar-preview");
-                  const symbol = document.getElementById("symbol-upload");
-                  if (avatar) {
-                    avatar.setAttribute("src", reader.result as string);
-                    avatar.hidden = false;
-                  }
-                  if (symbol) {
-                    symbol.hidden = true;
-                  }
-                };
-                reader.readAsDataURL(file);
+              if (typeof document !== "undefined") {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setStore({ ...store, avatar: file as any });
+                  const reader = new FileReader();
+                  reader.onloadend = function () {
+                    const avatar = document.getElementById("avatar-preview");
+                    const symbol = document.getElementById("symbol-upload");
+                    if (avatar) {
+                      avatar.setAttribute("src", reader.result as string);
+                      avatar.hidden = false;
+                    }
+                    if (symbol) {
+                      symbol.hidden = true;
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }
               }
             }}
           />
