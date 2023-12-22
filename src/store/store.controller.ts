@@ -242,6 +242,19 @@ export class StoreController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.MANAGER_STORE, RoleName.ADMIN)
+  @Get('store/admin-get-all')
+  async getAll(): Promise<SuccessResponse | NotFoundException> {
+    const data = await this.storeService.getAllNoPaging();
+    if (!data) return new NotFoundException('Lấy danh sách cửa hàng thất bại!');
+    return new SuccessResponse({
+      message: 'Lấy danh sách cửa hàng thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @Get('store/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {

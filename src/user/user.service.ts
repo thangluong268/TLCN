@@ -203,4 +203,14 @@ export class UserService {
       throw err;
     }
   }
+
+  async getAllNoPaging(): Promise<User[]> {
+    try {
+      return await this.userModel.find();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

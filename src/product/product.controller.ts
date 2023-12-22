@@ -338,6 +338,19 @@ export class ProductController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.MANAGER_PRODUCT, RoleName.ADMIN)
+  @Get('product/admin-get-all')
+  async getAll(): Promise<SuccessResponse | NotFoundException> {
+    const data = await this.productService.getAll();
+    if (!data) return new NotFoundException('Lấy danh sách sản phẩm thất bại!');
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @Get('product/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {

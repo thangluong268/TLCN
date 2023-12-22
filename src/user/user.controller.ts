@@ -58,6 +58,20 @@ export class UserController {
   }
 
   @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadUserAbility())
+  @CheckRole(RoleName.MANAGER_USER, RoleName.ADMIN)
+  @Get('admin/get-all')
+  async getAllNoPaging(): Promise<SuccessResponse | NotFoundException> {
+    const data = await this.userService.getAllNoPaging();
+    if (!data) return new NotFoundException('Lấy danh sách người dùng thất bại!');
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách người dùng thành công!',
+      metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
   @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
   @ApiQuery({ name: 'storeId', type: String, required: true })

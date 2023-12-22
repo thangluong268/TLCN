@@ -287,4 +287,14 @@ export class ProductService {
     }
   }
 
+  async getAll(): Promise<Product[]> {
+    try {
+      const products = await this.productModel.find();
+      return products;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

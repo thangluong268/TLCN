@@ -133,4 +133,16 @@ export class StoreService {
       throw err;
     }
   }
+
+  async getAllNoPaging(): Promise<Store[]> {
+    try {
+      return await this.storeModel.find();
+    } catch (err) {
+      if (err instanceof MongooseError) {
+        throw new InternalServerErrorExceptionCustom();
+      }
+      throw err;
+    }
+  }
+
 }
