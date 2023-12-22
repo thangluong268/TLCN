@@ -45,8 +45,8 @@ function CreateStore() {
   };
 
   const CheckValid = () => {
-    var isValid = true;
     if (typeof document !== "undefined") {
+      var isValid = true;
       if (store.address === "") {
         isValid = false;
         document
@@ -71,42 +71,41 @@ function CreateStore() {
         document.getElementById(`errMes-phoneNumber2`)!.innerHTML =
           "Không được để trống";
       }
-    }
-    if (!isValid) {
-      Toast("error", "Bạn chưa nhập đủ thông tin", 2000);
-      return false;
-    }
-    if (store.phoneNumber1 === store.phoneNumber2) {
-      Toast("error", "Số điện thoại không được trùng nhau", 2000);
-      return false;
-    }
-    if (store.avatar === "") {
-      Toast("error", "Bạn chưa chọn ảnh", 2000);
-      return false;
-    }
-
-    if (store.description === "") {
-      Toast("error", "Bạn chưa mô tả cửa hàng", 2000);
-      return false;
-    }
-
-    if (!acceptPolicy) {
-      Toast("error", "Bạn chưa đồng ý với chính sách", 2000);
-      return false;
-    }
-
-    var check = false;
-    const elementInValid = document.querySelectorAll("[id^='errMes-']");
-    elementInValid.forEach((item) => {
-      if (item.innerHTML !== "") {
-        Toast("error", "Thông tin chưa chính xác", 2000);
-        check = true;
+      if (!isValid) {
+        Toast("error", "Bạn chưa nhập đủ thông tin", 2000);
+        return false;
       }
-    });
-    if (check) {
-      return false;
-    }
+      if (store.phoneNumber1 === store.phoneNumber2) {
+        Toast("error", "Số điện thoại không được trùng nhau", 2000);
+        return false;
+      }
+      if (store.avatar === "") {
+        Toast("error", "Bạn chưa chọn ảnh", 2000);
+        return false;
+      }
 
+      if (store.description === "") {
+        Toast("error", "Bạn chưa mô tả cửa hàng", 2000);
+        return false;
+      }
+
+      if (!acceptPolicy) {
+        Toast("error", "Bạn chưa đồng ý với chính sách", 2000);
+        return false;
+      }
+
+      var check = false;
+      const elementInValid = document.querySelectorAll("[id^='errMes-']");
+      elementInValid.forEach((item) => {
+        if (item.innerHTML !== "") {
+          Toast("error", "Thông tin chưa chính xác", 2000);
+          check = true;
+        }
+      });
+      if (check) {
+        return false;
+      }
+    }
     return true;
   };
   const CreateStore = async () => {
