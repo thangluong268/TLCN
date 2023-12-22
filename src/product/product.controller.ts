@@ -353,10 +353,6 @@ export class ProductController {
         const product = await this.productService.getById(item._id);
         if (!product) return;
 
-        const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
-
-        const quantityDelivered: number = await this.billService.countProductDelivered(item._id, type, 'DELIVERED');
-
         const evaluation = await this.evaluationService.getByProductId(item._id);
         if (!evaluation) return;
 
@@ -430,7 +426,26 @@ export class ProductController {
 
         const totalFeedback = await this.feedbackService.countTotal(item._id);
 
-        return { product, quantityDelivered, emojis, starPercent, averageStar, totalFeedback };
+        const store = await this.storeService.getById(item.storeId);
+        if (!store) return;
+
+        const category = await this.categoryService.getById(product.categoryId);
+        const quantitySold: number = await this.billService.countProductDelivered(item._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(item._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
+        const isPurchased: boolean = await this.billService.checkProductPurchased(item._id);
+
+        const productFullInfo = {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
+          isPurchased,
+        };
+
+        return { product: productFullInfo, emojis, starPercent, averageStar, totalFeedback };
       }),
     );
 
