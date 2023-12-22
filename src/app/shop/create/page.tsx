@@ -46,28 +46,31 @@ function CreateStore() {
 
   const CheckValid = () => {
     var isValid = true;
-    if (store.address === "") {
-      isValid = false;
-      document
-        .getElementById(`formCreate-address`)
-        ?.classList.add("border-red-500");
-      document.getElementById(`errMes-address`)!.innerHTML =
-        "Không được để trống";
-    }
-    if (store.name === "") {
-      isValid = false;
-      document
-        .getElementById(`formCreate-name`)
-        ?.classList.add("border-red-500");
-      document.getElementById(`errMes-name`)!.innerHTML = "Không được để trống";
-    }
-    if (store.phoneNumber2 === "") {
-      isValid = false;
-      document
-        .getElementById(`formCreate-phoneNumber2`)
-        ?.classList.add("border-red-500");
-      document.getElementById(`errMes-phoneNumber2`)!.innerHTML =
-        "Không được để trống";
+    if (typeof document !== "undefined") {
+      if (store.address === "") {
+        isValid = false;
+        document
+          .getElementById(`formCreate-address`)
+          ?.classList.add("border-red-500");
+        document.getElementById(`errMes-address`)!.innerHTML =
+          "Không được để trống";
+      }
+      if (store.name === "") {
+        isValid = false;
+        document
+          .getElementById(`formCreate-name`)
+          ?.classList.add("border-red-500");
+        document.getElementById(`errMes-name`)!.innerHTML =
+          "Không được để trống";
+      }
+      if (store.phoneNumber2 === "") {
+        isValid = false;
+        document
+          .getElementById(`formCreate-phoneNumber2`)
+          ?.classList.add("border-red-500");
+        document.getElementById(`errMes-phoneNumber2`)!.innerHTML =
+          "Không được để trống";
+      }
     }
     if (!isValid) {
       Toast("error", "Bạn chưa nhập đủ thông tin", 2000);
