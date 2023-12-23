@@ -37,12 +37,14 @@ export class UserController {
   async getListUserHaveMostBills(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
     const bills = await this.billService.getListUserHaveMostBills(limit);
 
+    console.log(bills)
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bills.map(async (item: any) => {
         let user = await this.userService.getById(item._id);
-        if (!user) throw new NotFoundException('Không tìm thấy người dùng này!');
+        if (!user) return;
         user = user.toObject();
         delete user.status;
         delete user.__v;
