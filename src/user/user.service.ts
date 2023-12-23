@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
+import { LoginSocialDto } from 'src/auth/dto/login-social.dto';
 import { SignUpDto } from '../auth/dto/signup.dto';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +15,7 @@ export class UserService {
     private readonly userModel: Model<User>,
   ) {}
 
-  async create(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
+  async createNormal(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
     try {
       const newUser = await this.userModel.create(signUpDto);
       await newUser.save();
@@ -28,9 +29,34 @@ export class UserService {
     }
   }
 
+  async createSocial(loginSocialDto: LoginSocialDto): Promise<User> {
+    try {
+      const newUser = await this.userModel.create(loginSocialDto);
+      newUser.isSocial = true;
+      await newUser.save();
+      return newUser;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
   async getByEmail(email: string): Promise<User> {
     try {
       const user = await this.userModel.findOne({ email });
+
+      user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+
+      return user;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async getByEmailAndSocial(email: string, isSocial: boolean): Promise<User> {
+    try {
+      const user = await this.userModel.findOne({ email, isSocial });
 
       user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
 
@@ -59,6 +85,17 @@ export class UserService {
       const user = await this.userModel.findByIdAndUpdate(userId, req, { new: true });
 
       return user;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async updateMany(): Promise<void> {
+    try {
+      await this.userModel.updateMany({}, { isSocial: false });
+      return;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -212,5 +249,4 @@ export class UserService {
       throw err;
     }
   }
-
 }

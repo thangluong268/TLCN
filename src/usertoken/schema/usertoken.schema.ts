@@ -1,18 +1,17 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { IsNotEmpty } from "class-validator";
-import mongoose, { Document, ObjectId } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { IsNotEmpty } from 'class-validator';
+import { Document } from 'mongoose';
 
 @Schema({
-    timestamps: true,
+  timestamps: true,
 })
 export class UserToken extends Document {
-    @Prop()
-    @IsNotEmpty()
-    userId: string;
+  @Prop()
+  @IsNotEmpty()
+  userId: string;
 
-    @Prop()
-    hashedRefreshToken: string;
+  @Prop()
+  hashedRefreshToken: string;
 }
 
 export const UserTokenSchema = SchemaFactory.createForClass(UserToken);
-

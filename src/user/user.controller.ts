@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator';
 import { CheckAbilities, DeleteUserAbility, ReadUserAbility, UpdateUserAbility } from '../ability/decorators/abilities.decorator';
 import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
@@ -184,6 +185,19 @@ export class UserController {
     return new SuccessResponse({
       message: 'Lấy danh sách người dùng thành công!',
       metadata: { data },
+    });
+  }
+
+  @Public()
+  @Patch('user/admin/fix/update-many')
+  async updateMany(
+  ): Promise<SuccessResponse | NotFoundException> {
+
+    await this.userService.updateMany();
+
+    return new SuccessResponse({
+      message: 'Cập nhật thông tin người dùng thành công!',
+      metadata: { data: {} },
     });
   }
 

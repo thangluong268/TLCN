@@ -45,7 +45,7 @@ export class DataSeed {
     userInfo.email = process.env.EMAIL_ADMIN;
     userInfo.password = await this.hashData(process.env.PASSWORD_ADMIN);
 
-    const user = await this.userService.create(userInfo);
+    const user = await this.userService.createNormal(userInfo);
     const adminRole = new CreateRoleDto();
     adminRole.name = RoleName.ADMIN;
     await this.roleService.addUserToRole(user._id, adminRole);

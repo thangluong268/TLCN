@@ -21,11 +21,11 @@ import { UsertokenService } from '../usertoken/usertoken.service';
 import { AuthService } from './auth.service';
 import { GetCurrentUserId } from './decorators/get-current-userid.decorator';
 import { Public } from './decorators/public.decorator';
+import { LoginSocialDto } from './dto/login-social.dto';
 import { LoginDto } from './dto/login.dto';
 import { SeedDto, SeedProductDto } from './dto/seed.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { JwtRTAuthGuard } from './guards/jwt-rt-auth.guard';
-
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -42,6 +42,51 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Post('login-social')
+  async loginSocial(
+    @Body()
+    loginSocialDto: LoginSocialDto,
+  ): Promise<SuccessResponse | BadRequestException> {
+    const userSocial: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, true);
+
+    let newUser: User;
+
+    if (!userSocial) {
+      const user: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, false);
+      if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+
+      const hashedPassword = await this.authService.hashData(loginSocialDto.password);
+      loginSocialDto.password = hashedPassword;
+      newUser = await this.userService.createSocial(loginSocialDto);
+
+      const resultAddRole = await this.roleService.addUserToRole(newUser._id, {
+        name: RoleName.USER,
+      });
+
+      if (!resultAddRole) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+    }
+
+    const { password, ...userWithoutPass } = userSocial ? userSocial['_doc'] : newUser['_doc'];
+
+    const isMatch = await this.authService.compareData(loginSocialDto.password, password);
+    if (!isMatch) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+
+    const userId = userSocial ? userSocial._id : newUser._id;
+
+    const role = await this.roleService.getRoleNameByUserId(userId);
+
+    return new SuccessResponse({
+      message: 'Đăng nhập thành công!',
+      metadata: {
+        data: {
+          providerData: [userWithoutPass],
+          role,
+        },
+      },
+    });
+  }
+
+  @Public()
   @Post('signup')
   async signUp(
     @Body()
@@ -52,7 +97,7 @@ export class AuthController {
 
     const hashedPassword = await this.authService.hashData(signUpDto.password);
     signUpDto.password = hashedPassword;
-    const newUser = await this.userService.create(signUpDto);
+    const newUser = await this.userService.createNormal(signUpDto);
     const payload = { userId: newUser._id };
     const tokens = await this.authService.getTokens(payload);
     await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken);
@@ -70,7 +115,7 @@ export class AuthController {
   @Post('login')
   @ApiResponse({ status: HttpStatus.OK, description: 'Get list users', type: SuccessResponseDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid user data', type: ErrorResponseDto })
-  async login( @Body() loginDto: LoginDto ): Promise<SuccessResponse | BadRequestException> {
+  async login(@Body() loginDto: LoginDto): Promise<SuccessResponse | BadRequestException> {
     const user = await this.userService.getByEmail(loginDto.email);
     if (!user) return new BadRequestException('Email hoặc mật khẩu không chính xác!');
     const { password, ...userWithoutPass } = user['_doc'];
@@ -154,7 +199,7 @@ export class AuthController {
   ): Promise<SuccessResponse> {
     const hashedPassword = await this.authService.hashData(signUpDto.password);
     signUpDto.password = hashedPassword;
-    const newUser = await this.userService.create(signUpDto);
+    const newUser = await this.userService.createNormal(signUpDto);
     const payload = { userId: newUser._id };
     const tokens = await this.authService.getTokens(payload);
     await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken);
@@ -174,7 +219,7 @@ export class AuthController {
       seedDto.users.map(async user => {
         let hashedPassword = await this.authService.hashData(user.password);
         user.password = hashedPassword;
-        let newUser: any = await this.userService.create(user);
+        let newUser: any = await this.userService.createNormal(user);
         let payload = { userId: newUser._id };
         let tokens = await this.authService.getTokens(payload);
         await this.userTokenService.createUserToken(newUser._id, tokens.refreshToken);
