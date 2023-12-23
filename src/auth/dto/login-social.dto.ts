@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, MinLength } from 'class-validator';
 
 export class LoginSocialDto {
   @ApiProperty()
@@ -8,8 +8,7 @@ export class LoginSocialDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsEmail({}, { message: 'Email is invalid' })
-  email: string;
+  email?: string;
 
   @ApiProperty()
   @IsNotEmpty()
