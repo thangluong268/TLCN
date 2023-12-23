@@ -404,7 +404,7 @@ function Home() {
       <div className="bg-white rounded-md p-4 mb-5">
         {/* For sell */}
         <div className="text-center text-[#007aff] text-[24px] font-bold mb-3">
-          Top các cửa hàng có nhiều sản phẩm trên hệ thống
+          Top các người dùng mua hàng nhiều nhất trên hệ thống
         </div>
         <SortTable title={arrTitleUser} noPaging={true}>
           {userHasMostBill.map((item, index) => (
