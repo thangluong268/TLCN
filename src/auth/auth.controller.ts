@@ -47,33 +47,40 @@ export class AuthController {
     @Body()
     loginSocialDto: LoginSocialDto,
   ): Promise<SuccessResponse | BadRequestException> {
-    const hashedPass = await this.authService.hashData(loginSocialDto.password);
-
-    const userSocial: User = await this.userService.getByEmailPasswordAndSocial(loginSocialDto.email, hashedPass, true);
+    const userSocial: User = await this.userService.getByEmailPasswordAndSocial(loginSocialDto.email, loginSocialDto.password, true);
 
     let newUser: User;
 
     if (!userSocial) {
+      if (loginSocialDto.email !== '' || loginSocialDto.email) {
         const user: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, false);
-        if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+        if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng 1!');
+      }
 
       const hashedPassword = await this.authService.hashData(loginSocialDto.password);
       loginSocialDto.password = hashedPassword;
-      newUser = await this.userService.createSocial(loginSocialDto);
+      const createdUser = await this.userService.createSocial(loginSocialDto);
 
-      const resultAddRole = await this.roleService.addUserToRole(newUser._id, {
+      console.log(createdUser);
+
+      const newUserDoc = createdUser['_doc'] ? createdUser['_doc'] : createdUser;
+      newUser = newUserDoc;
+
+      const resultAddRole = await this.roleService.addUserToRole(newUserDoc._id, {
         name: RoleName.USER,
       });
 
-      if (!resultAddRole) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+      if (!resultAddRole) return new BadRequestException('Tài khoản hiện tại không khả dụng 2!');
     }
 
-    const { password, ...userWithoutPass } = userSocial ? userSocial['_doc'] : newUser['_doc'];
+    const userMatch = userSocial ? userSocial : newUser;
+
+    const { password, ...userWithoutPass } = userMatch;
 
     const isMatch = await this.authService.compareData(loginSocialDto.password, password);
-    if (!isMatch) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+    if (!isMatch) return new BadRequestException('Tài khoản hiện tại không khả dụng 3!');
 
-    const userId = userSocial ? userSocial._id : newUser._id;
+    const userId = userMatch._id;
 
     const payload = { userId };
     const tokens = await this.authService.getTokens(payload);

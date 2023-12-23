@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
 import { Model, MongooseError } from 'mongoose';
 import { LoginSocialDto } from 'src/auth/dto/login-social.dto';
 import { SignUpDto } from '../auth/dto/signup.dto';
@@ -67,13 +68,30 @@ export class UserService {
     }
   }
 
-  async getByEmailPasswordAndSocial(email: string, password: string, isSocial: boolean): Promise<User> {
+  async compareData(data: string, hashedData: string): Promise<boolean> {
+    const isMatched = await bcrypt.compare(data, hashedData);
+    return isMatched;
+  }
+
+  async getByEmailPasswordAndSocial(email: string, passwordInput: string, isSocial: boolean): Promise<User> {
     try {
-      const user = await this.userModel.findOne({ email, password, isSocial });
+      const users: User[] = await this.userModel.find({ email, isSocial });
 
-      user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+      let userMatch: User;
 
-      return user;
+      for (const user of users) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+        let userDoc = user['_doc'] ? user['_doc'] : user;
+        // eslint-disable-next-line prefer-const
+        let isMatch = await this.compareData(passwordInput, userDoc.password);
+        if (userDoc.email === email && isMatch && userDoc.isSocial === isSocial) {
+          userMatch = userDoc;
+        }
+      }
+
+      // userMatch?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+
+      return userMatch;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
