@@ -1,5 +1,3 @@
-import React from "react";
-
 function CheckValidInput(obInput: any) {
   const arrInvalid = {
     blank: "Không được để trống",

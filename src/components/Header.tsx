@@ -325,8 +325,6 @@ function Header() {
                     <div
                       onClick={(e) => {
                         logOut();
-                        localStorage.removeItem("user");
-                        window.location.href = "/login";
                       }}
                     >
                       Đăng xuất

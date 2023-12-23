@@ -42,6 +42,8 @@ export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({
 
   const logOut = () => {
     signOut(auth);
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   };
 
   useEffect(() => {
