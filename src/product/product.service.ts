@@ -78,6 +78,31 @@ export class ProductService {
     }
   }
 
+  async getAllGive(
+    pageQuery: number = 1,
+    limitQuery: number = 5,
+    sortTypeQuery: string = 'desc',
+    sortValueQuery: string = 'productName',
+  ): Promise<{ total: number; products: Product[] }> {
+
+    const skip = Number(limitQuery) * (Number(pageQuery) - 1);
+    try {
+      const total = await this.productModel.countDocuments({ price: 0, status: true });
+      const products = await this.productModel
+        .find({ price: 0, status: true })
+        .sort({ createdAt: -1 })
+        .limit(Number(limitQuery))
+        .skip(skip);
+
+      sortByConditions(products, sortTypeQuery, sortValueQuery);
+
+      return { total, products };
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async update(id: string, product: any): Promise<Product> {
     try {
@@ -270,7 +295,6 @@ export class ProductService {
       ]);
 
       return products;
-
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -296,5 +320,4 @@ export class ProductService {
       throw err;
     }
   }
-
 }

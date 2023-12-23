@@ -187,6 +187,32 @@ export class ProductController {
   }
 
   @Public()
+  @Get('product-give')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getAllGive(@Query('page') page: number, @Query('limit') limit: number): Promise<SuccessResponse> {
+    const data = await this.productService.getAllGive(page, limit, null, null); 
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+        };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { total: data.total, data: fullInfoProducts },
+    });
+  }
+
+  @Public()
   @Get('product')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
