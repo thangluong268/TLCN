@@ -7,6 +7,7 @@ import { TokensDto } from './dto/tokens.dto';
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getTokens(payload: any): Promise<TokensDto> {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(payload, {

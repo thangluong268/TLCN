@@ -73,6 +73,14 @@ export class AuthController {
 
     const userId = userSocial ? userSocial._id : newUser._id;
 
+    const payload = { userId };
+    const tokens = await this.authService.getTokens(payload);
+    const userToken = await this.userTokenService.getUserTokenById(userId);
+    userToken
+      ? await this.userTokenService.updateUserToken(userId, tokens.refreshToken)
+      : await this.userTokenService.createUserToken(userId, tokens.refreshToken);
+
+
     const role = await this.roleService.getRoleNameByUserId(userId);
 
     return new SuccessResponse({
@@ -80,6 +88,7 @@ export class AuthController {
       metadata: {
         data: {
           providerData: [userWithoutPass],
+          stsTokenManager: tokens,
           role,
         },
       },

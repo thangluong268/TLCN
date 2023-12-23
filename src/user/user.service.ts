@@ -91,17 +91,6 @@ export class UserService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async updateMany(): Promise<void> {
-    try {
-      await this.userModel.updateMany({}, { isSocial: false });
-      return;
-    } catch (err) {
-      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
-      throw err;
-    }
-  }
-
   async delete(userId: string): Promise<User> {
     try {
       const user = await this.userModel.findByIdAndDelete(userId);
