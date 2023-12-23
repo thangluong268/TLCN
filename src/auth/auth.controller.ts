@@ -47,7 +47,10 @@ export class AuthController {
     @Body()
     loginSocialDto: LoginSocialDto,
   ): Promise<SuccessResponse | BadRequestException> {
-    const userSocial: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, true);
+
+    const hashedPass = await this.authService.hashData(loginSocialDto.password);
+    
+    const userSocial: User = await this.userService.getByEmailPasswordAndSocial(loginSocialDto.email, hashedPass, true);
 
     let newUser: User;
 
@@ -79,7 +82,6 @@ export class AuthController {
     userToken
       ? await this.userTokenService.updateUserToken(userId, tokens.refreshToken)
       : await this.userTokenService.createUserToken(userId, tokens.refreshToken);
-
 
     const role = await this.roleService.getRoleNameByUserId(userId);
 

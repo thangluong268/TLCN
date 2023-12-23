@@ -67,6 +67,19 @@ export class UserService {
     }
   }
 
+  async getByEmailPasswordAndSocial(email: string, password: string, isSocial: boolean): Promise<User> {
+    try {
+      const user = await this.userModel.findOne({ email, password, isSocial });
+
+      user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+
+      return user;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
   async getById(id: string): Promise<User> {
     try {
       const user = await this.userModel.findById(id);
