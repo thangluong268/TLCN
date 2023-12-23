@@ -61,8 +61,6 @@ export class AuthController {
       loginSocialDto.password = hashedPassword;
       const createdUser = await this.userService.createSocial(loginSocialDto);
 
-      console.log(createdUser);
-
       const newUserDoc = createdUser['_doc'] ? createdUser['_doc'] : createdUser;
       newUser = newUserDoc;
 
