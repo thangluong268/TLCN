@@ -89,7 +89,7 @@ export class UserService {
         }
       }
 
-      // userMatch?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+      userMatch?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
 
       return userMatch;
     } catch (err) {
