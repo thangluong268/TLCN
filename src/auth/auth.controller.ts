@@ -47,16 +47,17 @@ export class AuthController {
     @Body()
     loginSocialDto: LoginSocialDto,
   ): Promise<SuccessResponse | BadRequestException> {
-
     const hashedPass = await this.authService.hashData(loginSocialDto.password);
-    
+
     const userSocial: User = await this.userService.getByEmailPasswordAndSocial(loginSocialDto.email, hashedPass, true);
 
     let newUser: User;
 
     if (!userSocial) {
-      const user: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, false);
-      if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+      if (loginSocialDto.email) {
+        const user: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, false);
+        if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
+      }
 
       const hashedPassword = await this.authService.hashData(loginSocialDto.password);
       loginSocialDto.password = hashedPassword;
