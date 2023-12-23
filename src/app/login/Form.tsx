@@ -14,7 +14,6 @@ import { UserAuth } from "../authContext";
 import Toast from "@/utils/Toast";
 import { APILogin } from "@/services/Auth";
 import axios from "axios";
-import { set } from "firebase/database";
 interface LoginForm {
   email: string;
   password: string;

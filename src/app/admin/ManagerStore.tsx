@@ -81,7 +81,7 @@ function ManagerStore() {
   const [detailStore, setDetailStore] = React.useState({} as DetailStore);
   React.useEffect(() => {
     const fetchData = async () => {
-      await APIGetListStore(page || 1, 10, search).then((res) => {
+      await APIGetListStore(page || 1, 20, search).then((res) => {
         setListStore(res.metadata.data);
       });
     };
@@ -238,7 +238,7 @@ function ManagerStore() {
             totalPage={listStore.total}
             currentPage={page}
             setPage={(data) => setPage(data)}
-            perPage={10}
+            perPage={20}
           >
             {listStore.stores?.map((item, index) => (
               <tr

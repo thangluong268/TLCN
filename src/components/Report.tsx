@@ -40,7 +40,7 @@ function Report(props: Props) {
   React.useEffect(() => {
     const fetchData = async () => {
       console.log("status", status);
-      await APIReportAdmin(page || 1, 10, type, status).then((res) => {
+      await APIReportAdmin(page || 1, 20, type, status).then((res) => {
         if (res.status == 200 || res.status == 201) {
           setTotal(res.metadata.total);
           setListReport(

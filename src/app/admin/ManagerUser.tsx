@@ -68,7 +68,7 @@ function ManagerUser() {
   const [isShow, setIsShow] = React.useState<boolean>(false);
   React.useEffect(() => {
     const fetchData = async () => {
-      await APIGetListUser(page || 1, 10, search).then((res) =>
+      await APIGetListUser(page || 1, 20, search).then((res) =>
         setListUser(res.metadata.data)
       );
     };
@@ -159,7 +159,7 @@ function ManagerUser() {
         totalPage={listUser.total}
         currentPage={page}
         setPage={(data) => setPage(data)}
-        perPage={10}
+        perPage={20}
       >
         {listUser.users?.map((item, index) => (
           <tr

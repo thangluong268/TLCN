@@ -25,7 +25,7 @@ function SortTable(props: SortTableProps) {
     currentPage,
     setPage,
     noPaging,
-    perPage,
+    perPage = 20,
   } = props;
   return (
     <>

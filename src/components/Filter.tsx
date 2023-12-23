@@ -45,7 +45,9 @@ function Filter(props: FilterProps) {
           }}
           onBlur={(e) => {
             if (e.currentTarget.value != "") {
-              if (e.currentTarget.value <= price.priceMax.replace("VND", "")) {
+              if (
+                +e.currentTarget.value <= +price.priceMax.replace("VND", "")
+              ) {
                 setPrice({
                   ...price,
                   priceMin: e.currentTarget.value + " VND",
@@ -85,7 +87,9 @@ function Filter(props: FilterProps) {
           }}
           onBlur={(e) => {
             if (e.currentTarget.value != "") {
-              if (e.currentTarget.value >= price.priceMin.replace("VND", "")) {
+              if (
+                +e.currentTarget.value >= +price.priceMin.replace("VND", "")
+              ) {
                 setPrice({
                   ...price,
                   priceMax: e.currentTarget.value + " VND",

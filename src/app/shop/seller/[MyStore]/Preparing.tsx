@@ -107,7 +107,7 @@ function Preparing() {
   };
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await APIGetListBill(page || 1, 2, "CONFIRMED").then(
+      const data = await APIGetListBill(page || 1, 20, "CONFIRMED").then(
         (res) => res
       );
       var arr = [] as ArrBill[];

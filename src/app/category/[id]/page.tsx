@@ -95,7 +95,7 @@ function Category() {
               totalPage={totalPage}
               currentPage={page}
               setPage={setPage}
-              perPage={5}
+              perPage={20}
             />
           </div>
         </div>

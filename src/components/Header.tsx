@@ -274,7 +274,7 @@ function Header() {
 
                   <div className="group py-6 flex flex-col justify-center items-center">
                     <FaBell className="w-[24px] h-[24px] cursor-pointer hover:fill-[#59595b]" />
-                    {dataNoti && isShowCart && (
+                    {dataNoti.length > 0 && isShowCart && (
                       <>
                         <div className="group-hover:block group-hover:shadow-inner hidden">
                           <FramePopup>

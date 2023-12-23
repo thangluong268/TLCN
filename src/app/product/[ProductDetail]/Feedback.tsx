@@ -165,7 +165,7 @@ function Feedback(props: Props) {
         totalPage={total}
         currentPage={page || 1}
         setPage={setPage}
-        perPage={10}
+        perPage={20}
       />
       {/* Viết bình luận và cho sao */}
       {user && isPurchase ? (

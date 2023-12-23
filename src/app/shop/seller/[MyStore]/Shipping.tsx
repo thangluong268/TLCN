@@ -107,7 +107,7 @@ function Shipping() {
   };
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await APIGetListBill(page || 1, 2, "DELIVERING").then(
+      const data = await APIGetListBill(page || 1, 20, "DELIVERING").then(
         (res) => res
       );
       var arr = [] as ArrBill[];

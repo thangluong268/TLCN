@@ -14,6 +14,7 @@ import {
   FacebookAuthProvider,
 } from "firebase/auth";
 import { auth } from "../../firebase.config";
+import { APILoginSocial } from "@/services/Auth";
 
 interface AuthContextProps {
   user: any; // Thay any bằng kiểu dữ liệu phù hợp với user
@@ -44,8 +45,19 @@ export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log(currentUser);
+      const data = await APILoginSocial({
+        fullName: currentUser?.providerData[0].displayName || "",
+        email: currentUser?.providerData[0].email || "",
+        avatar: currentUser?.providerData[0].photoURL || "",
+        password: currentUser?.uid || "",
+      });
+      console.log(data);
+      if (data.status === 200 || data.status === 201) {
+        setUser(data.metadata.data);
+      }
+      // setUser(curretUser);
     });
     return () => unsubscribe();
   }, []);

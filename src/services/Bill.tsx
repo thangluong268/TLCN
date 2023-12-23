@@ -146,3 +146,17 @@ export const APIGetUserMostBill = async (limit: number): Promise<any> => {
   );
   return res.data;
 };
+
+// api/bill/user/:id?status=
+export const APIUpdateBillUser = async (
+  id: string,
+  status: string
+): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user/${id}?status=${status}`,
+    {},
+    { headers }
+  );
+  return res.data;
+};

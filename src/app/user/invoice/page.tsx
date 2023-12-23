@@ -5,6 +5,7 @@ import {
   APIGetCountBillByStatusUser,
   APIGetListBillUser,
   APIUpdateBill,
+  APIUpdateBillUser,
 } from "@/services/Bill";
 import Toast from "@/utils/Toast";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
@@ -64,7 +65,7 @@ function Info() {
     },
   };
   const Cancel = async () => {
-    await APIUpdateBill(currentId, "CANCELLED").then((res) => {
+    await APIUpdateBillUser(currentId, "CANCELLED").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Huỷ đơn thành công", 2000);
         setIsShow(false);
@@ -76,7 +77,7 @@ function Info() {
     });
   };
   const UpGrade = async () => {
-    await APIUpdateBill(currentId, "RETURNED").then((res) => {
+    await APIUpdateBillUser(currentId, "RETURNED").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Hoàn đơn thành công", 2000);
         setIsShow(false);
@@ -128,7 +129,7 @@ function Info() {
   ];
   React.useEffect(() => {
     const getBill = async () => {
-      const res = await APIGetListBillUser(page || 1, 2, status);
+      const res = await APIGetListBillUser(page || 1, 20, status);
       setTotalPage(res.metadata.total);
       console.log(res.metadata.data.fullData);
       var arr = [] as TableInvoice[];

@@ -58,7 +58,7 @@ function Cancel() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await APIGetListBill(page || 1, 2, "CANCELLED").then(
+      const data = await APIGetListBill(page || 1, 20, "CANCELLED").then(
         (res) => res
       );
       var arr = [] as ArrBill[];

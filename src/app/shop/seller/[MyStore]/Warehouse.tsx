@@ -109,7 +109,7 @@ function Warehouse() {
     const fetchData = async () => {
       const data = await APIGetListProduct(
         page || 1,
-        2,
+        20,
         "",
         sortType,
         sortValue

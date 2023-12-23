@@ -107,7 +107,9 @@ function New() {
   };
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await APIGetListBill(page || 1, 2, "NEW").then((res) => res);
+      const data = await APIGetListBill(page || 1, 20, "NEW").then(
+        (res) => res
+      );
       var arr = [] as ArrBill[];
       setTotal(data.metadata.data.total);
       data.metadata.data.fullData.map((lstProduct: any, index: number) => {

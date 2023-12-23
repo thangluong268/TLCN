@@ -40,3 +40,16 @@ export const APIForgetPassword = async (email: string, password: string) => {
   );
   return res.data;
 };
+
+// api/auth/login-social => post
+export const APILoginSocial = async (body: any) => {
+  document.getElementById("loading-page")?.classList.remove("hidden");
+
+  const res = await axios.post(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/login-social`,
+    body
+  );
+  document.getElementById("loading-page")?.classList.add("hidden");
+
+  return res.data;
+};
