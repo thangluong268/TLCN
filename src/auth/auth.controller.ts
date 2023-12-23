@@ -54,10 +54,8 @@ export class AuthController {
     let newUser: User;
 
     if (!userSocial) {
-      if (loginSocialDto.email) {
         const user: User = await this.userService.getByEmailAndSocial(loginSocialDto.email, false);
         if (user) return new BadRequestException('Tài khoản hiện tại không khả dụng!');
-      }
 
       const hashedPassword = await this.authService.hashData(loginSocialDto.password);
       loginSocialDto.password = hashedPassword;

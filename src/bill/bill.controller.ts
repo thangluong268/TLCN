@@ -459,7 +459,7 @@ export class BillController {
   @CheckRole(RoleName.USER, RoleName.ADMIN)
   @ApiQuery({ name: 'status', type: String, required: true })
   @Put('/user/:id')
-  async updateStatusUser(
+  async updateStatusBillUser(
     @Param('id') id: string,
     @Query('status') status: string,
     @GetCurrentUserId() userId: string,

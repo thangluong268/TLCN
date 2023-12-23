@@ -229,7 +229,7 @@ export class UserController {
   @CheckAbilities(new ReadUserAbility())
   @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/:id')
-  async findOne(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+  async getProfile(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(id);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
