@@ -10,6 +10,7 @@ import { APIUpdateUser } from "@/services/User";
 import CheckValidInput from "@/utils/CheckValidInput";
 import FormatMoney from "@/utils/FormatMoney";
 import Toast from "@/utils/Toast";
+import axios from "axios";
 import React from "react";
 import { FaTruckFast, FaTruckField } from "react-icons/fa6";
 function Payment() {
@@ -30,6 +31,17 @@ function Payment() {
     receiverPhone: "",
     address: "",
   });
+  const [rates, setRates] = React.useState<any>(null);
+  React.useEffect(() => {
+    axios
+      .get(
+        "http://data.fixer.io/api/latest?access_key=99f152b66433c5949fabcd136df41f73"
+      )
+      .then((res) => {
+        console.log("sssssss", res);
+        setRates(res.data.rates);
+      });
+  }, []);
   const [deliveryMethod, setDeliveryMethod] = React.useState([
     {
       name: "Giao hàng nhanh",
@@ -764,11 +776,15 @@ function Payment() {
             <hr className="w-full my-4" />
             <Paypal
               amount={
-                data?.reduce((total, item) => total + item.totalPrice, 0) +
-                deliveryMethod?.reduce(
-                  (total, item) => (item.checked ? total + item.price : total),
-                  0
-                )
+                +(
+                  data?.reduce((total, item) => total + item.totalPrice, 0) +
+                  deliveryMethod?.reduce(
+                    (total, item) =>
+                      item.checked ? total + item.price : total,
+                    0
+                  ) /
+                    (rates ? rates.VND : 1)
+                ).toFixed(2)
               }
               callback={() => CraeteBill()}
             />

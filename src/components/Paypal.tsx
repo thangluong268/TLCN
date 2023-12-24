@@ -7,17 +7,6 @@ interface PaypalProps {
 }
 function Paypal(props: PaypalProps) {
   const { amount, callback } = props;
-  const [rates, setRates] = React.useState<any>(null);
-  React.useEffect(() => {
-    axios
-      .get(
-        "http://data.fixer.io/api/latest?access_key=99f152b66433c5949fabcd136df41f73"
-      )
-      .then((res) => {
-        setRates(res.data.rates);
-      });
-  }, []);
-
   return (
     <PayPalScriptProvider
       options={
@@ -33,7 +22,7 @@ function Paypal(props: PaypalProps) {
             purchase_units: [
               {
                 amount: {
-                  value: +(amount / (rates ? rates.VND : 1)).toFixed(2),
+                  value: amount,
                 },
               },
             ],
