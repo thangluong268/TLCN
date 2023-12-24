@@ -191,7 +191,7 @@ export class ProductController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async getAllGive(@Query('page') page: number, @Query('limit') limit: number): Promise<SuccessResponse> {
-    const data = await this.productService.getAllGive(page, limit, null, null); 
+    const data = await this.productService.getAllGive(page, limit, null, null);
 
     const fullInfoProducts = await Promise.all(
       data.products.map(async (product: Product) => {
@@ -491,9 +491,19 @@ export class ProductController {
 
     const quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
 
+    const category = await this.categoryService.getById(product.categoryId);
+    const store = await this.storeService.getById(product.storeId);
+
+    const data = {
+      ...product.toObject(),
+      categoryName: category.name,
+      storeName: store.name,
+      quantityDelivered,
+    };
+
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm thành công!',
-      metadata: { data: product, quantityDelivered },
+      metadata: { data },
     });
   }
 
