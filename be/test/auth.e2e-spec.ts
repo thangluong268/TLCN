@@ -1,11 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
+import { RoleName } from '../src/role/schema/role.schema';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthController } from '../src/auth/auth.controller';
 import { DatabaseService } from '../src/database/database.service';
-import { createRoleMock } from '../src/role/mock-dto/role.mock';
 import { createUserMock } from '../src/user/mock-dto/user.mock';
 
 describe('Auth Controller E2E Test', () => {
@@ -103,12 +103,9 @@ describe('Auth Controller E2E Test', () => {
     let newUserId: string;
 
     it('POST /auth/login Should login successfully', async () => {
-
       const newUser = await dbConnection.collection('users').insertOne(createUserMock());
-      const createRoleData = createRoleMock();
-      createRoleData.listUser = [newUser.insertedId.toString()];
-      await dbConnection.collection('roles').insertOne(createRoleData);
-      
+      await dbConnection.collection('roles').updateOne({ name: RoleName.USER }, { $push: { listUser: newUser.insertedId.toString() } });
+
       const response = await request(httpServer).post(URL_LOGIN).send({
         email: 'luongthangg268@gmail.com',
         password: 'Thang@11',

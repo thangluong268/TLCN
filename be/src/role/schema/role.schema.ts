@@ -4,8 +4,10 @@ import { Document } from 'mongoose';
 export enum RoleName {
   USER = 'User',
   SELLER = 'Seller',
-  MANAGER = 'Manager',
   ADMIN = 'Admin',
+  MANAGER_USER = 'Manager_User',
+  MANAGER_PRODUCT = 'Manager_Product',
+  MANAGER_STORE = 'Manager_Store',
 }
 
 @Schema({

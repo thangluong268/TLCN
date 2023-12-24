@@ -104,3 +104,58 @@ export const APIGetListBillUser = async (
   );
   return res.data;
 };
+
+// /api/bill/user/657c6b868c3a7c4556f285ec
+export const APIGetBillUser = async (id: string): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user/${id}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/bill/admin/count-total-data
+export const APIGetCountBillAdmin = async (): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/admin/count-total-data`,
+    { headers }
+  );
+  return res.data;
+};
+
+// api/bill/admin/calculate-total-revenue-by-year?year=2023
+export const APIGetRevenueByYearAdmin = async (
+  year: string = ""
+): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/admin/calculate-total-revenue-by-year?year=${year}`,
+    { headers }
+  );
+  return res.data;
+};
+// /api/user/admin/users-most-bills?limit=4
+export const APIGetUserMostBill = async (limit: number): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/user/admin/users-most-bills?limit=${limit}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// api/bill/user/:id?status=
+export const APIUpdateBillUser = async (
+  id: string,
+  status: string
+): Promise<any> => {
+  const headers = GetHeaders();
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/bill/user/${id}?status=${status}`,
+    {},
+    { headers }
+  );
+  return res.data;
+};

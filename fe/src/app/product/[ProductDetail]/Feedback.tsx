@@ -1,19 +1,24 @@
 import Paging from "@/components/Paging";
 import Star from "@/components/Star";
-import { APICreateFeedback, APIGetFeedbackUser } from "@/services/Feedback";
+import {
+  APICreateFeedback,
+  APIGetFeedbackUser,
+  APIUpdateFeedback,
+} from "@/services/Feedback";
 import { UserInterface } from "@/types/User";
 import ConvertDate from "@/utils/ConvertDate";
-import { set } from "firebase/database";
+import Toast from "@/utils/Toast";
 import { useParams } from "next/navigation";
 import React from "react";
 import { FaRegPaperPlane } from "react-icons/fa";
 interface Props {
   isPurchase: boolean;
   setTotalFeedback: (arg: number) => void;
+  setShowLogin: (arg: boolean) => void;
 }
 
 function Feedback(props: Props) {
-  const { isPurchase, setTotalFeedback } = props;
+  const { isPurchase, setTotalFeedback, setShowLogin } = props;
   const [page, setPage] = React.useState(1);
   const [total, setTotal] = React.useState(0);
   const [feedbacks, setFeedbacks] = React.useState([]);
@@ -69,6 +74,27 @@ function Feedback(props: Props) {
       }
     }
   };
+
+  const Cosensus = async (fb: any, id: string) => {
+    const res = await APIUpdateFeedback(params.ProductDetail + "", id);
+    if (res.status !== 200 && res.status !== 201) {
+      Toast("warning", res.message, 3000);
+    } else {
+      var arr = feedbacks.map((item: any) => {
+        if (item._id == fb._id) {
+          if (item.consensus.includes(user?._id)) {
+            item.consensus = item.consensus.filter(
+              (item: any) => item != user?._id
+            );
+          } else {
+            item.consensus.push(user?._id);
+          }
+        }
+        return item;
+      });
+      setFeedbacks(arr as any);
+    }
+  };
   return (
     <>
       {feedbacks!.map((item: any, index: any) => (
@@ -110,18 +136,24 @@ function Feedback(props: Props) {
                   {item.consensus.length} người đồng thuận
                 </p>
                 <div className="flex items-center mt-3">
-                  <a
-                    href="#"
-                    className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                  <div
+                    className={`text-gray-900 ${
+                      item.consensus.includes(user?._id)
+                        ? "bg-blue-700 text-white hover:bg-blue-600"
+                        : "bg-white hover:bg-gray-100"
+                    } cursor-pointer border border-gray-300 focus:outline-none  focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-xs px-2 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}
+                    onClick={(e) => {
+                      if (user) {
+                        Cosensus(item, item.userId);
+                      } else {
+                        setShowLogin(true);
+                      }
+                    }}
                   >
-                    Đồng thuận
-                  </a>
-                  <a
-                    href="#"
-                    className="ps-4 text-sm font-medium text-blue-600 hover:underline dark:text-blue-500 border-gray-200 ms-4 border-s md:mb-0 dark:border-gray-600"
-                  >
-                    Báo cáo
-                  </a>
+                    {item.consensus.includes(user?._id)
+                      ? "Đã đồng thuận"
+                      : "Đồng thuận"}
+                  </div>
                 </div>
               </aside>
             )}
@@ -133,7 +165,7 @@ function Feedback(props: Props) {
         totalPage={total}
         currentPage={page || 1}
         setPage={setPage}
-        perPage={10}
+        perPage={20}
       />
       {/* Viết bình luận và cho sao */}
       {user && isPurchase ? (

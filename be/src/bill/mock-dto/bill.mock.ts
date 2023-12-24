@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export const billMock = (): any => {
   return {
@@ -19,7 +20,8 @@ export const billMock = (): any => {
       "phoneNumber": "0989876565",
       "address": "test"
     },
-    status: "NEW"
+    status: "NEW",
+    userId: "657bd527c5fcce0d918683e4"
   }
 }
 

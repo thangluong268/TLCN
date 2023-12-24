@@ -33,7 +33,7 @@ function Paypal(props: PaypalProps) {
             purchase_units: [
               {
                 amount: {
-                  value: +(amount / (rates ? rates.VND : 1)).toFixed(2),
+                  value: +(amount / (rates ? rates.VND : 24250)).toFixed(2),
                 },
               },
             ],

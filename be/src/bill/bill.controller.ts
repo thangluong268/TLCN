@@ -6,8 +6,10 @@ import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { CartService } from '../cart/cart.service';
-import { NotFoundException } from '../core/error.response';
+import { BadRequestException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
+import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
+import { NotificationService } from '../notification/notification.service';
 import { ProductService } from '../product/product.service';
 import { RoleName } from '../role/schema/role.schema';
 import { StoreService } from '../store/store.service';
@@ -17,7 +19,7 @@ import { BillDto } from './dto/bill.dto';
 import { CreateBillDto, ProductInfo } from './dto/create-bill.dto';
 import { GiveGateway, MoMoGateway, PAYMENT_METHOD, VNPayGateway } from './payment/payment.gateway';
 import { PaymentService } from './payment/payment.service';
-import { BILL_STATUS, BILL_STATUS_TRANSITION } from './schema/bill.schema';
+import { BILL_STATUS, BILL_STATUS_TRANSITION, ContentNotiByStatus } from './schema/bill.schema';
 
 @Controller('bill')
 @ApiTags('Bill')
@@ -30,6 +32,7 @@ export class BillController {
     private readonly productService: ProductService,
     private readonly storeService: StoreService,
     private readonly cartService: CartService,
+    private readonly notificationService: NotificationService,
   ) {
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.VNPAY, new VNPayGateway());
     this.paymentService.registerPaymentGateway(PAYMENT_METHOD.MOMO, new MoMoGateway());
@@ -38,7 +41,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Post('user')
   async create(@Body() createBillDto: CreateBillDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
@@ -64,6 +67,35 @@ export class BillController {
           createBillDto.deliveryFee,
         );
 
+        // Gửi thông báo cho người bán
+        const store = await this.storeService.getById(billDto.storeId);
+        const createNotiDataToSeller: CreateNotificationDto = {
+          userIdFrom: userId,
+          userIdTo: store.userId,
+          content: `đã đặt hàng thành công. Mã đơn: #${newBill._id.toString()}.`,
+          type: 'Đặt hàng',
+          sub: {
+            fullName: user.fullName,
+            avatar: user.avatar,
+            productId: newBill._id.toString(),
+          },
+        };
+        await this.notificationService.create(createNotiDataToSeller);
+
+        // Gửi thông báo cho người dùng
+        const createNotiDataToUser: CreateNotificationDto = {
+          userIdFrom: userId,
+          userIdTo: userId,
+          content: `Bạn đã đặt hàng thành công. Mã đơn: #${newBill._id.toString()}.`,
+          type: 'Đặt hàng',
+          sub: {
+            fullName: user.fullName,
+            avatar: user.avatar,
+            productId: newBill._id.toString(),
+          },
+        };
+        await this.notificationService.create(createNotiDataToUser);
+
         return newBill;
       }),
     );
@@ -76,11 +108,10 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: false, example: '2023' })
   @Get('seller/count-total-by-status')
-  async countTotalByStatusSeller(@Query('year') year: number, @GetCurrentUserId() userId: string)
-  : Promise<SuccessResponse | NotFoundException> {
+  async countTotalByStatusSeller(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -105,10 +136,9 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/count-total-by-status')
   async countTotalByStatusUser(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -135,11 +165,10 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('seller/calculate-revenue-by-year')
-  async calculateRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string)
-  : Promise<SuccessResponse | NotFoundException> {
+  async calculateRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(userId);
     if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
 
@@ -156,7 +185,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
   @Get('seller/count-charity-by-year')
   async countCharityByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
@@ -176,7 +205,24 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.ADMIN, RoleName.ADMIN)
+  @ApiQuery({ name: 'year', type: Number, required: true, example: '2023' })
+  @Get('admin/calculate-total-revenue-by-year')
+  async calculateTotalRevenueByYear(@Query('year') year: number, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+    const user = await this.userService.getById(userId);
+    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
+
+    const data = await this.billService.calculateTotalRevenueByYear(year);
+
+    return new SuccessResponse({
+      message: 'Lấy tổng doanh thu của từng tháng theo năm thành công!',
+      metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -246,7 +292,7 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Get('seller')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -316,10 +362,47 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadBillAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.ADMIN)
+  @Get('admin/count-total-data')
+  async countTotalData(): Promise<SuccessResponse | NotFoundException> {
+    const totalProduct: number = await this.productService.countTotal();
+    const totalStore: number = await this.storeService.countTotal();
+    const totalUser: number = await this.userService.countTotal();
+    const totalRevenue: number = await this.billService.calculateRevenueAllTime();
+
+    const data = {
+      totalProduct,
+      totalStore,
+      totalUser,
+      totalRevenue,
+    };
+
+    return new SuccessResponse({
+      message: `Lấy data thành công!`,
+      metadata: { data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('admin/revenue-store')
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  async revenueStore(@Query('storeId') storeId: string): Promise<SuccessResponse | NotFoundException> {
+    const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(storeId);
+    const totalDelivered: number = await this.billService.countTotalByStatusSeller(storeId, 'DELIVERED', null);
+
+    return new SuccessResponse({
+      message: `Lấy data thành công!`,
+      metadata: { totalRevenue, totalDelivered },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadBillAbility())
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Get('user/:id')
   async getMyBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
-
     const bill: any = await this.billService.getMyBill(id, userId);
 
     if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
@@ -373,41 +456,96 @@ export class BillController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
-  @CheckRole(RoleName.USER)
-  @Put('user/:id')
-  async cancelBill(@Param('id') id: string, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
+  @ApiQuery({ name: 'status', type: String, required: true })
+  @Put('/user/:id')
+  async updateStatusBillUser(
+    @Param('id') id: string,
+    @Query('status') status: string,
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse | NotFoundException | BadRequestException> {
+    if (status !== 'CANCELLED' && status !== 'RETURNED') return new BadRequestException('Trạng thái không hợp lệ!');
     const bill = await this.billService.getById(id);
+    if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
 
-    const result = await this.billService.update(id, 'CANCELLED');
+    const store = await this.storeService.getById(bill.storeId);
 
-    if (!result) return new NotFoundException('Không tìm thấy đơn hàng này!');
+    const userSend = await this.userService.getById(userId);
 
-    await this.userService.updateWallet(userId, bill.totalPrice, 'sub');
+    const result = await this.billService.update(id, status);
+    if (!result) return new NotFoundException('Cập nhật trạng thái đơn hàng thất bại!');
+
+    if (status === 'CANCELLED') {
+      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
+
+      // Gửi thông báo cho người bán
+      const createNotiDataToSeller: CreateNotificationDto = {
+        userIdFrom: userId,
+        userIdTo: store.userId,
+        content: `đã hủy đơn hàng #${bill._id.toString()}.`,
+        type: 'Cập nhật đơn hàng',
+        sub: {
+          fullName: userSend.fullName,
+          avatar: userSend.avatar,
+          productId: bill._id.toString(),
+        },
+      };
+      await this.notificationService.create(createNotiDataToSeller);
+
+      // Gửi thông báo cho người dùng
+      const createNotiDataToUser: CreateNotificationDto = {
+        userIdFrom: userId,
+        userIdTo: userId,
+        content: `Bạn đã hủy đơn hàng #${bill._id.toString()}.`,
+        type: 'Cập nhật đơn hàng',
+        sub: {
+          fullName: userSend.fullName,
+          avatar: userSend.avatar,
+          productId: bill._id.toString(),
+        },
+      };
+      await this.notificationService.create(createNotiDataToUser);
+    }
+
+    if (status === 'RETURNED') {
+      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
+      await this.userService.updateWallet(bill.userId, bill.totalPrice * 5, 'plus');
+    }
 
     return new SuccessResponse({
-      message: 'Hủy đơn hàng thành công!',
+      message: 'Cập nhật trạng thái đơn hàng thành công!',
       metadata: { data: result },
     });
   }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateBillAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Put('/seller/:id')
   @ApiQuery({ name: 'status', type: String, required: true })
-  async updateStatus(@Param('id') id: string, @Query('status') status: string): Promise<SuccessResponse | NotFoundException> {
+  async updateStatusSeller(@Param('id') id: string, @Query('status') status: string): Promise<SuccessResponse | NotFoundException> {
     const bill = await this.billService.getById(id);
     if (!bill) return new NotFoundException('Không tìm thấy đơn hàng này!');
 
+    const store = await this.storeService.getById(bill.storeId);
+
     const result = await this.billService.update(id, status);
-    if (!result) return new NotFoundException('Không tìm thấy đơn hàng này!');
+    if (!result) return new NotFoundException('Cập nhật trạng thái đơn hàng thất bại!');
 
     if (status === 'CANCELLED') await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
-
-    if (status === 'RETURNED') {
-      await this.userService.updateWallet(bill.userId, bill.totalPrice, 'sub');
-      await this.userService.updateWallet(bill.userId, bill.totalPrice * 5, 'plus');
-    }
+    // Gửi thông báo cho người dùng
+    const createNotiDataToUser: CreateNotificationDto = {
+      userIdFrom: store.userId,
+      userIdTo: bill.userId,
+      content: new ContentNotiByStatus(bill._id.toString())[status.toUpperCase()],
+      type: 'Cập nhật đơn hàng',
+      sub: {
+        fullName: store.name,
+        avatar: store.avatar,
+        productId: bill._id.toString(),
+      },
+    };
+    await this.notificationService.create(createNotiDataToUser);
 
     return new SuccessResponse({
       message: 'Cập nhật trạng thái đơn hàng thành công!',

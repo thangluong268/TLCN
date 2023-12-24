@@ -5,10 +5,13 @@ import {
   APIGetCountBillByStatusUser,
   APIGetListBillUser,
   APIUpdateBill,
+  APIUpdateBillUser,
 } from "@/services/Bill";
 import Toast from "@/utils/Toast";
 import formatToDDMMYYYY from "@/utils/formatToDDMMYYYY";
 import React from "react";
+import Review from "./review";
+import FormatMoney from "@/utils/FormatMoney";
 interface Invoice {
   status: string;
   title: string;
@@ -20,6 +23,15 @@ interface TableInvoice {
   storeName: string;
   price: number;
   recievedDate: string;
+  paymentMethod: string;
+  createdAt: Date;
+  receiverInfo: {
+    name: string;
+    phone: string;
+    address: string;
+  };
+  listProductsFullInfo: any;
+  deliveryFee: number;
 }
 
 function Info() {
@@ -30,6 +42,8 @@ function Info() {
   const [data, setData] = React.useState<TableInvoice[]>([] as TableInvoice[]);
   const [isShow, setIsShow] = React.useState(false);
   const [changed, setChanged] = React.useState(false);
+  const [isReview, setIsReview] = React.useState(false);
+  const [currentBill, setCurrentBill] = React.useState<any>({});
   const [typeMes, setTypeMes] = React.useState<string>("");
 
   const [currentId, setCurrentId] = React.useState("");
@@ -51,7 +65,7 @@ function Info() {
     },
   };
   const Cancel = async () => {
-    await APIUpdateBill(currentId, "CANCELLED").then((res) => {
+    await APIUpdateBillUser(currentId, "CANCELLED").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Huỷ đơn thành công", 2000);
         setIsShow(false);
@@ -63,7 +77,7 @@ function Info() {
     });
   };
   const UpGrade = async () => {
-    await APIUpdateBill(currentId, "RETURNED").then((res) => {
+    await APIUpdateBillUser(currentId, "RETURNED").then((res) => {
       if (res.status == 200 || res.status == 201) {
         Toast("success", "Hoàn đơn thành công", 2000);
         setIsShow(false);
@@ -115,7 +129,7 @@ function Info() {
   ];
   React.useEffect(() => {
     const getBill = async () => {
-      const res = await APIGetListBillUser(page || 1, 2, status);
+      const res = await APIGetListBillUser(page || 1, 20, status);
       setTotalPage(res.metadata.total);
       console.log(res.metadata.data.fullData);
       var arr = [] as TableInvoice[];
@@ -125,9 +139,14 @@ function Info() {
         const createdAtDate = new Date(lstProduct.createdAt);
         createdAtDate.setDate(createdAtDate.getDate() + 3);
         arrBill.recievedDate = formatToDDMMYYYY(createdAtDate);
+        arrBill.createdAt = lstProduct.createdAt;
         arrBill.storeName = lstProduct.storeInfo?.name;
         arrBill.price = lstProduct.totalPrice;
+        arrBill.paymentMethod = lstProduct.paymentMethod;
         arrBill.productName = [] as string[];
+        arrBill.receiverInfo = lstProduct.receiverInfo;
+        arrBill.listProductsFullInfo = lstProduct.listProductsFullInfo;
+        arrBill.deliveryFee = lstProduct.deliveryFee;
         lstProduct.listProductsFullInfo?.map((item: any, index: number) => {
           if (item.product) {
             arrBill.productName?.push(
@@ -197,7 +216,11 @@ function Info() {
               </td>
               <td
                 scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"
+                className="cursor-pointer px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"
+                onClick={(e) => {
+                  setIsReview(true);
+                  setCurrentBill(item);
+                }}
               >
                 <div className="flex flex-col">
                   {item.productName?.map((item, index) => (
@@ -206,7 +229,9 @@ function Info() {
                 </div>
               </td>
               <td className="px-6 py-4 text-center">{item.storeName}</td>
-              <td className="px-6 py-4 text-center">{item.price}</td>
+              <td className="px-6 py-4 text-center">
+                {FormatMoney(item.price)}
+              </td>
 
               <td className="px-6 py-4 text-center">{item.recievedDate}</td>
               {status == "NEW" && (
@@ -236,7 +261,6 @@ function Info() {
             </tr>
           ))}
         </SortTable>
-
         <Modal
           isShow={isShow}
           setIsShow={(data: any) => setIsShow(data)}
@@ -249,6 +273,10 @@ function Info() {
             {type[typeMes]?.mes}
           </div>
         </Modal>
+
+        {isReview && (
+          <Review setChanged={(data) => setIsReview(data)} bill={currentBill} />
+        )}
       </div>
     </div>
   );

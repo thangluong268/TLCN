@@ -16,3 +16,4 @@ export class SignUpDto {
   @MinLength(6)
   password: string;
 }
+

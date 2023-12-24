@@ -13,8 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -27,5 +28,12 @@ jobs:
     - run: npm ci
     - run: npm run build
     - run: npm run test:e2e auth.e2e-spec.ts
-    - run: npm run test:e2e bill.e2e-spec.ts
     - run: npm run test:e2e product.e2e-spec.ts
+    - run: npm run test:e2e cart.e2e-spec.ts
+    - run: npm run test:e2e bill.e2e-spec.ts
+    - run: npm run test:e2e category.e2e-spec.ts
+    - run: npm run test:e2e feedback.e2e-spec.ts
+    - run: npm run test:e2e notification.e2e-spec.ts
+    - run: npm run test:e2e store.e2e-spec.ts
+    - run: npm run test:e2e user.e2e-spec.ts
+    - run: npm run test:e2e evaluation.e2e-spec.ts

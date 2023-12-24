@@ -18,6 +18,25 @@ export enum PRODUCT_TYPE {
   GIVE = 'GIVE',
 }
 
+export class ContentNotiByStatus {
+  private readonly billId: string;
+  constructor(billId: string) {
+    this.billId = billId;
+  }
+  get CONFIRMED(): string {
+    return `Đơn hàng #${this.billId} đang được chuẩn bị.`;
+  }
+  get DELIVERING(): string {
+    return `Đơn hàng #${this.billId} đang được giao.`;
+  }
+  get DELIVERED(): string {
+    return `Đơn hàng #${this.billId} đã được giao.`;
+  }
+  get CANCELLED(): string {
+    return `Đơn hàng #${this.billId} đã bị hủy.`;
+  }
+}
+
 @Schema({
   timestamps: true,
 })

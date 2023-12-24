@@ -1,28 +1,16 @@
 "use client";
-import Star from "@/components/Star";
 import { addItemtoCartPopup } from "@/redux/features/cart/cartpopup-slice";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { APIAddProductInCart } from "@/services/Cart";
 import { APIGetEvaluation, APIGetEvaluationUser } from "@/services/Evaluation";
-import {
-  APIGetListProductOtherInStore,
-  APIGetProduct,
-} from "@/services/Product";
-import { Product } from "@/types/Cart";
+import { APIGetProduct } from "@/services/Product";
 import { UserInterface } from "@/types/User";
 import ConvertToShortFormat from "@/utils/ConvertToShortFormat";
 import Toast from "@/utils/Toast";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
-import {
-  FaHeart,
-  FaPlus,
-  FaShareAlt,
-  FaShopify,
-  FaShoppingCart,
-  FaTelegramPlane,
-} from "react-icons/fa";
+import { FaHeart, FaShareAlt, FaShopify, FaShoppingCart } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {
   FacebookShareButton,
@@ -31,23 +19,24 @@ import {
   FacebookMessengerIcon,
 } from "next-share";
 import { APIGetFeedbackStar } from "@/services/Feedback";
-import {
-  APIGetMyStore,
-  APIGetStoreById,
-  APIGetStoreReputation,
-} from "@/services/Store";
+
 import Store from "./Store";
 import Feedback from "./Feedback";
+import Modal from "@/components/Modal";
+import Form from "@/app/login/Form";
+import { APIReportUser } from "@/services/Report";
 
 function ProductDetail() {
   const [product, setProduct] = React.useState({} as any);
   const [currentImage, setCurrentImage] = React.useState(0);
   const [user, setUser] = React.useState<UserInterface>();
-  const [page, setPage] = React.useState(1);
   const [quantityDelivered, setQuantityDelivered] = React.useState(0);
   const [totalFeedback, setTotalFeedback] = React.useState(0);
-
+  const [showLogin, setShowLogin] = React.useState(false);
   const params = useParams();
+  const [showReport, setShowReport] = React.useState(false);
+  const [contentReport, setContentReport] = React.useState("");
+  const [type, setType] = React.useState("");
   const dispatch = useDispatch<AppDispatch>();
   const [evaluation, setEvaluation] = React.useState({
     total: 0,
@@ -55,7 +44,6 @@ function ProductDetail() {
     isPurchased: false,
   });
   const [star, setStar] = React.useState({} as any);
-  const [feedback, setFeedback] = React.useState([]);
 
   React.useEffect(() => {
     const user = localStorage.getItem("user")
@@ -162,6 +150,25 @@ function ProductDetail() {
     });
   };
 
+  const Report = async () => {
+    if (contentReport == "") {
+      Toast("warning", "Vui lòng nhập nội dung báo cáo", 2000);
+      return;
+    }
+    await APIReportUser({
+      subjectId: type == "product" ? params.ProductDetail : product.storeId,
+      content: contentReport,
+      type: type,
+    }).then((res) => {
+      setShowReport(false);
+      if (res.status == 200 || res.status == 201) {
+        Toast("success", "Báo cáo thành công", 2000);
+      } else {
+        Toast("error", res.message, 2000);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-[160px] my-4">
       {product._id && (
@@ -212,6 +219,7 @@ function ProductDetail() {
                           "Bạn cần đăng nhập để yêu thích sản phẩm này",
                           2000
                         );
+                        setShowLogin(true);
                       } else {
                         Heart();
                       }
@@ -248,6 +256,25 @@ function ProductDetail() {
                       </div>
                     </div>
                   </div>
+                  <div
+                    className="text-center font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        Toast(
+                          "error",
+                          "Bạn cần đăng nhập để báo cáo sản phẩm này",
+                          2000
+                        );
+                        setShowLogin(true);
+                      } else {
+                        setType("product");
+                        setShowReport(true);
+                      }
+                    }}
+                  >
+                    Báo cáo sản phẩm
+                  </div>
                 </div>
                 <hr className="my-2" />
 
@@ -259,6 +286,7 @@ function ProductDetail() {
                       if (!user) {
                         e.preventDefault();
                         Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                        setShowLogin(true);
                       } else {
                         AddToCart();
                       }
@@ -271,13 +299,13 @@ function ProductDetail() {
                     type="button"
                     className="w-full text-center py-3 font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                   >
-                    <Link
-                      href="/payment"
+                    <div
                       className="flex justify-center items-center "
                       onClick={(e) => {
                         if (!user) {
                           e.preventDefault();
                           Toast("error", "Bạn cần đăng nhập để mua hàng", 2000);
+                          setShowLogin(true);
                         } else {
                           AddToCart(true);
                         }
@@ -285,7 +313,7 @@ function ProductDetail() {
                     >
                       <FaShopify className="mr-3" />
                       <span>Mua ngay</span>
-                    </Link>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -334,7 +362,12 @@ function ProductDetail() {
               </div>
             </div>
           </div>
-          <Store product={product} />
+          <Store
+            product={product}
+            setType={(data: string) => setType(data)}
+            setShowLogin={(data: boolean) => setShowLogin(data)}
+            setShowReport={(data: boolean) => setShowReport(data)}
+          />
           <div className="mb-3 bg-white rounded-md p-4 w-full">
             <div className="text-lg font-bold mb-2">Đánh giá sản phẩm:</div>
             <div className="flex flex-col items-center justify-center w-full">
@@ -463,12 +496,34 @@ function ProductDetail() {
             <hr className="my-6 w-full" />
 
             <Feedback
-              isPurchase={!evaluation.isPurchased}
+              isPurchase={evaluation.isPurchased}
               setTotalFeedback={setTotalFeedback}
+              setShowLogin={(data: boolean) => setShowLogin(data)}
             />
           </div>
         </>
       )}
+      <Modal
+        isShow={showLogin}
+        setIsShow={(e) => setShowLogin(false)}
+        confirm={() => console.log("sss")}
+        title={"Đăng nhập để tiếp tục"}
+        fastLogin={true}
+      >
+        <Form fastLogin={true} />
+      </Modal>
+      <Modal
+        isShow={showReport}
+        setIsShow={(e) => setShowReport(false)}
+        confirm={() => Report()}
+        title={`Báo cáo ${type == "product" ? "sản phẩm" : "cửa hàng"}`}
+      >
+        <div> Nội dung báo cáo:</div>
+        <textarea
+          className="w-full h-32 border border-gray-300 rounded-md mt-2 p-2 outline-none"
+          onChange={(e) => setContentReport(e.target.value)}
+        ></textarea>
+      </Modal>
     </div>
   );
 }

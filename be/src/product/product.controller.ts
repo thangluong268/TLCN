@@ -17,6 +17,8 @@ import { CategoryService } from '../category/category.service';
 import { NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { EvaluationService } from '../evaluation/evaluation.service';
+import { FeedbackService } from '../feedback/feedback.service';
+import { Feedback } from '../feedback/schema/feedback.schema';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from '../notification/schema/notification.schema';
 import { RoleName } from '../role/schema/role.schema';
@@ -40,6 +42,7 @@ export class ProductController {
     private readonly notificationService: NotificationService,
     private readonly billService: BillService,
     private readonly categoryService: CategoryService,
+    private readonly feedbackService: FeedbackService,
   ) {}
 
   @UseGuards(AbilitiesGuard)
@@ -148,16 +151,91 @@ export class ProductController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @Get('product/admin')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllBySearchAdmin(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
+    const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, {});
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+        const quantitySold: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
+        };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { total: data.total, data: fullInfoProducts },
+    });
+  }
+
+  @Public()
+  @Get('product-give')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getAllGive(@Query('page') page: number, @Query('limit') limit: number): Promise<SuccessResponse> {
+    const data = await this.productService.getAllGive(page, limit, null, null);
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+        };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { total: data.total, data: fullInfoProducts },
+    });
+  }
+
   @Public()
   @Get('product')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'search', type: String, required: false })
   async getAllBySearchPublic(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
-    const products = await this.productService.getAllBySearch(null, page, limit, search, null, null, { status: true });
+    const data = await this.productService.getAllBySearch(null, page, limit, search, null, null, { status: true });
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+        };
+      }),
+    );
+
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
-      metadata: { data: products },
+      metadata: { total: data.total, data: fullInfoProducts },
     });
   }
 
@@ -178,9 +256,9 @@ export class ProductController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateProductAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
   @Patch('product/seller/:id')
-  async update(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
+  async updateSeller(@Param('id') id: string, @Body() product: UpdateProductDto): Promise<SuccessResponse | NotFoundException> {
     const newProduct = await this.productService.update(id, product);
     if (!newProduct) return new NotFoundException('Không tìm thấy sản phẩm này!');
     return new SuccessResponse({
@@ -193,7 +271,7 @@ export class ProductController {
   @Get('product/listProductLasted')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async getlistProductLasted(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const data = await this.productService.getListProductLasted(Number(limit));
+    const data = await this.productService.getListProductLasted(limit);
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm thành công!',
       metadata: { data },
@@ -204,7 +282,7 @@ export class ProductController {
   @Get('product/mostProductsInStore')
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async mostProductsInStore(@Query('limit') limit: number): Promise<SuccessResponse> {
-    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(Number(limit));
+    const storeHaveMostProducts = await this.productService.getListStoreHaveMostProducts(limit);
 
     const data = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,7 +308,6 @@ export class ProductController {
           storeAvatar: store.avatar,
           listProducts: products.slice(0, 10),
         };
-
       }),
     );
 
@@ -264,7 +341,7 @@ export class ProductController {
   @Get('product-filter')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @ApiQuery({ name: 'search', type: String, required: false })
+  @ApiQuery({ name: 'search', type: String, required: true })
   async getAllBySearchAndFilterPublic(
     @Query('page') page: number,
     @Query('limit') limit: number,
@@ -287,6 +364,123 @@ export class ProductController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.MANAGER_PRODUCT, RoleName.ADMIN)
+  @Get('product/admin-get-all')
+  async getAll(): Promise<SuccessResponse | NotFoundException> {
+    const products = await this.productService.getAll();
+    if (!products) return new NotFoundException('Lấy danh sách sản phẩm thất bại!');
+
+    products.slice(0, 30);
+
+    const data = await Promise.all(
+      products.map(async (item: Product) => {
+        const product = await this.productService.getById(item._id);
+        if (!product) return;
+
+        const evaluation = await this.evaluationService.getByProductId(item._id);
+        if (!evaluation) return;
+
+        const total: number = evaluation.emojis.length;
+
+        const emoji = {
+          Haha: 0,
+          Love: 0,
+          Wow: 0,
+          Sad: 0,
+          Angry: 0,
+          like: 0,
+        };
+
+        evaluation.emojis.forEach(e => {
+          switch (e.name) {
+            case 'Haha':
+              emoji.Haha++;
+              break;
+            case 'Love':
+              emoji.Love++;
+              break;
+            case 'Wow':
+              emoji.Wow++;
+              break;
+            case 'Sad':
+              emoji.Sad++;
+              break;
+            case 'Angry':
+              emoji.Angry++;
+              break;
+            case 'like':
+              emoji.like++;
+              break;
+          }
+        });
+
+        const emojis = {
+          total,
+          haha: emoji.Haha,
+          love: emoji.Love,
+          wow: emoji.Wow,
+          sad: emoji.Sad,
+          angry: emoji.Angry,
+          like: emoji.like,
+        };
+
+        const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(item._id);
+
+        const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        const starPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        let averageStar = 0;
+
+        if (feedbacks.length > 0) {
+          feedbacks.forEach(feedback => {
+            star[feedback.star]++;
+          });
+
+          Object.keys(star).forEach(key => {
+            starPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+          });
+
+          Object.keys(star).forEach(key => {
+            averageStar += star[key] * Number(key);
+          });
+
+          averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+        }
+
+        const totalFeedback = await this.feedbackService.countTotal(item._id);
+
+        const store = await this.storeService.getById(item.storeId);
+        if (!store) return;
+
+        const category = await this.categoryService.getById(product.categoryId);
+        const quantitySold: number = await this.billService.countProductDelivered(item._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(item._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
+        const isPurchased: boolean = await this.billService.checkProductPurchased(item._id);
+
+        const productFullInfo = {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
+          isPurchased,
+        };
+
+        return { product: productFullInfo, emojis, starPercent, averageStar, totalFeedback };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @Get('product/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
@@ -297,15 +491,111 @@ export class ProductController {
 
     const quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
 
+    const category = await this.categoryService.getById(product.categoryId);
+    const store = await this.storeService.getById(product.storeId);
+
+    const data = {
+      ...product.toObject()
+    };
+
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm thành công!',
-      metadata: { data: product, quantityDelivered },
+      metadata: { data, quantityDelivered, categoryName: category.name, storeName: store.name },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @Get('product/admin/:id')
+  async getByIdAdmin(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const product = await this.productService.getById(id);
+    if (!product) return new NotFoundException('Không tìm thấy sản phẩm này!');
+
+    const type = product.price === 0 ? PRODUCT_TYPE.GIVE : PRODUCT_TYPE.SELL;
+
+    const quantityDelivered: number = await this.billService.countProductDelivered(id, type, 'DELIVERED');
+
+    const evaluation = await this.evaluationService.getByProductId(id);
+    if (!evaluation) return new NotFoundException('Không tìm thấy đánh giá của sản phẩm này!');
+
+    const total: number = evaluation.emojis.length;
+
+    const emoji = {
+      Haha: 0,
+      Love: 0,
+      Wow: 0,
+      Sad: 0,
+      Angry: 0,
+      like: 0,
+    };
+
+    evaluation.emojis.forEach(e => {
+      switch (e.name) {
+        case 'Haha':
+          emoji.Haha++;
+          break;
+        case 'Love':
+          emoji.Love++;
+          break;
+        case 'Wow':
+          emoji.Wow++;
+          break;
+        case 'Sad':
+          emoji.Sad++;
+          break;
+        case 'Angry':
+          emoji.Angry++;
+          break;
+        case 'like':
+          emoji.like++;
+          break;
+      }
+    });
+
+    const emojis = {
+      total,
+      haha: emoji.Haha,
+      love: emoji.Love,
+      wow: emoji.Wow,
+      sad: emoji.Sad,
+      angry: emoji.Angry,
+      like: emoji.like,
+    };
+
+    const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(id);
+
+    const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    const starPercent = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    let averageStar = 0;
+
+    feedbacks.forEach(feedback => {
+      star[feedback.star]++;
+    });
+
+    Object.keys(star).forEach(key => {
+      starPercent[key] = Math.round((star[key] / feedbacks.length) * 100);
+    });
+
+    Object.keys(star).forEach(key => {
+      averageStar += star[key] * Number(key);
+    });
+
+    averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+    const totalFeedback = await this.feedbackService.countTotal(id);
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin sản phẩm bởi Admin thành công!',
+      metadata: { data: product, quantityDelivered, emojis, starPercent, averageStar, totalFeedback },
     });
   }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteProductAbility())
-  @CheckRole(RoleName.MANAGER, RoleName.SELLER)
+  @CheckRole(RoleName.MANAGER_PRODUCT, RoleName.SELLER)
   @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const product = await this.productService.deleteProduct(id);

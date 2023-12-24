@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, MongooseError, Types } from 'mongoose';
+import mongoose, { Model, MongooseError, Types } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import sortByConditions from '../utils/sortByContitions';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -28,7 +28,7 @@ export class ProductService {
 
   async getById(id: string): Promise<Product> {
     try {
-      const product = await this.productModel.findOne({ _id: id });
+      const product = await this.productModel.findOne({ _id: id.toString() });
       return product;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -38,8 +38,8 @@ export class ProductService {
 
   async getAllBySearch(
     storeIdInput: string,
-    pageQuery: number,
-    limitQuery: number,
+    pageQuery: number = 1,
+    limitQuery: number = 5,
     searchQuery: string,
     sortTypeQuery: string = 'desc',
     sortValueQuery: string = 'productName',
@@ -47,27 +47,51 @@ export class ProductService {
     status: any,
   ): Promise<{ total: number; products: Product[] }> {
     const storeId = storeIdInput ? { storeId: storeIdInput } : {};
-    const limit = Number(limitQuery) || Number(process.env.LIMIT_DEFAULT);
-    const page = Number(pageQuery) || Number(process.env.PAGE_DEFAULT);
     const search = searchQuery
       ? {
           $or: [
+            { _id: mongoose.Types.ObjectId.isValid(searchQuery) === true ? searchQuery.toString() : new mongoose.Types.ObjectId() },
             { productName: { $regex: searchQuery, $options: 'i' } },
             { description: { $regex: searchQuery, $options: 'i' } },
             { keywords: { $regex: searchQuery, $options: 'i' } },
             { type: { $regex: searchQuery, $options: 'i' } },
             { storeName: { $regex: searchQuery, $options: 'i' } },
-            { categoryId: { $regex: searchQuery, $options: 'i' } },
+            { categoryId: mongoose.Types.ObjectId.isValid(searchQuery) === true ? searchQuery.toString() : new mongoose.Types.ObjectId() },
           ],
         }
       : {};
-    const skip = limit * (page - 1);
+    const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
       const total = await this.productModel.countDocuments({ ...search, ...storeId, ...status });
       const products = await this.productModel
         .find({ ...search, ...storeId, ...status })
         .sort({ createdAt: -1 })
-        .limit(limit)
+        .limit(Number(limitQuery))
+        .skip(skip);
+
+      sortByConditions(products, sortTypeQuery, sortValueQuery);
+
+      return { total, products };
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async getAllGive(
+    pageQuery: number = 1,
+    limitQuery: number = 5,
+    sortTypeQuery: string = 'desc',
+    sortValueQuery: string = 'productName',
+  ): Promise<{ total: number; products: Product[] }> {
+
+    const skip = Number(limitQuery) * (Number(pageQuery) - 1);
+    try {
+      const total = await this.productModel.countDocuments({ price: 0, status: true });
+      const products = await this.productModel
+        .find({ price: 0, status: true })
+        .sort({ createdAt: -1 })
+        .limit(Number(limitQuery))
         .skip(skip);
 
       sortByConditions(products, sortTypeQuery, sortValueQuery);
@@ -104,9 +128,9 @@ export class ProductService {
     }
   }
 
-  async getListProductLasted(limit: number): Promise<Product[]> {
+  async getListProductLasted(limit: number = 5): Promise<Product[]> {
     try {
-      const products = await this.productModel.find({ status: true }).sort({ createdAt: -1 }).limit(limit);
+      const products = await this.productModel.find({ status: true }).sort({ createdAt: -1 }).limit(Number(limit));
       return products;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -266,12 +290,31 @@ export class ProductService {
           $sort: { count: -1 },
         },
         {
-          $limit: limit,
+          $limit: Number(limit),
         },
       ]);
 
       return products;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
 
+  async countTotal(): Promise<number> {
+    try {
+      const total = await this.productModel.countDocuments();
+      return total;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async getAll(): Promise<Product[]> {
+    try {
+      const products = await this.productModel.find();
+      return products;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

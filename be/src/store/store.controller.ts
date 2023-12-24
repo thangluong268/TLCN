@@ -11,6 +11,7 @@ import { CheckRole } from '../ability/decorators/role.decorator';
 import { AbilitiesGuard } from '../ability/guards/abilities.guard';
 import { GetCurrentUserId } from '../auth/decorators/get-current-userid.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { BillService } from '../bill/bill.service';
 import { BadRequestException, ConflictException, NotFoundException } from '../core/error.response';
 import { SuccessResponse } from '../core/success.response';
 import { FeedbackService } from '../feedback/feedback.service';
@@ -21,6 +22,7 @@ import { RoleName } from '../role/schema/role.schema';
 import { UserService } from '../user/user.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { Store } from './schema/store.schema';
 import { StoreService } from './store.service';
 
 @Controller()
@@ -33,11 +35,12 @@ export class StoreController {
     private readonly roleService: RoleService,
     private readonly feedbackService: FeedbackService,
     private readonly productService: ProductService,
+    private readonly billService: BillService,
   ) {}
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateStoreAbility())
-  @CheckRole(RoleName.USER)
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
   @Post('store/user')
   async create(
     @Body() store: CreateStoreDto,
@@ -63,7 +66,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadStoreAbility())
-  @CheckRole(RoleName.SELLER, RoleName.USER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Get('store/seller')
   async getMyStore(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getByUserId(userId);
@@ -75,10 +78,27 @@ export class StoreController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('store/admin')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  async getAllStores(@Query('page') page: number, @Query('limit') limit: number, @Query('search') search: string): Promise<SuccessResponse> {
+    const data = await this.storeService.getAll(page, limit, search);
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách cửa hàng thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @ApiQuery({ name: 'storeId', type: String, required: true })
+  @ApiQuery({ name: 'userId', type: String, required: false })
   @Get('store-reputation')
-  async getReputation(@Query('storeId') storeId: string): Promise<SuccessResponse | NotFoundException> {
+  async getReputation(@Query('storeId') storeId: string, @Query('userId') userId: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getById(storeId);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
@@ -123,9 +143,17 @@ export class StoreController {
 
     const totalFollow = await this.userService.countTotalFollowStoresByStoreId(storeId);
 
+    let isFollow = false;
+
+    if (userId) {
+      const user = await this.userService.getById(userId);
+
+      isFollow = user.followStores.includes(storeId);
+    }
+
     return new SuccessResponse({
       message: 'Lấy thông tin độ uy tín cửa hàng thành công!',
-      metadata: { averageStar, totalFeedback, totalFollow },
+      metadata: { averageStar, totalFeedback, totalFollow, isFollow },
     });
   }
 
@@ -133,20 +161,19 @@ export class StoreController {
   @CheckAbilities(new ReadStoreAbility())
   @CheckRole(RoleName.ADMIN)
   @ApiQuery({ name: 'limit', type: Number, required: false })
-  @Get('stores-most-products')
+  @Get('store/admin/stores-most-products')
   async getListStoreHaveMostProducts(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
-    const stores = await this.productService.getListStoreHaveMostProducts(Number(limit));
+    const stores = await this.productService.getListStoreHaveMostProducts(limit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stores.map(async (item: any) => {
-        let store = await this.storeService.getById(item._id);
+        const store = await this.storeService.getById(item._id);
         if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
-        store = store.toObject();
+        // store = store.toObject();
         delete store.status;
         delete store.__v;
-        delete store['createdA'];
         delete store['updatedAt'];
         return { store, totalProducts: item.count };
       }),
@@ -158,13 +185,138 @@ export class StoreController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_STORE)
+  @Get('store/admin/:id')
+  async getByIdAdmin(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const store = await this.storeService.getById(id);
+    if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
+
+    const products = await this.productService.getProductsByStoreId(id);
+
+    let totalFeedback = 0;
+
+    let totalProductsHasFeedback = 0;
+    let totalAverageStar = 0;
+
+    let averageStar = 0;
+
+    await Promise.all(
+      products.map(async product => {
+        const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id);
+
+        if (feedbacks.length === 0) return;
+
+        totalFeedback += feedbacks.length;
+
+        const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        feedbacks.forEach(feedback => {
+          star[feedback.star]++;
+        });
+
+        let averageStar = 0;
+
+        Object.keys(star).forEach(key => {
+          averageStar += star[key] * Number(key);
+        });
+
+        averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+        totalAverageStar += averageStar;
+
+        totalProductsHasFeedback++;
+      }),
+    );
+
+    if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2));
+
+    const totalFollow = await this.userService.countTotalFollowStoresByStoreId(id);
+
+    const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(id);
+    const totalDelivered: number = await this.billService.countTotalByStatusSeller(id, 'DELIVERED', null);
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin cửa hàng thành công!',
+      metadata: { store, averageStar, totalFeedback, totalFollow, totalRevenue, totalDelivered },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadStoreAbility())
+  @CheckRole(RoleName.MANAGER_STORE, RoleName.ADMIN)
+  @Get('store/admin-get-all')
+  async getAll(): Promise<SuccessResponse | NotFoundException> {
+    const stores = await this.storeService.getAllNoPaging();
+    if (!stores) return new NotFoundException('Lấy danh sách cửa hàng thất bại!');
+
+    stores.slice(0, 30);
+
+    const data = await Promise.all(
+      stores.map(async (item: Store) => {
+        const store = await this.storeService.getById(item._id);
+        if (!store) return;
+
+        const products = await this.productService.getProductsByStoreId(item._id);
+
+        let totalFeedback = 0;
+
+        let totalProductsHasFeedback = 0;
+        let totalAverageStar = 0;
+
+        let averageStar = 0;
+
+        await Promise.all(
+          products.map(async product => {
+            const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id);
+
+            if (feedbacks.length === 0) return;
+
+            totalFeedback += feedbacks.length;
+
+            const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+            feedbacks.forEach(feedback => {
+              star[feedback.star]++;
+            });
+
+            let averageStar = 0;
+
+            Object.keys(star).forEach(key => {
+              averageStar += star[key] * Number(key);
+            });
+
+            averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+            totalAverageStar += averageStar;
+
+            totalProductsHasFeedback++;
+          }),
+        );
+
+        if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2));
+
+        const totalFollow = await this.userService.countTotalFollowStoresByStoreId(item._id);
+
+        const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(item._id);
+        const totalDelivered: number = await this.billService.countTotalByStatusSeller(item._id, 'DELIVERED', null);
+
+        return { store, averageStar, totalFeedback, totalFollow, totalRevenue, totalDelivered };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách cửa hàng thành công!',
+      metadata: { data },
+    });
+  }
+
   @Public()
   @Get('store/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const store = await this.storeService.getById(id);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
-
-    delete store.__v;
 
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
@@ -174,7 +326,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new DeleteStoreAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Delete('store/seller')
   async delete(@GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException | BadRequestException> {
     const result = await this.storeService.delete(userId);
@@ -189,7 +341,7 @@ export class StoreController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.SELLER)
+  @CheckRole(RoleName.SELLER, RoleName.ADMIN)
   @Put('store/seller')
   async update(@Body() store: UpdateStoreDto, @GetCurrentUserId() userId: string): Promise<SuccessResponse | NotFoundException> {
     const newStore = await this.storeService.update(userId, store);
@@ -197,19 +349,6 @@ export class StoreController {
     return new SuccessResponse({
       message: 'Cập nhật thông tin cửa hàng thành công!',
       metadata: { data: newStore },
-    });
-  }
-
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new UpdateStoreAbility())
-  @CheckRole(RoleName.MANAGER)
-  @Put('store/manager/warningcount/:id')
-  async updateWarningCount(@Param('id') id: string, @Param('action') action: string): Promise<SuccessResponse | NotFoundException> {
-    const store = await this.storeService.updateWarningCount(id, action);
-    if (!store) throw new NotFoundException('Không tìm thấy cửa hàng này!');
-    return new SuccessResponse({
-      message: 'Cập nhật cảnh báo thành công!',
-      metadata: { data: store },
     });
   }
 }

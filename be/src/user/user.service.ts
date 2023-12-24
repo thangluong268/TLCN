@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
 import { Model, MongooseError } from 'mongoose';
+import { LoginSocialDto } from 'src/auth/dto/login-social.dto';
 import { SignUpDto } from '../auth/dto/signup.dto';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +16,7 @@ export class UserService {
     private readonly userModel: Model<User>,
   ) {}
 
-  async create(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
+  async createNormal(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
     try {
       const newUser = await this.userModel.create(signUpDto);
       await newUser.save();
@@ -22,6 +24,18 @@ export class UserService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...userWithoutPass } = userDoc;
       return userWithoutPass;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async createSocial(loginSocialDto: LoginSocialDto): Promise<User> {
+    try {
+      const newUser = await this.userModel.create(loginSocialDto);
+      newUser.isSocial = true;
+      await newUser.save();
+      return newUser;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;
@@ -41,9 +55,52 @@ export class UserService {
     }
   }
 
-  async getById(userId: string): Promise<User> {
+  async getByEmailAndSocial(email: string, isSocial: boolean): Promise<User> {
     try {
-      const user = await this.userModel.findById(userId);
+      const user = await this.userModel.findOne({ email, isSocial });
+
+      user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+
+      return user;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async compareData(data: string, hashedData: string): Promise<boolean> {
+    const isMatched = await bcrypt.compare(data, hashedData);
+    return isMatched;
+  }
+
+  async getByEmailPasswordAndSocial(email: string, passwordInput: string, isSocial: boolean): Promise<User> {
+    try {
+      const users: User[] = await this.userModel.find({ email, isSocial });
+
+      let userMatch: User;
+
+      for (const user of users) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+        let userDoc = user['_doc'] ? user['_doc'] : user;
+        // eslint-disable-next-line prefer-const
+        let isMatch = await this.compareData(passwordInput, userDoc.password);
+        if (userDoc.email === email && isMatch && userDoc.isSocial === isSocial) {
+          userMatch = userDoc;
+        }
+      }
+
+      userMatch?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
+
+      return userMatch;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async getById(id: string): Promise<User> {
+    try {
+      const user = await this.userModel.findById(id);
 
       user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
 
@@ -75,15 +132,17 @@ export class UserService {
     }
   }
 
-  async followStore(userId: string, storeId: string): Promise<void> {
+  async followStore(id: string, storeId: string): Promise<void> {
     try {
-      const user: User = await this.userModel.findById(userId);
+      let user: User = await this.userModel.findById(id);
+
+      user = user['_doc'] ? user['_doc'] : user;
 
       const index = user.followStores.findIndex(id => id.toString() === storeId.toString());
 
       index == -1 ? user.followStores.push(storeId) : user.followStores.splice(index, 1);
 
-      await user.save();
+      await this.userModel.findByIdAndUpdate(id, { followStores: user.followStores });
       return;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -91,15 +150,18 @@ export class UserService {
     }
   }
 
-  async addFriend(userIdSend: string, userIdReceive: string): Promise<void> {
+  async addFriend(id: string, userIdReceive: string): Promise<void> {
     try {
-      const user: User = await this.userModel.findById(userIdSend);
+      let user: User = await this.userModel.findById(id);
+
+      user = user['_doc'] ? user['_doc'] : user;
 
       const index = user.friends.findIndex(id => id.toString() === userIdReceive.toString());
 
       index == -1 ? user.friends.push(userIdReceive) : user.friends.splice(index, 1);
 
-      await user.save();
+      await this.userModel.findByIdAndUpdate(id, { friends: user.friends });
+
       return;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
@@ -133,19 +195,24 @@ export class UserService {
     }
   }
   // getAll
-  async getAll(page: number, limit: number, search: string): Promise<{ total: number; users: User[] }> {
+  async getAll(page: number = 1, limit: number = 5, search: string): Promise<{ total: number; users: User[] }> {
     try {
-      // Total user and search user by email or name
-      const total = await this.userModel.countDocuments({
-        $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }],
-      });
-      const users = await this.userModel
-        .find({ $or: [{ email: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }] })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
+      const skip = (Number(page) - 1) * Number(limit);
+      const query = search
+        ? {
+            $or: [
+              { fullName: { $regex: search, $options: 'i' } },
+              { email: { $regex: search, $options: 'i' } },
+              { phone: { $regex: search, $options: 'i' } },
+            ],
+          }
+        : {};
 
-      users.map(user => {
+      const total = await this.userModel.countDocuments(query);
+
+      const users = await this.userModel.find(query).sort({ createdAt: -1 }).limit(Number(limit)).skip(skip);
+
+      users.forEach(user => {
         user?.address.sort((a, b) => (b.default ? 1 : -1) - (a.default ? 1 : -1));
         return user;
       });
@@ -179,6 +246,24 @@ export class UserService {
   async countTotalFollowStoresByStoreId(storeId: string): Promise<number> {
     try {
       return await this.userModel.countDocuments({ followStores: storeId });
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async countTotal(): Promise<number> {
+    try {
+      return await this.userModel.countDocuments();
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async getAllNoPaging(): Promise<User[]> {
+    try {
+      return await this.userModel.find();
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

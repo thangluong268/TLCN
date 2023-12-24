@@ -41,6 +41,17 @@ export class FeedbackService {
     }
   }
 
+  async countTotal(productId: string): Promise<number> {
+    try {
+      return await this.feedbackModel.countDocuments({ productId });
+    } catch (err) {
+      if (err instanceof MongooseError) {
+        throw new InternalServerErrorExceptionCustom();
+      }
+      throw err;
+    }
+  }
+
   async getAllByProductId(productId: string): Promise<Feedback[]> {
     try {
       const feedbacks = await this.feedbackModel.find({ productId }).sort({ createdAt: -1 });
@@ -54,11 +65,11 @@ export class FeedbackService {
     }
   }
 
-  async updateConsensus(userId: string, productId: string, userIdConsensus: string): Promise<boolean> {
+  async updateConsensus(userId: string, productId: string, userIdConsensus: string): Promise<Feedback> {
     try {
       const feedback: Feedback = await this.feedbackModel.findOne({ userId, productId });
 
-      if (!feedback) return false;
+      if (!feedback) return null;
 
       const index = feedback.consensus.findIndex(id => id.toString() === userIdConsensus.toString());
 
@@ -66,7 +77,7 @@ export class FeedbackService {
 
       await feedback.save();
 
-      return true;
+      return feedback;
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

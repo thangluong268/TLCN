@@ -1,31 +1,30 @@
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './auth/auth.module';
-import { PolicyModule } from './policy/policy.module';
-import { RoleModule } from './role/role.module';
-import { AbilityModule } from './ability/ability.module';
-import { BillModule } from './bill/bill.module';
-import { UsertokenModule } from './usertoken/usertoken.module';
-import { UserModule } from './user/user.module';
-import { FirebaseModule } from './firebase/firebase.module';
-import { UserotpModule } from './userotp/userotp.module';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { AbilityModule } from './ability/ability.module';
+import { AuthModule } from './auth/auth.module';
+import { BillModule } from './bill/bill.module';
 import { CartModule } from './cart/cart.module';
-import { StoreModule } from './store/store.module';
-import { FeedbackModule } from './feedback/feedback.module';
-import { ProductModule } from './product/product.module';
-import { SeedsModule } from './seeds/seeds.module';
-import { EvaluationModule } from './evaluation/evaluation.module';
-import { NotificationModule } from './notification/notification.module';
-import { PromotionModule } from './promotion/promotion.module';
-import { FineModule } from './fine/fine.module';
 import { CategoryModule } from './category/category.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { DatabaseModule } from './database/database.module';
-
+import { EvaluationModule } from './evaluation/evaluation.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { FineModule } from './fine/fine.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { NotificationModule } from './notification/notification.module';
+import { PolicyModule } from './policy/policy.module';
+import { ProductModule } from './product/product.module';
+import { PromotionModule } from './promotion/promotion.module';
+import { ReportModule } from './report/report.module';
+import { RoleModule } from './role/role.module';
+import { SeedsModule } from './seeds/seeds.module';
+import { StoreModule } from './store/store.module';
+import { UserModule } from './user/user.module';
+import { UserotpModule } from './userotp/userotp.module';
+import { UsertokenModule } from './usertoken/usertoken.module';
 
 @Module({
   imports: [
@@ -80,7 +79,8 @@ import { DatabaseModule } from './database/database.module';
     FineModule,
     CategoryModule,
     CloudinaryModule,
+    ReportModule,
   ],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,25 +1,24 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProductDto {
-    @ApiProperty({type: [String]})
-    avatar: string[];
+  @ApiProperty({ type: [String] })
+  avatar: string[];
 
-    @ApiProperty()
-    quantity: number;
+  @ApiProperty()
+  quantity: number;
 
-    @ApiProperty()
-    productName: string;
+  @ApiProperty()
+  productName: string;
 
-    @ApiProperty()
-    price: number;
+  @ApiProperty()
+  price: number;
 
-    @ApiProperty()
-    description: string;
+  @ApiProperty()
+  description: string;
 
-    @ApiProperty()
-    categoryId: string;
+  @ApiProperty()
+  categoryId: string;
 
-    @ApiProperty({type: [String]})
-    keywords: string[];
+  @ApiProperty({ type: [String] })
+  keywords: string[];
 }

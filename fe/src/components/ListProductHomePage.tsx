@@ -10,19 +10,6 @@ function ListProductHomePage(props: any) {
     <div className="flex flex-col bg-white p-4 rounded-xl mb-2">
       <div className="flex justify-between font-bold">
         <div>{title}</div>
-        {/* <div
-          className="text-blue-600 cursor-pointer"
-          onClick={(e) => {
-            if (listHighLight) {
-              window.location.href =
-                "/store/" + listHighLight[check][0].storeId;
-            } else {
-              window.location.href = "/product";
-            }
-          }}
-        >
-          Xem tất cả
-        </div> */}
       </div>
       <div className="flex my-2 ms-2">
         {listHighLight &&
@@ -35,7 +22,7 @@ function ListProductHomePage(props: any) {
                 key={index}
                 onClick={(e) => setCheck(index)}
               >
-                {item[0].storeName}
+                {item.storeName}
               </div>
             );
           })}
@@ -50,9 +37,11 @@ function ListProductHomePage(props: any) {
         buttonLeft={true}
       >
         {listHighLight
-          ? listHighLight[check]?.map((item: any, index: number) => {
-              return <CardProduct key={index} data={item} />;
-            })
+          ? listHighLight[check]?.listProducts.map(
+              (item: any, index: number) => {
+                return <CardProduct key={index} data={item} />;
+              }
+            )
           : listProduct.map((item: any, index: number) => {
               return <CardProduct key={index} data={item} />;
             })}

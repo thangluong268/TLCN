@@ -1,6 +1,7 @@
 "use client";
 import Input from "@/components/Input";
 import Modal from "@/components/Modal";
+import ModalRequired from "@/components/ModalRequired";
 import Paypal from "@/components/Paypal";
 import { useAppSelector } from "@/redux/store";
 import { APICreateBill } from "@/services/Bill";
@@ -18,6 +19,7 @@ function Payment() {
     add: false,
     edit: false,
   });
+  const [showModalRequied, setShowModalRequied] = React.useState(false);
   const [isGift, setIsGift] = React.useState(false);
   const [indexAddressPicked, setIndexAddressPicked] = React.useState(0);
   const [isDetail, setIsDetail] = React.useState(false);
@@ -147,6 +149,9 @@ function Payment() {
           address: address[0].address || "Không xác định",
         });
       }
+      if (!user.address?.length) {
+        setShowModalRequied(true);
+      }
       setUser(user);
     } else {
       window.location.href = "/login";
@@ -200,13 +205,22 @@ function Payment() {
     } else {
       // Edit address to user in localStorage and set default and setUser
       const defaultValue =
-        userLocal.providerData[0]?.address[indexAddressPicked].default;
+        userLocal.providerData[0]?.address[indexAddressPicked]?.default;
       userLocal.providerData[0].address[indexAddressPicked] = {
         receiverName: addressPopup.receiverName,
         receiverPhone: addressPopup.receiverPhone,
         address: addressPopup.address,
-        default: defaultValue,
+        default: defaultValue || true,
       };
+      if (showModalRequied) {
+        setReceiverInfo({
+          receiverName: addressPopup.receiverName,
+          receiverPhone: addressPopup.receiverPhone,
+          address: addressPopup.address,
+        });
+      }
+      setShowModalRequied(false);
+
       Toast("success", "Sửa địa chỉ thành công", 2000);
     }
     localStorage.setItem("user", JSON.stringify(userLocal));
@@ -296,15 +310,21 @@ function Payment() {
         listProducts.push(obj);
       }
     });
+    const addressForPaypal = JSON.parse(
+      localStorage.getItem("addressForPaypal")!
+    );
     const obj = {
       data: listProducts,
       deliveryMethod: deliveryMethod.find((item) => item.checked)?.value,
       paymentMethod: paymentMethod.find((item) => item.checked)?.value,
-      receiverInfo: {
-        fullName: receiverInfo.receiverName,
-        phoneNumber: receiverInfo.receiverPhone,
-        address: receiverInfo.address,
-      },
+      receiverInfo:
+        paymentMethod.find((item) => item.checked)?.value == "Paypal"
+          ? addressForPaypal
+          : {
+              fullName: receiverInfo.receiverName,
+              phoneNumber: receiverInfo.receiverPhone,
+              address: receiverInfo.address,
+            },
       giveInfo: isGift && {
         senderName: giveInfo.senderName,
         wish: giveInfo.wish,
@@ -315,6 +335,8 @@ function Payment() {
     APICreateBill(obj);
     Toast("success", "Đặt hàng thành công", 2000);
     setTimeout(() => {
+      localStorage.removeItem("listProductIdChecked");
+      localStorage.removeItem("addressForPaypal");
       window.location.href = "/";
     }, 2000);
   };
@@ -534,6 +556,14 @@ function Payment() {
                         receiverPhone: item.receiverPhone,
                         address: item.address,
                       });
+                      localStorage.setItem(
+                        "addressForPaypal",
+                        JSON.stringify({
+                          fullName: item.receiverName,
+                          phoneNumber: item.receiverPhone,
+                          address: item.address,
+                        })
+                      );
                       setIsUpdate_Add({ state: true, add: false, edit: true });
                       setIndexAddressPicked(index);
                     }}
@@ -573,6 +603,54 @@ function Payment() {
             </>
           )}
         </Modal>
+
+        <ModalRequired
+          isShow={showModalRequied}
+          confirm={() => ChangeAddress()}
+          title="Thêm địa chỉ giao hàng"
+        >
+          <div className="flex flex-col w-full">
+            <Input label="Họ và tên">
+              <input
+                type="text"
+                className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
+                value={addressPopup.receiverName}
+                onChange={(e) => {
+                  setAddressPopup({
+                    ...addressPopup,
+                    receiverName: e.target.value,
+                  });
+                }}
+              />
+            </Input>
+            <Input label="Số điện thoại">
+              <input
+                type="text"
+                className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
+                value={addressPopup.receiverPhone}
+                onChange={(e) => {
+                  setAddressPopup({
+                    ...addressPopup,
+                    receiverPhone: e.target.value,
+                  });
+                }}
+              />
+            </Input>
+            <Input label="Địa chỉ">
+              <input
+                type="text"
+                className="w-full outline-none border-solid border-2 border-gray-300 rounded-md p-2"
+                value={addressPopup.address}
+                onChange={(e) => {
+                  setAddressPopup({
+                    ...addressPopup,
+                    address: e.target.value,
+                  });
+                }}
+              />
+            </Input>
+          </div>
+        </ModalRequired>
 
         <div className="bg-white rounded-md p-4 mb-4">
           <div className="flex items-center">

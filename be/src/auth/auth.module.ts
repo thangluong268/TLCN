@@ -1,23 +1,20 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { PassportModule } from '@nestjs/passport';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { UserModule } from '../user/user.module';
+import { PassportModule } from '@nestjs/passport';
+import { AbilityModule } from '../ability/ability.module';
+import { EvaluationModule } from '../evaluation/evaluation.module';
+import { FirebaseModule } from '../firebase/firebase.module';
+import { ProductModule } from '../product/product.module';
 import { RoleModule } from '../role/role.module';
+import { StoreModule } from '../store/store.module';
+import { UserModule } from '../user/user.module';
+import { UsertokenModule } from '../usertoken/usertoken.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
 import { JwtATStrategy } from './strategies/jwt-at.strategy';
 import { JwtRTStrategy } from './strategies/jwt-rt.strategy';
-import { MongooseModule } from '@nestjs/mongoose';
-import { UserTokenSchema } from '../usertoken/schema/usertoken.schema';
-import { AbilityModule } from '../ability/ability.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtATAuthGuard } from './guards/jwt-at-auth.guard';
-import { UsertokenModule } from '../usertoken/usertoken.module';
-import { FirebaseModule } from '../firebase/firebase.module';
-import { StoreModule } from '../store/store.module';
-import { ProductModule } from '../product/product.module';
-import { EvaluationModule } from '../evaluation/evaluation.module';
 
 @Module({
   imports: [
@@ -44,4 +41,4 @@ import { EvaluationModule } from '../evaluation/evaluation.module';
   ],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

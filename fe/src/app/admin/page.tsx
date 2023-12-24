@@ -1,7 +1,10 @@
+"use client";
 import React from "react";
 
-function Admin() {
-  return <div>Admin</div>;
+import Children from "./Children";
+
+function Page() {
+  return <Children role="Admin" />;
 }
 
-export default Admin;
+export default Page;

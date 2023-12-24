@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty } from "class-validator";
 export class CheckUserotpDto {
     @ApiProperty()
     @IsNotEmpty()
-    otp: Number;
+    otp: number;
 
     @ApiProperty()
     @IsNotEmpty()

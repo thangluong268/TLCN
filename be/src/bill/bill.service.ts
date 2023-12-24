@@ -85,11 +85,12 @@ export class BillService {
     }
   }
 
-  async calculateRevenueAllTime(storeId: string): Promise<number> {
+  async calculateRevenueAllTimeByStoreId(storeId: string): Promise<number> {
     try {
       const result = await this.billModel.aggregate([
         {
           $match: {
+            status: 'DELIVERED',
             storeId: storeId.toString(),
           },
         },
@@ -117,6 +118,7 @@ export class BillService {
         {
           $match: {
             storeId: storeId.toString(),
+            status: 'DELIVERED',
             $expr: {
               $eq: [{ $year: '$createdAt' }, { $year: new Date(year) }],
             },
@@ -171,7 +173,7 @@ export class BillService {
 
       const response = {
         data: monthlyRevenue,
-        revenueTotalAllTime: await this.calculateRevenueAllTime(storeId),
+        revenueTotalAllTime: await this.calculateRevenueAllTimeByStoreId(storeId),
         revenueTotalInYear: totalRevenue,
         minRevenue,
         maxRevenue,
@@ -184,11 +186,12 @@ export class BillService {
     }
   }
 
-  async countCharityAllTime(storeId: string): Promise<number> {
+  async countCharityAllTimeByStoreId(storeId: string): Promise<number> {
     try {
       const result = await this.billModel.aggregate([
         {
           $match: {
+            status: 'DELIVERED',
             storeId: storeId.toString(),
           },
         },
@@ -224,6 +227,7 @@ export class BillService {
         {
           $match: {
             storeId: storeId.toString(),
+            status: 'DELIVERED',
             $expr: {
               $eq: [{ $year: '$createdAt' }, { $year: new Date(year) }],
             },
@@ -286,7 +290,7 @@ export class BillService {
 
       const response = {
         data: monthlyCharity,
-        charityTotalAllTime: await this.countCharityAllTime(storeId),
+        charityTotalAllTime: await this.countCharityAllTimeByStoreId(storeId),
         charityTotalInYear: totalGive,
         minGive,
         maxGive,
@@ -416,4 +420,129 @@ export class BillService {
       throw err;
     }
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getListUserHaveMostBills(limit: number = 5): Promise<any> {
+    try {
+      const bills = await this.billModel.aggregate([
+        {
+          $group: {
+            _id: '$userId',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: Number(limit),
+        },
+      ]);
+
+      return bills;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  async calculateRevenueAllTime(): Promise<number> {
+    try {
+      const result = await this.billModel.aggregate([
+        {
+          $match: {
+            status: 'DELIVERED'
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$totalPrice' },
+          },
+        },
+      ]);
+
+      const totalRevenue = result[0]?.totalRevenue || 0;
+
+      return totalRevenue;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async calculateTotalRevenueByYear(year: number): Promise<Record<string, any>> {
+    try {
+      const result = await this.billModel.aggregate([
+        {
+          $match: {
+            status: 'DELIVERED',
+            $expr: {
+              $eq: [{ $year: '$createdAt' }, { $year: new Date(year) }],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: '$createdAt' },
+            totalRevenue: { $sum: '$totalPrice' },
+          },
+        },
+      ]);
+
+      // Tạo mảng chứa 12 tháng với doanh thu mặc định là 0
+      const monthlyRevenue: Record<string, number> = {
+        'Tháng 1': 0,
+        'Tháng 2': 0,
+        'Tháng 3': 0,
+        'Tháng 4': 0,
+        'Tháng 5': 0,
+        'Tháng 6': 0,
+        'Tháng 7': 0,
+        'Tháng 8': 0,
+        'Tháng 9': 0,
+        'Tháng 10': 0,
+        'Tháng 11': 0,
+        'Tháng 12': 0,
+      };
+
+      // Chỉ chứa những tháng có thông tin
+      // const monthlyRevenue: Record<number, number> = {}
+
+      let totalRevenue = 0;
+      let minRevenue: { month: string; revenue: number } | null = null;
+      let maxRevenue: { month: string; revenue: number } | null = null;
+
+      result.forEach((entry: { _id: number; totalRevenue: number }) => {
+        const month = entry._id;
+        const revenue = entry.totalRevenue;
+
+        monthlyRevenue[`Tháng ${month}`] = revenue;
+        totalRevenue += revenue;
+
+        if (!minRevenue || revenue < minRevenue.revenue) {
+          minRevenue = { month: `Tháng ${month}`, revenue };
+        }
+
+        if (!maxRevenue || revenue > maxRevenue.revenue) {
+          maxRevenue = { month: `Tháng ${month}`, revenue };
+        }
+      });
+
+      const response = {
+        data: monthlyRevenue,
+        revenueTotalAllTime: await this.calculateRevenueAllTime(),
+        revenueTotalInYear: totalRevenue,
+        minRevenue,
+        maxRevenue,
+      };
+
+      return response;
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
+
 }

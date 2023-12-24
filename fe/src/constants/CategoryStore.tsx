@@ -7,16 +7,16 @@
 // Đơn huỷ
 // Quản lý kho
 
-import Cancel from "@/app/store/seller/[MyStore]/Cancel";
-import Create from "@/app/store/seller/[MyStore]/Create";
-import Home from "@/app/store/seller/[MyStore]/Home";
-import Info from "@/app/store/seller/[MyStore]/Info";
-import New from "@/app/store/seller/[MyStore]/New";
-import Preparing from "@/app/store/seller/[MyStore]/Preparing";
-import Rebill from "@/app/store/seller/[MyStore]/Rebill";
-import Shipped from "@/app/store/seller/[MyStore]/Shipped";
-import Shipping from "@/app/store/seller/[MyStore]/Shipping";
-import Warehouse from "@/app/store/seller/[MyStore]/Warehouse";
+import Cancel from "@/app/shop/seller/[MyStore]/Cancel";
+import Create from "@/app/shop/seller/[MyStore]/Create";
+import Home from "@/app/shop/seller/[MyStore]/Home";
+import Info from "@/app/shop/seller/[MyStore]/Info";
+import New from "@/app/shop/seller/[MyStore]/New";
+import Preparing from "@/app/shop/seller/[MyStore]/Preparing";
+import Rebill from "@/app/shop/seller/[MyStore]/Rebill";
+import Shipped from "@/app/shop/seller/[MyStore]/Shipped";
+import Shipping from "@/app/shop/seller/[MyStore]/Shipping";
+import Warehouse from "@/app/shop/seller/[MyStore]/Warehouse";
 
 export const CATEGORYSTORE = [
   {

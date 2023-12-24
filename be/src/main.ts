@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { createDocument } from './swagger/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { ErrorMiddleware } from './core/error.middleware';
 declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -19,6 +21,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new ErrorMiddleware());
 
   await app.listen(process.env.PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);

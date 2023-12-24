@@ -89,3 +89,23 @@ export const createUserMock2 = (): any => {
     phone: '0978512345',
   };
 };
+
+export const createAdminMock = (): any => {
+  return {
+    fullName: 'Admin',
+    email: 'admin@gmail.com',
+    password: '$2b$10$9MjWWmmb9oP4Owr6grbKrefGc9JY4SsCwE94D8JoC6khnuIqnk05i',
+    address: [],
+    friends: [],
+    followStores: [],
+    wallet: 0,
+    warningCount: 0,
+    status: true,
+    createdAt: {
+      $date: '2023-11-05T06:57:48.659Z',
+    },
+    updatedAt: {
+      $date: '2023-12-05T15:57:54.732Z',
+    },
+  };
+};

@@ -15,10 +15,10 @@ function Search() {
   const [totalPage, setTotalPage] = React.useState<any>(1);
   React.useEffect(() => {
     const fetchData = async (searchParam: any) => {
-      await APIGetListProductForUser(page || 1, 5, searchParam).then(
+      await APIGetListProductForUser(page || 1, 20, searchParam).then(
         (res: any) => {
-          setLstProduct(res.metadata.data.products);
-          setTotalPage(res.metadata.data.total);
+          setLstProduct(res.metadata.data);
+          setTotalPage(res.metadata.total);
         }
       );
     };
@@ -65,7 +65,7 @@ function Search() {
               totalPage={totalPage}
               currentPage={page}
               setPage={setPage}
-              perPage={5}
+              perPage={20}
             />
           </div>
         </div>

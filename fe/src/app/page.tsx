@@ -18,9 +18,10 @@ export default function Home() {
   React.useEffect(() => {
     const fetchData = async () => {
       const lst = await APIGetListProductLasted().then((res) => res);
-      // const lst1 = await APIGetListProducMostInStore().then((res) => res);
+      const lst1 = await APIGetListProducMostInStore().then((res) => res);
+      console.log(lst1);
       setListProduct(lst.metadata.data);
-      // setListProductMost(lst1.metadata.data);
+      setListProductMost(lst1.metadata.data);
     };
     fetchData();
   }, []);
@@ -86,10 +87,10 @@ export default function Home() {
               title="Có thể bạn sẽ thích"
               listProduct={listProduct}
             />
-            {/* <ListProductHomePage
+            <ListProductHomePage
               title="Cửa hàng nổi bật"
               listHighLight={listProductMost}
-            /> */}
+            />
             <ListProductRandomHomePage />
           </div>
         </div>
