@@ -28,7 +28,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: Setup and run tests
-      working-directory: ./be
+      working-directory: cd be
       run: |
         npm ci
         npm run build
