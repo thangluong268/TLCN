@@ -49,19 +49,15 @@ export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       console.log(currentUser);
-      if (currentUser != null) {
-        const data = await APILoginSocial({
-          fullName: currentUser?.providerData[0].displayName || "",
-          email: currentUser?.providerData[0].email || "",
-          avatar: currentUser?.providerData[0].photoURL || "",
-          password: currentUser?.uid || "",
-        });
-        console.log(data);
-        if (data.status === 200 || data.status === 201) {
-          setUser(data.metadata.data);
-        }
-      } else {
-        signOut(auth);
+      const data = await APILoginSocial({
+        fullName: currentUser?.providerData[0].displayName || "",
+        email: currentUser?.providerData[0].email || "",
+        avatar: currentUser?.providerData[0].photoURL || "",
+        password: currentUser?.uid || "",
+      });
+      console.log(data);
+      if (data.status === 200 || data.status === 201) {
+        setUser(data.metadata.data);
       }
       // setUser(curretUser);
     });
