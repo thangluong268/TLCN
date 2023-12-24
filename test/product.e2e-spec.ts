@@ -241,7 +241,9 @@ describe('Product Controller E2E Test', () => {
       expect(response.body.metadata.data).toHaveProperty('categoryId');
       expect(response.body.metadata.data).toHaveProperty('keywords');
       expect(response.body.metadata.data).toHaveProperty('storeId');
-      expect(response.body.metadata).toHaveProperty('quantityDelivered');
+      expect(response.body.metadata.data).toHaveProperty('quantityDelivered');
+      expect(response.body.metadata.data).toHaveProperty('categoryName');
+      expect(response.body.metadata.data).toHaveProperty('storeName');
     }, 10000);
   });
 

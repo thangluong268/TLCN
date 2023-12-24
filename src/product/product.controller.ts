@@ -495,15 +495,12 @@ export class ProductController {
     const store = await this.storeService.getById(product.storeId);
 
     const data = {
-      ...product.toObject(),
-      categoryName: category.name,
-      storeName: store.name,
-      quantityDelivered,
+      ...product.toObject()
     };
 
     return new SuccessResponse({
       message: 'Lấy thông tin sản phẩm thành công!',
-      metadata: { data },
+      metadata: { data, quantityDelivered, categoryName: category.name, storeName: store.name },
     });
   }
 
