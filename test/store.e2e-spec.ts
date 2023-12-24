@@ -188,8 +188,6 @@ describe('Store Controller E2E Test', () => {
 
       const response = await request(httpServer).get(URL).set('Authorization', `Bearer ${accessTokenAdmin}`);
 
-      console.log(response.body);
-
       expect(response.body.status).toBe(200);
       expect(response.body.message).toEqual('Lấy thông tin danh sách cửa hàng có nhiều sản phẩm nhất thành công!');
       expect(response.body.metadata).toHaveProperty('data');

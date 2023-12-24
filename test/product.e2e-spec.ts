@@ -103,7 +103,7 @@ describe('Product Controller E2E Test', () => {
     }, 10000);
   });
 
-  describe('Get all By search seller', () => {
+  describe('Get all By search Admin', () => {
     const URL = '/product/seller?page=1&limit=5';
     it('GET /product/seller?page=1&limit=5 Should return an array of products', async () => {
       await dbConnection.collection('products').insertOne({ ...productMock(), storeId });

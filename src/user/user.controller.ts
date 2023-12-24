@@ -31,13 +31,11 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
-  @CheckRole(RoleName.ADMIN)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_USER)
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @Get('admin/users-most-bills')
   async getListUserHaveMostBills(@Query('limit') limit: number): Promise<SuccessResponse | NotFoundException> {
     const bills = await this.billService.getListUserHaveMostBills(limit);
-
-    console.log(bills)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = await Promise.all(
@@ -193,7 +191,7 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
-  @CheckRole(RoleName.USER, RoleName.ADMIN)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
   @Patch('user/:id')
   async update(
     @Param('id') id: string,
@@ -229,7 +227,7 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
-  @CheckRole(RoleName.USER, RoleName.ADMIN)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
   @Get('user/:id')
   async getProfile(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const user = await this.userService.getById(id);
