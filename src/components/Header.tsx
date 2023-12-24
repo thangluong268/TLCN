@@ -102,11 +102,12 @@ function Header() {
                 };
               }),
             };
+            console.log("carts", carts);
             dispatch(setCartPopUp(carts));
           }
         };
 
-        if (user && user.role == "User") {
+        if (user) {
           fetchAllCart();
         }
       }

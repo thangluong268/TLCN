@@ -129,7 +129,7 @@ function CreateStore() {
         Toast("error", storeRes.message, 2000);
       }
       console.log(storeRes);
-      window.location.href = "/shop/" + storeRes.metadata?.data._id;
+      window.location.href = "/shop/seller" + storeRes.metadata?.data._id;
     }
   };
   const [mounted, setMounted] = React.useState(false);
