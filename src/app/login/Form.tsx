@@ -29,12 +29,12 @@ function Form(props: FormProps) {
     password: "",
   });
   const { user, googleSignIn, facebookSignIn, logOut } = UserAuth();
-  React.useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      window.location.href = "/";
-    }
-  }, [user]);
+  // React.useEffect(() => {
+  //   if (user) {
+  //     localStorage.setItem("user", JSON.stringify(user));
+  //     window.location.href = "/";
+  //   }
+  // }, [user]);
   React.useEffect(() => {
     const listener = (event: { code: string; preventDefault: () => void }) => {
       if (event.code === "Enter" || event.code === "NumpadEnter") {

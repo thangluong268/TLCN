@@ -49,21 +49,25 @@ export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       console.log(currentUser);
-      const data = await APILoginSocial({
-        fullName: currentUser?.providerData[0].displayName || "",
-        email: currentUser?.providerData[0].email || "",
-        avatar: currentUser?.providerData[0].photoURL || "",
-        password: currentUser?.uid || "",
-      });
-      console.log(data);
-      if (data.status === 200 || data.status === 201) {
-        setUser(data.metadata.data);
+      if (currentUser != null) {
+        const data = await APILoginSocial({
+          fullName: currentUser?.providerData[0].displayName || "",
+          email: currentUser?.providerData[0].email || "",
+          avatar: currentUser?.providerData[0].photoURL || "",
+          password: currentUser?.uid || "",
+        });
+        if (data.status === 200 || data.status === 201) {
+          if (!localStorage.getItem("user")) {
+            localStorage.setItem("user", JSON.stringify(data.metadata.data));
+            window.location.href = "/";
+          }
+        }
+      } else {
+        signOut(auth);
       }
-      // setUser(curretUser);
     });
     return () => unsubscribe();
   }, []);
-
   return (
     <AuthContext.Provider
       value={{ user, googleSignIn, facebookSignIn, logOut }}
