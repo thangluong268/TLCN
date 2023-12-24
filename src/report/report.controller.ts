@@ -33,7 +33,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new CreateReportAbility())
-  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE)
   @Post('report/user')
   async create(
     @Body() createReportDto: CreateReportDto,
@@ -52,7 +52,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadReportAbility())
-  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE)
   @Get('report/admin')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
@@ -103,7 +103,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadReportAbility())
-  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE)
   @Get('report/admin/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const report = await this.reportService.getById(id);
@@ -140,7 +140,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateReportAbility())
-  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE)
   @Put('report/admin/:id')
   async updateStatus(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const report = await this.reportService.getById(id);
@@ -166,7 +166,7 @@ export class ReportController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateReportAbility())
-  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT)
+  @CheckRole(RoleName.ADMIN, RoleName.MANAGER_PRODUCT, RoleName.MANAGER_STORE)
   @Delete('report/admin/:id')
   async delete(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
     const report = await this.reportService.getById(id);
