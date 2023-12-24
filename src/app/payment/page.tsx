@@ -310,15 +310,21 @@ function Payment() {
         listProducts.push(obj);
       }
     });
+    const addressForPaypal = JSON.parse(
+      localStorage.getItem("addressForPaypal")!
+    );
     const obj = {
       data: listProducts,
       deliveryMethod: deliveryMethod.find((item) => item.checked)?.value,
       paymentMethod: paymentMethod.find((item) => item.checked)?.value,
-      receiverInfo: {
-        fullName: receiverInfo.receiverName,
-        phoneNumber: receiverInfo.receiverPhone,
-        address: receiverInfo.address,
-      },
+      receiverInfo:
+        paymentMethod.find((item) => item.checked)?.value == "Paypal"
+          ? addressForPaypal
+          : {
+              fullName: receiverInfo.receiverName,
+              phoneNumber: receiverInfo.receiverPhone,
+              address: receiverInfo.address,
+            },
       giveInfo: isGift && {
         senderName: giveInfo.senderName,
         wish: giveInfo.wish,
@@ -329,6 +335,8 @@ function Payment() {
     APICreateBill(obj);
     Toast("success", "Đặt hàng thành công", 2000);
     setTimeout(() => {
+      localStorage.removeItem("listProductIdChecked");
+      localStorage.removeItem("addressForPaypal");
       window.location.href = "/";
     }, 2000);
   };
@@ -548,6 +556,14 @@ function Payment() {
                         receiverPhone: item.receiverPhone,
                         address: item.address,
                       });
+                      localStorage.setItem(
+                        "addressForPaypal",
+                        JSON.stringify({
+                          fullName: item.receiverName,
+                          phoneNumber: item.receiverPhone,
+                          address: item.address,
+                        })
+                      );
                       setIsUpdate_Add({ state: true, add: false, edit: true });
                       setIndexAddressPicked(index);
                     }}
