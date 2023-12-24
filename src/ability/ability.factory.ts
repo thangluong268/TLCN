@@ -91,6 +91,7 @@ export class AbilityFactory {
         break;
       case RoleName.MANAGER_STORE:
         can(Action.Manage, Store);
+        can(Action.Manage, Report);
         break;
       default:
         break;
