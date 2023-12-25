@@ -31,7 +31,6 @@ function Create() {
     ? JSON.parse(localStorage.getItem("category")!)
     : null;
   const CreateProduct = async (product: any) => {
-    document.getElementById("loading-page")?.classList.remove("hidden");
     document
       .getElementById("formCreate-productName")
       ?.classList.remove("border-red-500");

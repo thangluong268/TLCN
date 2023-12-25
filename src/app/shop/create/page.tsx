@@ -38,7 +38,7 @@ function CreateStore() {
       if (store.status == 200 || store.status == 201) {
         Toast("error", "Bạn đã có cửa hàng", 2000);
         setTimeout(() => {
-          window.location.href = "/shop/" + store.metadata.data._id;
+          window.location.href = "/shop/seller" + store.metadata.data._id;
         }, 2000);
       }
     };
@@ -113,23 +113,26 @@ function CreateStore() {
       const phoneNumber = [];
       phoneNumber.push(store.phoneNumber1);
       phoneNumber.push(store.phoneNumber2);
-      let formData = new FormData();
-      formData.append("file", store.avatar);
-      const rs = await APIUploadImage(formData);
-      const storeRes = await APICreate({
-        address: store.address,
-        name: store.name,
-        phoneNumber: phoneNumber,
-        description: store.description,
-        avatar: rs.metadata.data.url,
-      });
-      if (storeRes.status === 200 || storeRes.status === 201) {
-        Toast("success", "Tạo cửa hàng thành công", 2000);
+      if (store.avatar) {
+        let formData = new FormData();
+        formData.append("file", store.avatar);
+        const rs = await APIUploadImage(formData);
+        const storeRes = await APICreate({
+          address: store.address,
+          name: store.name,
+          phoneNumber: phoneNumber,
+          description: store.description,
+          avatar: rs.metadata.data.url,
+        });
+        if (storeRes.status === 200 || storeRes.status === 201) {
+          Toast("success", "Tạo cửa hàng thành công", 2000);
+        } else {
+          Toast("error", storeRes.message, 2000);
+        }
+        window.location.href = "/shop/seller" + storeRes.metadata?.data._id;
       } else {
-        Toast("error", storeRes.message, 2000);
+        Toast("error", "Bạn chưa chọn ảnh", 2000);
       }
-      console.log(storeRes);
-      window.location.href = "/shop/seller" + storeRes.metadata?.data._id;
     }
   };
   const [mounted, setMounted] = React.useState(false);

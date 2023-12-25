@@ -29,7 +29,6 @@ export const APICreateProduct = async (data: any) => {
     data,
     { headers }
   );
-  document.getElementById("loading-page")?.classList.add("hidden");
   return res.data;
 };
 
