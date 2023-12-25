@@ -11,23 +11,21 @@ const ReactQuill =
 function CreateStore() {
   const [acceptPolicy, setAcceptPolicy] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
+  const [store, setStore] = React.useState<any>({});
   React.useEffect(() => {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user")!)
       : null;
     setUser(user);
+    setStore({
+      address: "Địa chỉ mặc định",
+      name: "",
+      phoneNumber1: user?.providerData[0].phone || "",
+      phoneNumber2: "",
+      description: "",
+      avatar: "",
+    });
   }, []);
-  const [store, setStore] = React.useState({
-    address:
-      user?.providerData[0].address?.filter(
-        (item: any) => item.isDefault == true
-      )[0]?.name || "Cửa hàng mặc định",
-    name: "",
-    phoneNumber1: user?.providerData[0].phone || "",
-    phoneNumber2: "",
-    description: "",
-    avatar: "",
-  });
   const handleDescriptionChange = (value: string) => {
     setStore({ ...store, description: value });
   };
@@ -129,7 +127,7 @@ function CreateStore() {
         } else {
           Toast("error", storeRes.message, 2000);
         }
-        window.location.href = "/shop/seller" + storeRes.metadata?.data._id;
+        window.location.href = "/shop/seller/" + storeRes.metadata?.data._id;
       } else {
         Toast("error", "Bạn chưa chọn ảnh", 2000);
       }

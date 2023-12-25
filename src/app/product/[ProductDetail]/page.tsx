@@ -52,8 +52,9 @@ function ProductDetail() {
     setUser(user);
     const fetchData = async () => {
       const pd = await APIGetProduct(params.ProductDetail).then((res) => res);
+      console.log(pd);
       setQuantityDelivered(pd.metadata.quantityDelivered);
-      setProduct(pd.metadata.data);
+      setProduct({ ...pd.metadata.data, storeName: pd.metadata.storeName });
     };
     fetchData();
   }, []);
@@ -87,6 +88,7 @@ function ProductDetail() {
 
   const carts = useAppSelector((state) => state.cartPopupReducer.items);
   const AddToCart = async (buyNow?: boolean) => {
+    console.log(product);
     let isProductInCart = false;
     carts?.store?.map((data) => {
       if (data.id == product.storeId) {
