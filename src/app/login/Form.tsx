@@ -89,7 +89,11 @@ function Form(props: FormProps) {
         } else if (res.metadata.data.role == "Manager_User") {
           window.location.href = "/manager/user";
         } else {
-          window.location.href = "/";
+          if (window.location.pathname == "/login") {
+            window.location.href = "/";
+          } else {
+            window.location.reload();
+          }
         }
       }, 2000);
     }
