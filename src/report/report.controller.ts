@@ -150,7 +150,7 @@ export class ReportController {
 
     const numOfReport = await this.reportService.countByProductId(report.subjectId);
 
-    if (numOfReport === 5) {
+    if (numOfReport === 1) {
       const product = await this.productService.getById(report.subjectId);
       const store = await this.storeService.getById(product.storeId);
       const seller = await this.userService.getById(store.userId);
