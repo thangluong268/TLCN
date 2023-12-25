@@ -31,6 +31,7 @@ function Create() {
     ? JSON.parse(localStorage.getItem("category")!)
     : null;
   const CreateProduct = async (product: any) => {
+    document.getElementById("loading-page")?.classList.remove("hidden");
     document
       .getElementById("formCreate-productName")
       ?.classList.remove("border-red-500");
@@ -56,12 +57,14 @@ function Create() {
       product.keywords = product.list_keyword.split(",");
       const res = await APICreateProduct(product);
       if (res.status == 200 || res.status == 201) {
+        document.getElementById("loading-page")?.classList.add("hidden");
         Toast("success", "Tạo sản phẩm thành công", 2000);
         setTimeout(() => {
           dispatch(setCategoryStore(CATEGORYSTORE[CATEGORYSTORE.length - 2]));
         }, 2000);
       }
     } else {
+      document.getElementById("loading-page")?.classList.add("hidden");
       Toast("error", "Vui lòng điền đầy đủ thông tin", 2000);
     }
   };
@@ -136,11 +139,15 @@ function Create() {
         >
           <option value=""> Chọn danh mục</option>
           {category &&
-            category.map((item: any, index: number) => (
-              <option value={item._id} key={index}>
-                {item.name}
-              </option>
-            ))}
+            category.map((item: any, index: number) => {
+              if (item.name !== "Cho tặng miễn phí") {
+                return (
+                  <option value={item._id} key={index}>
+                    {item.name}
+                  </option>
+                );
+              }
+            })}
         </select>
       </Input>
 
