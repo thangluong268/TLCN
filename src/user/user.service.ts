@@ -19,6 +19,7 @@ export class UserService {
   async createNormal(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
     try {
       const newUser = await this.userModel.create(signUpDto);
+      newUser.avatar = 'https://res.cloudinary.com/dl3b2j3td/image/upload/v1702564956/TLCN/ov6t50kl5npfmwfopzrk.png';
       await newUser.save();
       const userDoc = newUser['_doc'];
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
