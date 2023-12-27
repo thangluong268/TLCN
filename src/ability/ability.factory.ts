@@ -69,6 +69,7 @@ export class AbilityFactory {
         can(Action.Manage, Notification);
         can(Action.Manage, Promotion);
         can(Action.Create, Report);
+        can(Action.Read, Product);
         cannot(Action.Read, Role).because('Không cho đọc role!');
         cannot(Action.Create, Product).because('Không cho tạo sản phẩm!');
         break;

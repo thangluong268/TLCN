@@ -270,4 +270,19 @@ export class UserService {
       throw err;
     }
   }
+
+  async getFollowStoresByUserId(page: number = 1, limit: number = 5, userId: string): Promise<{ total: number; data: string[] }> {
+    try {
+      const user: User = await this.getById(userId);
+      user.followStores.reverse();
+
+      const storeIds: string[] = user.followStores.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
+      const total: number = user.followStores.length;
+
+      return { total, data: storeIds };
+    } catch (err) {
+      if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
+      throw err;
+    }
+  }
 }

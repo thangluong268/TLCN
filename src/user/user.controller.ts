@@ -59,6 +59,33 @@ export class UserController {
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
+  @CheckRole(RoleName.USER, RoleName.ADMIN)
+  @Get('user-follow-stores')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getFollowStores(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse | NotFoundException> {
+    const storeIds = await this.userService.getFollowStoresByUserId(page, limit, userId);
+
+    const data = await Promise.all(
+      storeIds.data.map(async (storeId: string) => {
+        const store = await this.storeService.getById(storeId);
+        if (!store) return;
+        return store;
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách cửa hàng follow thành công!',
+      metadata: { total: storeIds.total, data },
+    });
+  }
+
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadUserAbility())
   @CheckRole(RoleName.MANAGER_USER, RoleName.ADMIN)
   @Get('admin/get-all')
   async getAllNoPaging(): Promise<SuccessResponse | NotFoundException> {
@@ -171,7 +198,6 @@ export class UserController {
     });
   }
 
-  // api/user/admin?page=1&limit=1&search=(Họ tên, email)
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new ReadUserAbility())
   @CheckRole(RoleName.ADMIN, RoleName.MANAGER_USER)
@@ -187,7 +213,32 @@ export class UserController {
     });
   }
 
-  // Update user
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadUserAbility())
+  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
+  @Get('user/:id')
+  async getProfile(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
+    const user = await this.userService.getById(id);
+    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
+
+    const billsOfUser = await this.billService.getAllByUserId(id);
+
+    const totalBills = billsOfUser.length;
+    const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0);
+    const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length;
+
+    const data = {
+      ...user.toObject(),
+      totalBills,
+      totalPricePaid,
+      totalReceived,
+    };
+
+    return new SuccessResponse({
+      message: 'Lấy thông tin người dùng thành công!',
+      metadata: { data },
+    });
+  }
 
   @UseGuards(AbilitiesGuard)
   @CheckAbilities(new UpdateUserAbility())
@@ -222,33 +273,6 @@ export class UserController {
     return new SuccessResponse({
       message: 'Cập nhật thông tin người dùng thành công!',
       metadata: { data: updatedUser },
-    });
-  }
-
-  @UseGuards(AbilitiesGuard)
-  @CheckAbilities(new ReadUserAbility())
-  @CheckRole(RoleName.USER, RoleName.ADMIN, RoleName.MANAGER_USER)
-  @Get('user/:id')
-  async getProfile(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
-    const user = await this.userService.getById(id);
-    if (!user) return new NotFoundException('Không tìm thấy người dùng này!');
-
-    const billsOfUser = await this.billService.getAllByUserId(id);
-
-    const totalBills = billsOfUser.length;
-    const totalPricePaid = billsOfUser.reduce((total, bill) => total + bill.totalPrice, 0);
-    const totalReceived = billsOfUser.filter(bill => bill.totalPrice === 0).length;
-
-    const data = {
-      ...user.toObject(),
-      totalBills,
-      totalPricePaid,
-      totalReceived,
-    };
-
-    return new SuccessResponse({
-      message: 'Lấy thông tin người dùng thành công!',
-      metadata: { data },
     });
   }
 }

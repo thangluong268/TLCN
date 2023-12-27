@@ -481,6 +481,42 @@ export class ProductController {
     });
   }
 
+  @UseGuards(AbilitiesGuard)
+  @CheckAbilities(new ReadProductAbility())
+  @CheckRole(RoleName.ADMIN, RoleName.USER)
+  @Get('product/user-love-list')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getAllLoveList(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @GetCurrentUserId() userId: string,
+  ): Promise<SuccessResponse> {
+
+    const productIds = await this.evaluationService.getProductIdsByUserId(page, limit, userId);
+
+    const data = await Promise.all(
+      productIds.data.map(async (productId: string) => {
+        const product = await this.productService.getById(productId);
+        if (!product) return;
+
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+        };
+      })
+    )
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm yêu thích thành công!',
+      metadata: { total: productIds.total, data },
+    });
+  }
+
   @Public()
   @Get('product/:id')
   async getById(@Param('id') id: string): Promise<SuccessResponse | NotFoundException> {
@@ -495,7 +531,7 @@ export class ProductController {
     const store = await this.storeService.getById(product.storeId);
 
     const data = {
-      ...product.toObject()
+      ...product.toObject(),
     };
 
     return new SuccessResponse({

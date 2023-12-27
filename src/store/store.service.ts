@@ -57,7 +57,7 @@ export class StoreService {
 
   async updateWarningCount(id: string, warningCount: number, emailSeller: string): Promise<void> {
     try {
-      if (warningCount + 1 === 5) {
+      if (warningCount + 1 === 3) {
         await this.storeModel.findOneAndUpdate({ _id: id.toString() }, { warningCount: warningCount + 1, status: false });
 
         await this.mailService.sendMail({
