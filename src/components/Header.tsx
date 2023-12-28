@@ -320,6 +320,14 @@ function Header() {
                     <Link href="/user/profile">Tài khoản của tôi</Link>
                   </li>
                   <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
+                    <Link href="/user/store/follow">Cửa hàng theo dõi</Link>
+                  </li>
+                  <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
+                    <Link href="/user/product/favorite">
+                      Sản phẩm yêu thích
+                    </Link>
+                  </li>
+                  <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">
                     <Link href="/user/invoice">Đơn mua</Link>
                   </li>
                   <li className="text-[14px] h-[32px] flex justify-center items-center rounded-lg hover:bg-[#c1d2f6] cursor-pointer hover:text-white">

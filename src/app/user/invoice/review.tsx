@@ -12,7 +12,7 @@ function Review(props: Props) {
   console.log("bill", bill);
   return (
     <div className="hidden-scrollbar justify-center items-center flex overflow-x-hidden overflow-y-auto absolute inset-0 z-50 outline-none focus:outline-none bg-gray-500 bg-opacity-50">
-      <div className="relative w-auto my-6 mx-auto max-w-3xl min-w-[40rem]">
+      <div className="relative w-auto my-6 mx-auto max-w-3xl min-w-[40rem] mt-20">
         <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
           <div className="relative flex flex-col bg-white shadow-lg rounded-xl pointer-events-auto dark:bg-gray-800">
             <div className="relative min-h-[8rem] bg-gray-900 text-center rounded-t-lg">
@@ -82,6 +82,17 @@ function Review(props: Props) {
                   Hoá đơn #{GetNumberInString(bill.id)}
                 </p>
               </div>
+              {bill.listProductsFullInfo.map((product: any) => (
+                <div className="flex justify-center my-2">
+                  {product.product.avatar.map((img: any) => (
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-20 h-20 object-cover rounded-md mx-4"
+                    />
+                  ))}
+                </div>
+              ))}
 
               <div className="mt-5 sm:mt-10 grid grid-cols-2 sm:grid-cols-3 gap-5">
                 <div>

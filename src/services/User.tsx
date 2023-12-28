@@ -47,3 +47,26 @@ export const APIGetAllUser = async () => {
 
   return res.data;
 };
+
+// /api/user/user-follow-stores?page=1&limit=2
+export const APIGetListStoreFollow = async (page: number, limit: number) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/user/user-follow-stores?page=${page}&limit=${limit}`,
+    { headers }
+  );
+  return res.data;
+};
+
+// /api/product/user-love-list?page=1&limit=4
+export const APIGetListProductFavorite = async (
+  page: number,
+  limit: number
+) => {
+  const headers = GetHeaders();
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/product/user-love-list?page=${page}&limit=${limit}`,
+    { headers }
+  );
+  return res.data;
+};
