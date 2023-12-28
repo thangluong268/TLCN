@@ -10,10 +10,14 @@ import { ProductModule } from '../product/product.module';
 import { UserModule } from '../user/user.module';
 import { StoreModule } from '../store/store.module';
 import { BillModule } from '../bill/bill.module';
+import { ProductSchema } from '../product/schema/product.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Evaluation', schema: EvaluationSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Evaluation', schema: EvaluationSchema },
+      { name: 'Product', schema: ProductSchema },
+    ]),
     AbilityModule,
     RoleModule,
     NotificationModule,
@@ -24,6 +28,6 @@ import { BillModule } from '../bill/bill.module';
   ],
   controllers: [EvaluationController],
   providers: [EvaluationService],
-  exports: [EvaluationService]
+  exports: [EvaluationService],
 })
 export class EvaluationModule {}

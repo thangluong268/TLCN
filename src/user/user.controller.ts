@@ -63,24 +63,18 @@ export class UserController {
   @Get('user-follow-stores')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
   async getFollowStores(
     @Query('page') page: number,
     @Query('limit') limit: number,
+    @Query('search') search: string,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse | NotFoundException> {
-    const storeIds = await this.userService.getFollowStoresByUserId(page, limit, userId);
-
-    const data = await Promise.all(
-      storeIds.data.map(async (storeId: string) => {
-        const store = await this.storeService.getById(storeId);
-        if (!store) return;
-        return store;
-      }),
-    );
+    const data = await this.userService.getFollowStoresByUserId(page, limit, search, userId);
 
     return new SuccessResponse({
       message: 'Lấy danh sách cửa hàng follow thành công!',
-      metadata: { total: storeIds.total, data },
+      metadata: { data },
     });
   }
 

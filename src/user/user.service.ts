@@ -5,6 +5,7 @@ import { Model, MongooseError } from 'mongoose';
 import { LoginSocialDto } from 'src/auth/dto/login-social.dto';
 import { SignUpDto } from '../auth/dto/signup.dto';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import { Store } from '../store/schema/store.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
 import { User } from './schema/user.schema';
@@ -14,6 +15,9 @@ export class UserService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+
+    @InjectModel(Store.name)
+    private readonly storeModel: Model<Store>,
   ) {}
 
   async createNormal(signUpDto: SignUpDto): Promise<UserWithoutPassDto> {
@@ -271,15 +275,32 @@ export class UserService {
     }
   }
 
-  async getFollowStoresByUserId(page: number = 1, limit: number = 5, userId: string): Promise<{ total: number; data: string[] }> {
+  async getFollowStoresByUserId(page: number = 1, limit: number = 5, searchQuery: string, userId: string): Promise<{ total: number; data: Store[] }> {
     try {
       const user: User = await this.getById(userId);
-      user.followStores.reverse();
 
-      const storeIds: string[] = user.followStores.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
-      const total: number = user.followStores.length;
+      const search = searchQuery
+        ? {
+            $or: [
+              { name: { $regex: searchQuery, $options: 'i' } },
+              { address: { $regex: searchQuery, $options: 'i' } },
+              { phoneNumber: { $regex: searchQuery, $options: 'i' } },
+              { description: { $regex: searchQuery, $options: 'i' } },
+            ],
+          }
+        : {};
 
-      return { total, data: storeIds };
+      const total: number = await this.storeModel.countDocuments({ _id: { $in: user.followStores }, ...search });
+      const stores: Store[] = await this.storeModel
+        .find({ _id: { $in: user.followStores }, ...search })
+        .limit(Number(limit))
+        .skip((Number(page) - 1) * Number(limit));
+
+      // Sort the stores based on the order in user.followStores
+      const orderMap = new Map(user.followStores.reverse().map((id, index) => [id.toString(), index]));
+      stores.sort((a, b) => orderMap.get(a._id.toString()) - orderMap.get(b._id.toString()));
+
+      return { total, data: stores };
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

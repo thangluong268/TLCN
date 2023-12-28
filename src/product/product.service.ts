@@ -84,15 +84,10 @@ export class ProductService {
     sortTypeQuery: string = 'desc',
     sortValueQuery: string = 'productName',
   ): Promise<{ total: number; products: Product[] }> {
-
     const skip = Number(limitQuery) * (Number(pageQuery) - 1);
     try {
       const total = await this.productModel.countDocuments({ price: 0, status: true });
-      const products = await this.productModel
-        .find({ price: 0, status: true })
-        .sort({ createdAt: -1 })
-        .limit(Number(limitQuery))
-        .skip(skip);
+      const products = await this.productModel.find({ price: 0, status: true }).sort({ createdAt: -1 }).limit(Number(limitQuery)).skip(skip);
 
       sortByConditions(products, sortTypeQuery, sortValueQuery);
 

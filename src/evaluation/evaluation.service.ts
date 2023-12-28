@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, MongooseError } from 'mongoose';
 import { InternalServerErrorExceptionCustom } from '../exceptions/InternalServerErrorExceptionCustom.exception';
+import { Product } from '../product/schema/product.schema';
 import { EmojiDto, HadEvaluation } from './dto/evaluation.dto';
 import { Evaluation } from './schema/evaluation.schema';
 
@@ -10,6 +11,9 @@ export class EvaluationService {
   constructor(
     @InjectModel(Evaluation.name)
     private readonly evaluationModel: Model<Evaluation>,
+
+    @InjectModel(Product.name)
+    private readonly productModel: Model<Product>,
   ) {}
 
   async create(productId: string): Promise<Evaluation> {
@@ -85,18 +89,40 @@ export class EvaluationService {
     }
   }
 
-  async getProductIdsByUserId(page: number = 1, limit: number = 5, userId: string): Promise<{ total: number, data: string[] }> {
+  async getProductsLoveByUserId(page: number = 1, limit: number = 5, search: string, userId: string): Promise<{ total: number; data: Product[] }> {
     try {
-      const total: number = await this.evaluationModel.countDocuments({ 'emojis.userId': userId });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query: any = {};
+
+      if (search) {
+        query.$or = [
+          { productName: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { keywords: { $regex: search, $options: 'i' } },
+          { type: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const products = await this.productModel.find(query).select('_id');
+
+      const productIds = products.map(product => product._id);
+
+      const total: number = await this.evaluationModel.countDocuments({ 'emojis.userId': userId, productId: { $in: productIds } });
+
       const evaluations: Evaluation[] = await this.evaluationModel
-        .find({ 'emojis.userId': userId })
-        .sort({ createdAt: -1 })
+        .find({ 'emojis.userId': userId, productId: { $in: productIds } })
+        .sort({ updatedAt: -1 })
         .limit(Number(limit))
         .skip((Number(page) - 1) * Number(limit));
 
-      const productIds: string[] = evaluations.map(evaluation => evaluation.productId);
+      const evaluatedProducts: Product[] = await Promise.all(
+        evaluations.map(async evaluation => {
+          const product = await this.productModel.findById(evaluation.productId);
+          return product;
+        }),
+      );
 
-      return { total, data: productIds };
+      return { total, data: evaluatedProducts };
     } catch (err) {
       if (err instanceof MongooseError) throw new InternalServerErrorExceptionCustom();
       throw err;

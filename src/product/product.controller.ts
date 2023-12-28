@@ -487,18 +487,17 @@ export class ProductController {
   @Get('product/user-love-list')
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
   async getAllLoveList(
     @Query('page') page: number,
     @Query('limit') limit: number,
+    @Query('search') search: string,
     @GetCurrentUserId() userId: string,
   ): Promise<SuccessResponse> {
-
-    const productIds = await this.evaluationService.getProductIdsByUserId(page, limit, userId);
+    const products = await this.evaluationService.getProductsLoveByUserId(page, limit, search, userId);
 
     const data = await Promise.all(
-      productIds.data.map(async (productId: string) => {
-        const product = await this.productService.getById(productId);
-        if (!product) return;
+      products.data.map(async (product) => {
 
         const category = await this.categoryService.getById(product.categoryId);
         const store = await this.storeService.getById(product.storeId);
@@ -508,12 +507,12 @@ export class ProductController {
           categoryName: category.name,
           storeName: store.name,
         };
-      })
-    )
+      }),
+    );
 
     return new SuccessResponse({
       message: 'Lấy danh sách sản phẩm yêu thích thành công!',
-      metadata: { total: productIds.total, data },
+      metadata: { total: products.total, data },
     });
   }
 
