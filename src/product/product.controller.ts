@@ -531,6 +531,9 @@ export class ProductController {
 
     const data = await Promise.all(
       products.data.map(async product => {
+        const quantitySold: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.SELL, 'DELIVERED');
+        const quantityGive: number = await this.billService.countProductDelivered(product._id, PRODUCT_TYPE.GIVE, 'DELIVERED');
+        const revenue: number = quantitySold * product.price;
         const category = await this.categoryService.getById(product.categoryId);
         const store = await this.storeService.getById(product.storeId);
 
@@ -538,6 +541,9 @@ export class ProductController {
           ...product.toObject(),
           categoryName: category.name,
           storeName: store.name,
+          quantitySold,
+          quantityGive,
+          revenue,
         };
       }),
     );
