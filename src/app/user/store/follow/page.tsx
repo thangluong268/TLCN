@@ -122,9 +122,7 @@ function StoreFollow() {
             </td>
             <td
               className="px-6 py-4 text-center cursor-pointer"
-              onClick={(e) =>
-                (window.location.href = `/user/store/${item._id}`)
-              }
+              onClick={(e) => (window.location.href = `/shop/${item._id}`)}
             >
               {item.name}
             </td>

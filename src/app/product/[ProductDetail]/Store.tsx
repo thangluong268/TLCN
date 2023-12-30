@@ -21,6 +21,7 @@ function Store(props: Props) {
   const [productsOrderCurrent, setProductsOrderCurrent] = React.useState([]);
   const [user, setUser] = React.useState<any>(null);
   const [storeInfo, setStoreInfo] = React.useState({
+    id: "",
     avatar: "",
     averageStar: 0,
     isFollow: false,
@@ -42,6 +43,7 @@ function Store(props: Props) {
         ]).then((res: any) => {
           console.log("resss", res[0]);
           setStoreInfo({
+            id: res[1].metadata.store._id,
             avatar: res[1].metadata.store.avatar,
             name: res[1].metadata.store.name,
             isFollow: res[0].metadata.isFollow,
@@ -87,7 +89,12 @@ function Store(props: Props) {
             alt=""
           />
           <div className="flex flex-col">
-            <div className="font-bold">{storeInfo.name}</div>
+            <div
+              className="font-bold cursor-pointer"
+              onClick={(e) => (window.location.href = `/shop/${storeInfo.id}`)}
+            >
+              {storeInfo.name}
+            </div>
             <div className="flex items-center justify-center">
               <svg
                 className="w-4 h-4 text-yellow-300 mr-1 mb-1"
