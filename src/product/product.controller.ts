@@ -240,6 +240,39 @@ export class ProductController {
   }
 
   @Public()
+  @Get('products-in-store')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  @ApiQuery({ name: 'storeId', type: String, required: true })
+  async getAllByStorePublic(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+    @Query('storeId') storeId: string,
+  ): Promise<SuccessResponse> {
+    const data = await this.productService.getAllBySearch(storeId, page, limit, search, null, null, { status: true });
+
+    const fullInfoProducts = await Promise.all(
+      data.products.map(async (product: Product) => {
+        const category = await this.categoryService.getById(product.categoryId);
+        const store = await this.storeService.getById(product.storeId);
+
+        return {
+          ...product.toObject(),
+          categoryName: category.name,
+          storeName: store.name,
+        };
+      }),
+    );
+
+    return new SuccessResponse({
+      message: 'Lấy danh sách sản phẩm của cửa hàng thành công!',
+      metadata: { total: data.total, data: fullInfoProducts },
+    });
+  }
+
+  @Public()
   @Get('products-other-in-store')
   @ApiQuery({ name: 'storeId', type: String, required: true })
   @ApiQuery({ name: 'productId', type: String, required: true })
@@ -497,8 +530,7 @@ export class ProductController {
     const products = await this.evaluationService.getProductsLoveByUserId(page, limit, search, userId);
 
     const data = await Promise.all(
-      products.data.map(async (product) => {
-
+      products.data.map(async product => {
         const category = await this.categoryService.getById(product.categoryId);
         const store = await this.storeService.getById(product.storeId);
 

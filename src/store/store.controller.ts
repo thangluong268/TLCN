@@ -318,9 +318,53 @@ export class StoreController {
     const store = await this.storeService.getById(id);
     if (!store) return new NotFoundException('Không tìm thấy cửa hàng này!');
 
+    const products = await this.productService.getProductsByStoreId(id);
+
+    let totalFeedback = 0;
+
+    let totalProductsHasFeedback = 0;
+    let totalAverageStar = 0;
+
+    let averageStar = 0;
+
+    await Promise.all(
+      products.map(async product => {
+        const feedbacks: Feedback[] = await this.feedbackService.getAllByProductId(product._id);
+
+        if (feedbacks.length === 0) return;
+
+        totalFeedback += feedbacks.length;
+
+        const star = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        feedbacks.forEach(feedback => {
+          star[feedback.star]++;
+        });
+
+        let averageStar = 0;
+
+        Object.keys(star).forEach(key => {
+          averageStar += star[key] * Number(key);
+        });
+
+        averageStar = Number((averageStar / feedbacks.length).toFixed(2));
+
+        totalAverageStar += averageStar;
+
+        totalProductsHasFeedback++;
+      }),
+    );
+
+    if (totalProductsHasFeedback !== 0) averageStar = Number((totalAverageStar / totalProductsHasFeedback).toFixed(2));
+
+    const totalFollow = await this.userService.countTotalFollowStoresByStoreId(id);
+
+    const totalRevenue: number = await this.billService.calculateRevenueAllTimeByStoreId(id);
+    const totalDelivered: number = await this.billService.countTotalByStatusSeller(id, 'DELIVERED', null);
+
     return new SuccessResponse({
       message: 'Lấy thông tin cửa hàng thành công!',
-      metadata: { data: store },
+      metadata: { store, averageStar, totalFeedback, totalFollow, totalRevenue, totalDelivered },
     });
   }
 
