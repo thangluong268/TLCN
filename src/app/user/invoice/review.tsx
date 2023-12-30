@@ -82,10 +82,11 @@ function Review(props: Props) {
                   Hoá đơn #{GetNumberInString(bill.id)}
                 </p>
               </div>
-              {bill.listProductsFullInfo.map((product: any) => (
-                <div className="flex justify-center my-2">
-                  {product.product.avatar.map((img: any) => (
+              {bill.listProductsFullInfo.map((product: any, index: number) => (
+                <div className="flex justify-center my-2" key={index}>
+                  {product.product.avatar.map((img: any, indexImg: number) => (
                     <img
+                      key={indexImg}
                       src={img}
                       alt=""
                       className="w-20 h-20 object-cover rounded-md mx-4"
