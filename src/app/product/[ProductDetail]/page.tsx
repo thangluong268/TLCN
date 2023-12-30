@@ -242,7 +242,7 @@ function ProductDetail() {
                       <span className="text-sm ml-2 mr-2">Chia sẻ</span>
                       <div className="mr-2">
                         <FacebookShareButton
-                          url={"https://dtexchange-hcmute.netlify.app/product"}
+                          url={window.location.href}
                           hashtag={"#DTExchange"}
                         >
                           <FacebookIcon size={32} round />
