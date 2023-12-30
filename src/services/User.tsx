@@ -49,10 +49,14 @@ export const APIGetAllUser = async () => {
 };
 
 // /api/user/user-follow-stores?page=1&limit=2
-export const APIGetListStoreFollow = async (page: number, limit: number) => {
+export const APIGetListStoreFollow = async (
+  page: number,
+  limit: number,
+  search: string = ""
+) => {
   const headers = GetHeaders();
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/user/user-follow-stores?page=${page}&limit=${limit}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/user/user-follow-stores?page=${page}&limit=${limit}&search=${search}`,
     { headers }
   );
   return res.data;
@@ -61,11 +65,12 @@ export const APIGetListStoreFollow = async (page: number, limit: number) => {
 // /api/product/user-love-list?page=1&limit=4
 export const APIGetListProductFavorite = async (
   page: number,
-  limit: number
+  limit: number,
+  search: string = ""
 ) => {
   const headers = GetHeaders();
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/product/user-love-list?page=${page}&limit=${limit}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/product/user-love-list?page=${page}&limit=${limit}&search=${search}`,
     { headers }
   );
   return res.data;

@@ -170,25 +170,23 @@ function Header() {
               }}
             />
 
-            {user && (
-              <div className="flex items-center rounded-3xl w-[400px] h-[40px] bg-[#E1E9F7] px-2">
-                <div className="p-2">
-                  <FaSistrix className="w-[24px] h-[24px] hover:cursor-pointer" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  value={search}
-                  className="flex-1 h-full outline-none bg-transparent"
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key == "Enter") {
-                      window.location.href = "/product/search?search=" + search;
-                    }
-                  }}
-                />
+            <div className="flex items-center rounded-3xl w-[400px] h-[40px] bg-[#E1E9F7] px-2">
+              <div className="p-2">
+                <FaSistrix className="w-[24px] h-[24px] hover:cursor-pointer" />
               </div>
-            )}
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={search}
+                className="flex-1 h-full outline-none bg-transparent"
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key == "Enter") {
+                    window.location.href = "/product/search?search=" + search;
+                  }
+                }}
+              />
+            </div>
 
             {user && (
               <>

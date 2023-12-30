@@ -17,7 +17,6 @@ interface Store {
   createdAt: string;
   warningCount: number;
 }
-
 interface StoreProps {
   _id: string;
   avatar: string;
@@ -43,7 +42,7 @@ interface DetailStore {
 interface Props {
   storeProps: StoreProps;
   detailStore: DetailStore;
-  setIsShowDetail: (data: boolean) => void;
+  setIsShowDetail?: (data: boolean) => void;
 }
 
 function Info(props: Props) {
@@ -89,6 +88,7 @@ function Info(props: Props) {
       fetchData();
     }
   }, []);
+  console.log(data);
 
   const UpdateInfo = async () => {
     document.getElementById("loading-page")?.classList.remove("hidden");
@@ -121,12 +121,12 @@ function Info(props: Props) {
   };
   return (
     <div className="flex flex-col w-full bg-white rounded-md py-2 px-4 mb-5">
-      {storeProps && (
+      {setIsShowDetail && (
         <div className="flex justify-end">
           <button
             type="button"
             className="flex-shrink-0 flex justify-center items-center h-8 w-8 rounded-lg text-white bg-gray-400 hover:bg-gray-300 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all text-sm dark:focus:ring-gray-700 dark:focus:ring-offset-gray-800"
-            onClick={() => setIsShowDetail(false)}
+            onClick={() => setIsShowDetail && setIsShowDetail(false)}
           >
             <span className="sr-only">Close</span>
             <svg
@@ -152,6 +152,7 @@ function Info(props: Props) {
         <div
           className="w-[200px] h-[200px] border border-[#d9d9d9] rounded-full flex justify-center items-center cursor-pointer"
           onClick={(e) => {
+            if (localStorage.getItem("role") != "User - Seller") return;
             if (storeProps) return;
             const input = document.getElementById("upload-avatar");
             if (input) {

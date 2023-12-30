@@ -42,8 +42,8 @@ function Store(props: Props) {
         ]).then((res: any) => {
           console.log("resss", res[0]);
           setStoreInfo({
-            avatar: res[1].metadata.data.avatar,
-            name: res[1].metadata.data.name,
+            avatar: res[1].metadata.store.avatar,
+            name: res[1].metadata.store.name,
             isFollow: res[0].metadata.isFollow,
             averageStar: res[0].metadata.averageStar,
             totalFeedback: res[0].metadata.totalFeedback,

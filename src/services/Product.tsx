@@ -168,3 +168,20 @@ export const APIGetListProductGive = async (page?: any, limit?: any) => {
   );
   return res.data;
 };
+
+// /api/products-in-store?page=1&limit=2&search=xe&storeId=60b9b4b9e6c9a40015f1b3a5
+export const APIGetListProductInStore = async (
+  page?: any,
+  limit?: any,
+  search?: any,
+  storeId?: any
+) => {
+  var page = page ? page : 1;
+  var limit = limit ? limit : 20;
+  var search = search ? search : "";
+  var storeId = storeId ? storeId : "";
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/products-in-store?page=${page}&limit=${limit}&search=${search}&storeId=${storeId}`
+  );
+  return res.data;
+};

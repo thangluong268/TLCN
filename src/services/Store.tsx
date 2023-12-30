@@ -64,11 +64,9 @@ export const APIGetStoreReputation = async (
 
 // /api/store/123
 export const APIGetStoreById = async (id: string) => {
-  const headers = GetHeaders();
-  const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/store/${id}`,
-    { headers }
-  );
+  document.getElementById("loading-page")?.classList.remove("hidden");
+  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/store/${id}`);
+  document.getElementById("loading-page")?.classList.add("hidden");
   return res.data;
 };
 
