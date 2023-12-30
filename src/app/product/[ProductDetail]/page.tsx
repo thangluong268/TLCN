@@ -250,7 +250,7 @@ function ProductDetail() {
                       </div>
                       <div>
                         <FacebookMessengerShareButton
-                          url={"https://dtexchange-hcmute.netlify.app"}
+                          url={window.location.href}
                           appId={"285854217141142"}
                         >
                           <FacebookMessengerIcon size={32} round />
